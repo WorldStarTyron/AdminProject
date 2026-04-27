@@ -5,19 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ledenpagina</title>
     @vite(['resources/css/app.css', 'resources/css/sidebar.css','resources/css/totalleden.css', 'resources/js/app.js'])
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     @include('layouts.sidebar')
-
-
-
-
-
-    <div class="main-content">
-        @include('layouts.header')        <br>
+ <div class="main-content">
+        @include('layouts.header')       
+         <br>
         
         @include('layouts.leden-overzicht')
-        
         
         <main class="page-content">
             <div class="table-container">

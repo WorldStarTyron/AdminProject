@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use App\Models\Lid;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class LidController extends Controller
 {
@@ -19,6 +20,24 @@ class LidController extends Controller
 
         $totaalLeden = Lid::count();
 
-        return view('ledenpagina', compact('leden', 'totaalLeden'));
+        // Data for chart: count joins per month for the current year
+        $chartData = Lid::selectRaw('MONTH(lid_sinds) as month, COUNT(*) as count')
+            ->whereYear('lid_sinds', date('Y'))
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
+        $labels = [];
+        $values = [];
+        
+        // Initialize all months with 0
+        for ($m = 1; $m <= 12; $m++) {
+            $monthName = date('M', mktime(0, 0, 0, $m, 1));
+            $labels[] = $monthName;
+            $dataPoint = $chartData->firstWhere('month', $m);
+            $values[] = $dataPoint ? $dataPoint->count : 0;
+        }
+
+        return view('ledenpagina', compact('leden', 'totaalLeden', 'labels', 'values'));
     }
 }

@@ -9,8 +9,8 @@
         </div>
     </div>
     
-    <div class="diagram">
-        <h2>Leden Diagram</h2>
+    <div class="diagram" style="flex: 1; max-width: 600px; margin-left: 20px;">
+        @include('layouts.Totalleden-Charts')
     </div>
 
 

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Models\Lid; // 1. Import the model
 use App\Http\Controllers\LidController;  // 2. Import the controller
 use App\Http\Controllers\PostController; // Import the Controller from PostController
-
+use App\Http\Controllers\ChartController;
 
 /*
 |--------------------------------------------------------------------------

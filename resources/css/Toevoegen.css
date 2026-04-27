@@ -1,0 +1,141 @@
+.form-container {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 2rem;
+    max-width: 800px;
+    margin: 2rem auto;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.form-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin: 0;
+}
+
+.close-btn {
+    font-size: 1.5rem;
+    color: #718096;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.close-btn:hover {
+    color: #4a5568;
+}
+
+.form-section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 2rem;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem 3rem;
+    margin-bottom: 2rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+}
+
+.form-group input,
+.form-group select {
+    padding: 0.625rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    color: #4a5568;
+    background-color: #fff;
+    width: 100%;
+}
+
+.form-group input::placeholder {
+    color: #a0aec0;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #4a5568;
+    box-shadow: 0 0 0 1px #4a5568;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn-add-user {
+    background-color: #3f3f3f;
+    color: white;
+    padding: 0.625rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-add-user:hover {
+    background-color: #2d2d2d;
+}
+
+.btn-cancel {
+    background-color: #edf2f7;
+    color: #4a5568;
+    padding: 0.625rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-decoration: none;
+    display: inline-block;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-cancel:hover {
+    background-color: #e2e8f0;
+}
+
+.error-container {
+    background-color: #fff5f5;
+    color: #c53030;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid #c53030;
+}
+
+.error-container ul {
+    margin: 0;
+    padding-left: 1.25rem;
+}
+
+@media (max-width: 640px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,51 @@
+.leden_overzicht_container {
+    padding: 20px;
+    display: flex;
+    justify-content: space-around;
+    flex-direction: row;
+    align-items: center;
+    align-content: center;
+}
+
+.leden_card {
+    background-color: #3f3f3f;
+    border-radius: 1rem;
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    max-width: 400px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.card_left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.card_title {
+    color: #fffbf8;
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.card_subtitle {
+    color: #9ca3af;
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.card_right {
+    display: flex;
+    align-items: center;
+}
+
+.card_number {
+    margin-left: 1rem;
+    color: #ffffff;
+    font-size: 4rem;
+    font-weight: 600;
+    line-height: 1;
+}
+

@@ -1,5 +1,5 @@
 <div class="chart-container" style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); height: 100%;">
-    <h3 style="margin-top: 0; font-size: 1.1rem; color: #1a202c;">Leden gejoined</h3>
+    <h3 style="margin-top: 0; font-size: 1.1rem; color: #1e3a8a; font-weight: 700;">Leden Groei</h3>
     <div style="height: 200px;">
         <canvas id="joinChart"></canvas>
     </div>
@@ -20,9 +20,10 @@ document.addEventListener('DOMContentLoaded', function() {
             datasets: [{
                 label: 'Joined',
                 data: values,
-                backgroundColor: '#4a5568',
+                backgroundColor: '#1e3a8a',
                 borderRadius: 4,
-                barThickness: 12,
+                barThickness: 15,
+                hoverBackgroundColor: '#1e40af',
             }]
         },
         options: {

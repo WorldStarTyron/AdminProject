@@ -19,13 +19,14 @@
             <div class="table-container">
                 <div class="table-header-top">
                     <div class="table-title-section">
-                        <h2 class="table-title">Leden Table</h2>
-                        <a href="{{ route('addlid.create') }}" class="btn-add" style="text-decoration: none;">Voeg lid</a>
+                        <h2 class="table-title">Leden Overzicht</h2>
+                        <p style="color: #64748b; margin: 0; font-size: 0.875rem;">Beheer alle geregistreerde leden in het systeem</p>
                     </div>
-                    <div class="table-actions">
+                    <div class="table-actions" style="display: flex; gap: 1rem; align-items: center;">
+                        <a href="{{ route('addlid.create') }}" class="btn-add" style="text-decoration: none;">+ Voeg lid</a>
                         <button class="btn-filter">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M3 6H21M6 12H18M10 18H14" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M3 6H21M6 12H18M10 18H14" stroke="#1e3a8a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                         </button>
                     </div>
@@ -54,7 +55,7 @@
                                     <td class="text-right">
                                         <button class="btn-more">
                                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M5 12H5.01M12 12H12.01M19 12H19.01" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                <path d="M5 12H5.01M12 12H12.01M19 12H19.01" stroke="#1e3a8a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                             </svg>
                                         </button>
                                     </td>

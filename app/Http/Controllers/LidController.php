@@ -16,7 +16,8 @@ class LidController extends Controller
             'leden.adres',
             'gebruikers.email'
         )->join('gebruikers','leden.gebruiker_id','=','gebruikers.gebruiker_id')
-        ->get();
+        ->paginate(6); // paginatie op 6 leden per pagina
+      
 
         $totaalLeden = Lid::count();
 

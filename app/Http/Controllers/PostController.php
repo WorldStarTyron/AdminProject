@@ -72,6 +72,11 @@ class PostController extends Controller
             ]);
         });
 
+        // Return JSON for AJAX requests, redirect for regular form posts
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Lid toegevoegd'], 201);
+        }
+
         return redirect()->route('ledenpagina')->with('success', 'Lid toegevoegd');
     }
 

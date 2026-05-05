@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/css/totalleden.css', 'resources/css/Toevoegen.css', 'resources/js/app.js', 'resources/js/AddLidModal.js'])
+    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/css/totalleden.css', 'resources/css/Toevoegen.css', 'resources/js/app.js', 'resources/js/FormValidator.js', 'resources/js/AddLidModal.js'])
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -226,7 +226,7 @@
                     <ul id="modalErrorList"></ul>
                 </div>
 
-                <form id="addLidForm">
+                <form id="addLidForm" data-store-url="{{ route('addlid.store') }}">
                     @csrf
 
                     <div class="form-grid">
@@ -295,9 +295,6 @@
         <span>Lid succesvol toegevoegd!</span>
     </div>
 
-    {{-- ===== Inline Script (fixes Blade directives that can't run in .js files) ===== --}}
-    <script>
-    
-    </script>
+    {{-- JS files loaded via Vite in <head> --}}
 </body>
 </html>

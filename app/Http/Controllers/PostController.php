@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Lid;
 use App\Models\User;
+use App\Http\Requests\StoreLidRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -35,17 +36,27 @@ class PostController extends Controller
 
     /**
      * Store a newly created resource in storage.
+     * 
+     * VALIDATION: The StoreLidRequest class (in app/Http/Requests/) 
+     * automatically validates ALL fields before this code runs.
+     * If validation fails, Laravel sends back error messages automatically.
      */
-    public function store(Request $request)
+    public function store(StoreLidRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:gebruikers,email',
-            'telefoonnummer' => 'required|string|max:20',
-            'woonplaats' => 'required|string|max:255',
-            'adres' => 'required|string|max:255',
-            'geboortedatum' => 'required|date',
-        ]);
+        // All validation already passed (handled by StoreLidRequest).
+        // Now do an extra duplicate check: same name + same birthdate = probably same person.
+        $duplicatePerson = User::join('leden', 'gebruikers.gebruiker_id', '=', 'leden.gebruiker_id')
+            ->where('gebruikers.naam', $request->name)
+            ->where('leden.geboortedatum', $request->geboortedatum)
+            ->exists();
+
+        if ($duplicatePerson) {
+            return response()->json([
+                'errors' => [
+                    'name' => ['Er bestaat al een lid met dezelfde naam en geboortedatum. Controleer of dit lid al geregistreerd is.']
+                ]
+            ], 422);
+        }
 
         \DB::transaction(function () use ($request) {
             $gebruiker_id = (string) Str::uuid();

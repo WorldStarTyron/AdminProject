@@ -27,8 +27,8 @@
                 <div class="absolute -bottom-[50px] -right-[30px] w-[150px] h-[150px] rounded-full bg-white/[0.06] pointer-events-none"></div>
                 <div class="absolute -top-[30px] right-[50px] w-[90px] h-[90px] rounded-full bg-white/[0.04] pointer-events-none"></div>
 
-                <div class="flex justify-between items-start">
-                    <div>
+                <div class="flex justify-between items-center">
+                    <div class="mt-5">
                         <p class="text-sm font-semibold text-white/90 mb-1">Total Income</p>
                         <p class="text-[2.5rem] font-extrabold text-white leading-none tracking-tight">Srd 34,323.30</p>
                         <p class="text-xs text-white/50 mt-1">elk maand</p>
@@ -58,7 +58,7 @@
                         <h2 class="text-xl font-extrabold text-slate-800 tracking-tight">Betaling per lid</h2>
                     </div>
                     <div class="flex items-center gap-3">
-                        <button id="openBetalingModal" class="inline-flex items-center gap-2 bg-gradient-to-br from-[#1e3a8a] to-[#2563eb] text-white text-[0.8125rem] font-semibold px-5 py-2.5 rounded-[10px] shadow-[0_2px_8px_rgba(30,58,138,0.2)] hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(30,58,138,0.3)] active:translate-y-0 transition-all duration-200 cursor-pointer border-none whitespace-nowrap">
+                        <button id="openBetalingModal" class="inline-flex items-center gap-2 bg-gradient-to-br from-[#1e3a8a] to-[#2563eb] text-white font-['Inter',sans-serif] text-[0.8125rem] font-semibold px-5 py-2.5 rounded-[10px] shadow-[0_2px_8px_rgba(30,58,138,0.2)] hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(30,58,138,0.3)] active:translate-y-0 transition-all duration-200 cursor-pointer border-none whitespace-nowrap">
                             Voeg Betaling
                         </button>
                         <button class="bg-slate-100 border-[1.5px] border-slate-200 rounded-[10px] w-[38px] h-[38px] flex items-center justify-center cursor-pointer text-slate-500 hover:bg-slate-200 hover:border-slate-300 hover:text-[#1e3a8a] transition-all duration-200">
@@ -153,71 +153,7 @@
         </main>
     </div>
 
-    {{-- ApexCharts - Stacked Bar Chart --}}
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var options = {
-            series: [{
-                name: 'Cash',
-                data: [4200, 3800, 4500, 3200, 4800, 5100, 4600]
-            }, {
-                name: 'Overmaking',
-                data: [3100, 2900, 3400, 2800, 3600, 3900, 3200]
-            }, {
-                name: 'Mobiel',
-                data: [1800, 2200, 1900, 2100, 2400, 2600, 2300]
-            }],
-            chart: {
-                type: 'bar',
-                height: 200,
-                stacked: true,
-                toolbar: { show: false },
-                fontFamily: 'Inter, sans-serif',
-            },
-            plotOptions: {
-                bar: {
-                    borderRadius: 4,
-                    columnWidth: '45%',
-                }
-            },
-            colors: ['#1e293b', '#64748b', '#cbd5e1'],
-            xaxis: {
-                categories: ['Jan', 'Feb', 'Maart', 'April', 'Mei', 'Juni', 'Juli'],
-                labels: {
-                    style: {
-                        colors: '#94a3b8',
-                        fontSize: '11px',
-                        fontWeight: 500,
-                    }
-                },
-                axisBorder: { show: false },
-                axisTicks: { show: false },
-            },
-            yaxis: {
-                show: false,
-            },
-            grid: {
-                show: false,
-            },
-            legend: {
-                show: false,
-            },
-            dataLabels: {
-                enabled: false,
-            },
-            tooltip: {
-                theme: 'dark',
-                y: {
-                    formatter: function(val) {
-                        return 'Srd ' + val.toLocaleString();
-                    }
-                }
-            },
-        };
-
-        var chart = new ApexCharts(document.querySelector("#contributieChart"), options);
-        chart.render();
-    });
-    </script>
+   <!-- TotalBetaling-Chart -->
+   @vite('resources/js/TotalBetaling-chart.js')
 </body>
 </html>

@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 
+@layer base {
 /* ===== Base Reset & Typography ===== */
 *,
 *::before,
@@ -321,11 +322,6 @@ body {
     font-weight: 500;
 }
 
-/* ===== Utility classes ===== */
-.font-semibold {
-    font-weight: 600;
-    color: #1e293b;
-}
 
 .text-right {
     text-align: right;
@@ -600,3 +596,4 @@ body {
         justify-content: center;
     }
 }
+} /* end @layer base */

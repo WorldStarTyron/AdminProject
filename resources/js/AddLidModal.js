@@ -1,58 +1,114 @@
 // AddLidModal.js
-// NOTE: The modal logic has been moved inline into ledenpagina.blade.php
-// because it requires Blade directives: {{ route('addlid.store') }}, @csrf, and @if(session()).
-// Blade directives are NOT processed inside .js files loaded via Vite.
-// This file is intentionally left empty to prevent JS syntax errors.
-document.addEventListener('DOMContentLoaded', function() {
-        // === Modal Logic ===
-        const modal = document.getElementById('addLidModal');
-        const openBtn = document.getElementById('openModalBtn');
-        const closeBtn = document.getElementById('closeModalBtn');
-        const cancelBtn = document.getElementById('cancelModalBtn');
-        const form = document.getElementById('addLidForm');
-        const errorsDiv = document.getElementById('modalErrors');
-        const errorList = document.getElementById('modalErrorList');
-        const toast = document.getElementById('successToast');
-        const submitBtn = document.getElementById('submitBtn');
+// ===============
+// This file handles the Add Member modal popup:
+// - Opening and closing the modal
+// - Submitting the form via AJAX (without page reload)
+// - Showing success/error messages
+// - Client-side search in the members table
+//
+// VALIDATION is handled by FormValidator.js (separate file).
 
-        function openModal() {
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
+document.addEventListener('DOMContentLoaded', function () {
+
+    // ==============================
+    // STEP 1: Get all the elements we need
+    // ==============================
+    var modal     = document.getElementById('addLidModal');
+    var openBtn   = document.getElementById('openModalBtn');
+    var closeBtn  = document.getElementById('closeModalBtn');
+    var cancelBtn = document.getElementById('cancelModalBtn');
+    var form      = document.getElementById('addLidForm');
+    var errorsDiv = document.getElementById('modalErrors');
+    var errorList = document.getElementById('modalErrorList');
+    var toast     = document.getElementById('successToast');
+    var submitBtn = document.getElementById('submitBtn');
+
+
+    // ==============================
+    // STEP 2: Open the modal
+    // ==============================
+    function openModal() {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden'; // prevent scrolling behind modal
+    }
+
+
+    // ==============================
+    // STEP 3: Close the modal
+    // ==============================
+    function closeModal() {
+        modal.classList.remove('active');
+        document.body.style.overflow = ''; // re-enable scrolling
+        form.reset();
+        errorsDiv.style.display = 'none';
+        errorList.innerHTML = '';
+
+        // Reset today's date as default
+        var dateField = document.getElementById('geboortedatum');
+        if (dateField) {
+            dateField.value = new Date().toISOString().split('T')[0];
         }
 
-        function closeModal() {
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-            form.reset();
-            errorsDiv.style.display = 'none';
-            errorList.innerHTML = '';
-            document.getElementById('geboortedatum').value = new Date().toISOString().split('T')[0];
+        // Reset validation styles (from FormValidator.js)
+        if (typeof window.resetFormValidation === 'function') {
+            window.resetFormValidation();
         }
+    }
 
-        openBtn.addEventListener('click', openModal);
-        closeBtn.addEventListener('click', closeModal);
-        cancelBtn.addEventListener('click', closeModal);
 
-        // Close on overlay click
-        modal.addEventListener('click', function(e) {
+    // ==============================
+    // STEP 4: Button click listeners
+    // ==============================
+    if (openBtn)   openBtn.addEventListener('click', openModal);
+    if (closeBtn)  closeBtn.addEventListener('click', closeModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+    // Close when clicking the dark overlay behind the modal
+    if (modal) {
+        modal.addEventListener('click', function (e) {
             if (e.target === modal) closeModal();
         });
+    }
 
-        // Close on Escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && modal.classList.contains('active')) closeModal();
-        });
+    // Close when pressing Escape key
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modal && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
 
-        // AJAX form submit
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
 
+    // ==============================
+    // STEP 5: Submit the form
+    // ==============================
+    if (form) {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault(); // stop the normal form submit
+
+            // Run client-side validation first (from FormValidator.js)
+            if (typeof window.checkAllFields === 'function') {
+                var allValid = window.checkAllFields();
+                if (!allValid) {
+                    return; // stop if any field is invalid
+                }
+            }
+
+            // Disable the button and show "loading" text
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span class="spinner"></span> Bezig...';
 
-            const formData = new FormData(form);
+            // Hide previous errors
+            errorsDiv.style.display = 'none';
+            errorList.innerHTML = '';
 
-            fetch("{{ route('addlid.store') }}", {
+            // Collect all form data
+            var formData = new FormData(form);
+
+            // Get the store URL from the form's data attribute
+            var storeUrl = form.getAttribute('data-store-url');
+
+            // Send to the server
+            fetch(storeUrl, {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -60,58 +116,74 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: formData,
             })
-            .then(response => {
+            .then(function (response) {
                 if (response.ok) {
+                    // SUCCESS: close modal, show toast, reload page
                     closeModal();
                     toast.classList.add('show');
-                    setTimeout(() => toast.classList.remove('show'), 3000);
-                    setTimeout(() => window.location.reload(), 1000);
+                    setTimeout(function () { toast.classList.remove('show'); }, 3000);
+                    setTimeout(function () { window.location.reload(); }, 1000);
+                    return null;
                 } else if (response.status === 422) {
+                    // VALIDATION ERROR: server found problems
                     return response.json();
                 } else {
                     throw new Error('Server error');
                 }
             })
-            .then(data => {
+            .then(function (data) {
                 if (data && data.errors) {
+                    // Show each error from the server
                     errorList.innerHTML = '';
-                    Object.values(data.errors).forEach(msgs => {
-                        msgs.forEach(msg => {
-                            const li = document.createElement('li');
-                            li.textContent = msg;
+                    var errorKeys = Object.keys(data.errors);
+
+                    for (var i = 0; i < errorKeys.length; i++) {
+                        var messages = data.errors[errorKeys[i]];
+                        for (var j = 0; j < messages.length; j++) {
+                            var li = document.createElement('li');
+                            li.textContent = messages[j];
                             errorList.appendChild(li);
-                        });
-                    });
+                        }
+                    }
+
                     errorsDiv.style.display = 'block';
                 }
             })
-            .catch(error => {
+            .catch(function (error) {
                 console.error('Error:', error);
                 errorList.innerHTML = '<li>Er is een fout opgetreden. Probeer het opnieuw.</li>';
                 errorsDiv.style.display = 'block';
             })
-            .finally(() => {
+            .finally(function () {
+                // Re-enable the button
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Lid toevoegen`;
+                submitBtn.innerHTML =
+                    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none">' +
+                    '<path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2.5" ' +
+                    'stroke-linecap="round" stroke-linejoin="round"/></svg> Lid toevoegen';
             });
         });
+    }
 
-        // Show toast if redirected back with success
-        if(session('success'))
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
-        endif
 
-        // === Client-side search ===
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) {
-            searchInput.addEventListener('input', function() {
-                const query = this.value.toLowerCase();
-                const rows = document.querySelectorAll('#ledenTable tbody .table-row');
-                rows.forEach(row => {
-                    const text = row.textContent.toLowerCase();
-                    row.style.display = text.includes(query) ? '' : 'none';
-                });
-            });
-        }
-    });
+    // ==============================
+    // STEP 6: Client-side search in the table
+    // ==============================
+    var searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            var query = this.value.toLowerCase();
+            var rows = document.querySelectorAll('#ledenTable tbody .table-row');
+
+            for (var i = 0; i < rows.length; i++) {
+                var text = rows[i].textContent.toLowerCase();
+                if (text.indexOf(query) !== -1) {
+                    rows[i].style.display = '';
+                } else {
+                    rows[i].style.display = 'none';
+                }
+            }
+        });
+    }
+
+});

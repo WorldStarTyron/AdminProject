@@ -293,3 +293,37 @@
         justify-content: center;
     }
 }
+
+/* ===== Field Validation Styles ===== */
+/* These styles show red/green borders on form fields */
+
+/* RED border = field has an error */
+.form-group input.field-error,
+.form-group select.field-error {
+    border-color: #ef4444;
+    background-color: #fef2f2;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.08);
+}
+
+/* GREEN border = field is valid */
+.form-group input.field-valid,
+.form-group select.field-valid {
+    border-color: #10b981;
+    background-color: #f0fdf4;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.08);
+}
+
+/* Error message text under the field */
+.field-error-msg {
+    color: #dc2626;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-top: 0.375rem;
+    display: block;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}

@@ -1,3 +1,6 @@
+@import "tailwindcss";
+
+
 /* ===== Base Reset & Typography ===== */
 *,
 *::before,
@@ -169,24 +172,46 @@ body {
     transform: translateY(0);
 }
 
+.filter-form {
+    display: flex;
+    align-items: center;
+}
+
 .btn-filter {
-    background-color: #f1f5f9;
+    background-color: #f8fafc;
     border: 1.5px solid #e2e8f0;
     border-radius: 10px;
-    width: 38px;
     height: 38px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 0.5rem;
+    padding: 0 0.75rem;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.25s ease;
     color: #64748b;
 }
 
 .btn-filter:hover {
-    background-color: #e2e8f0;
-    border-color: #cbd5e1;
+    background-color: #ffffff;
+    border-color: #1e3a8a;
+    box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.08);
     color: #1e3a8a;
+}
+
+.btn-filter svg {
+    flex-shrink: 0;
+}
+
+.btn-filter select {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 0.8125rem;
+    font-family: inherit;
+    color: #334155;
+    cursor: pointer;
+    padding-right: 0.25rem;
+    appearance: auto;
 }
 
 /* ===== Table ===== */

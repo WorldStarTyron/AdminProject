@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="description" content="Betalingen overzicht - Beheer alle betalingen in het administratie systeem">
+    <title>Betalingen | Administratie Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/js/app.js'])
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+<body class="m-0 bg-[#f0f4f8] text-slate-700 font-['Inter',sans-serif] antialiased">
+    @include('layouts.sidebar')
+
+    <div class="main-content">
+        @include('layouts.header')
+
+        {{-- Stats & Chart Row --}}
+        <div class="flex flex-col lg:flex-row items-stretch gap-6 p-6 px-8 animate-[fadeSlideUp_0.4s_ease-out]">
+
+            {{-- Total Income Card --}}
+            <div class="relative bg-gradient-to-br from-[#1e3a8a] via-[#1d4ed8] to-[#2563eb] rounded-2xl p-6 flex flex-col justify-between min-h-[160px] w-full lg:max-w-[340px] lg:min-w-[260px] shrink-0 overflow-hidden shadow-[0_4px_16px_rgba(30,58,138,0.2),0_1px_3px_rgba(30,58,138,0.1)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(30,58,138,0.3),0_4px_12px_rgba(30,58,138,0.15)]">
+                {{-- Decorative circles --}}
+                <div class="absolute -bottom-[50px] -right-[30px] w-[150px] h-[150px] rounded-full bg-white/[0.06] pointer-events-none"></div>
+                <div class="absolute -top-[30px] right-[50px] w-[90px] h-[90px] rounded-full bg-white/[0.04] pointer-events-none"></div>
+
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm font-semibold text-white/90 mb-1">Total Income</p>
+                        <p class="text-[2.5rem] font-extrabold text-white leading-none tracking-tight">Srd 34,323.30</p>
+                        <p class="text-xs text-white/50 mt-1">elk maand</p>
+                    </div>
+                    <div class="w-10 h-10 bg-white/[0.12] rounded-xl flex items-center justify-center backdrop-blur-sm">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 1V23M17 5H9.5C8.57174 5 7.6815 5.36875 7.02513 6.02513C6.36875 6.6815 6 7.57174 6 8.5C6 9.42826 6.36875 10.3185 7.02513 10.9749C7.6815 11.6313 8.57174 12 9.5 12H14.5C15.4283 12 16.3185 12.3687 16.9749 13.0251C17.6313 13.6815 18 14.5717 18 15.5C18 16.4283 17.6313 17.3185 16.9749 17.9749C16.3185 18.6313 15.4283 19 14.5 19H6" stroke="rgba(255,255,255,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Chart Card --}}
+            <div class="flex-1 min-w-0 bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.03)] border border-slate-200/60 p-6">
+                <h3 class="text-base font-bold text-slate-800 mb-4">Maandelijke contributie</h3>
+                <div id="contributieChart" class="w-full" style="min-height: 200px;"></div>
+            </div>
+        </div>
+
+        {{-- Payments Table Section --}}
+        <main class="px-8 pb-8 flex-1">
+            <div class="bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.03)] border border-slate-200/60 p-7 animate-[fadeSlideUp_0.5s_ease-out]">
+
+                {{-- Table Header --}}
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-7 gap-4">
+                    <div>
+                        <h2 class="text-xl font-extrabold text-slate-800 tracking-tight">Betaling per lid</h2>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button id="openBetalingModal" class="inline-flex items-center gap-2 bg-gradient-to-br from-[#1e3a8a] to-[#2563eb] text-white text-[0.8125rem] font-semibold px-5 py-2.5 rounded-[10px] shadow-[0_2px_8px_rgba(30,58,138,0.2)] hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(30,58,138,0.3)] active:translate-y-0 transition-all duration-200 cursor-pointer border-none whitespace-nowrap">
+                            Voeg Betaling
+                        </button>
+                        <button class="bg-slate-100 border-[1.5px] border-slate-200 rounded-[10px] w-[38px] h-[38px] flex items-center justify-center cursor-pointer text-slate-500 hover:bg-slate-200 hover:border-slate-300 hover:text-[#1e3a8a] transition-all duration-200">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 6H21M6 12H18M10 18H14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Table --}}
+                <div class="overflow-x-auto rounded-[10px] border border-slate-100">
+                    <table class="w-full border-collapse text-left" id="betalingTable">
+                        <thead>
+                            <tr>
+                                <th class="px-4 py-3.5 text-[0.6875rem] font-bold text-slate-500 bg-slate-50 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Naam</th>
+                                <th class="px-4 py-3.5 text-[0.6875rem] font-bold text-slate-500 bg-slate-50 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Datum</th>
+                                <th class="px-4 py-3.5 text-[0.6875rem] font-bold text-slate-500 bg-slate-50 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Bedrag</th>
+                                <th class="px-4 py-3.5 text-[0.6875rem] font-bold text-slate-500 bg-slate-50 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Status</th>
+                                <th class="px-4 py-3.5 text-[0.6875rem] font-bold text-slate-500 bg-slate-50 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Betaling Method</th>
+                                <th class="px-4 py-3.5 text-[0.6875rem] font-bold text-slate-500 bg-slate-50 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Bonnummer</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{-- Demo rows --}}
+                            <tr class="transition-colors duration-150 hover:bg-slate-50">
+                                <td class="px-4 py-3.5 text-[0.8125rem] text-blue-600 font-medium border-b border-slate-100">Jerry Mattedi</td>
+                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-600 border-b border-slate-100">3 April 2026</td>
+                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-600 border-b border-slate-100">Srd 321</td>
+                                <td class="px-4 py-3.5 text-[0.8125rem] border-b border-slate-100">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700">Betaald</span>
+                                </td>
+                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-600 border-b border-slate-100">Cash</td>
+                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-500 border-b border-slate-100">
+                                    <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[0.6875rem] font-mono font-semibold">BON KA-2026-0001</span>
+                                </td>
+                            </tr>
+                            <tr class="transition-colors duration-150 hover:bg-slate-50">
+                                <td class="px-4 py-3.5 text-[0.8125rem] text-blue-600 font-medium border-b border-slate-100">Elianora Vasilov</td>
+                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-600 border-b border-slate-100">9 April 2026</td>
+                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-600 border-b border-slate-100">Srd 313</td>
+                                <td class="px-4 py-3.5 text-[0.8125rem] border-b border-slate-100">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700">Betaald</span>
+                                </td>
+                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-600 border-b border-slate-100">Cash</td>
+                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-500 border-b border-slate-100"></td>
+                            </tr>
+                            <tr class="transition-colors duration-150 hover:bg-slate-50">
+                                <td class="px-4 py-3.5 text-[0.8125rem] text-blue-600 font-medium border-b border-slate-100">Alvis Daen</td>
+                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-600 border-b border-slate-100">2 April 2026</td>
+                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-600 border-b border-slate-100">Srd 421</td>
+                                <td class="px-4 py-3.5 text-[0.8125rem] border-b border-slate-100">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700">Betaald</span>
+                                </td>
+                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-600 border-b border-slate-100">overmaking</td>
+                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-500 border-b border-slate-100"></td>
+                            </tr>
+                            <tr class="transition-colors duration-150 hover:bg-slate-50">
+                                <td class="px-4 py-3.5 text-[0.8125rem] text-blue-600 font-medium border-b border-slate-100">Lissa Shipsey</td>
+                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-600 border-b border-slate-100">10 April 2026</td>
+                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-600 border-b border-slate-100">Srd 536</td>
+                                <td class="px-4 py-3.5 text-[0.8125rem] border-b border-slate-100">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700">Betaald</span>
+                                </td>
+                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-600 border-b border-slate-100">overmaking</td>
+                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-500 border-b border-slate-100"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                {{-- Pagination --}}
+                <div class="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <p class="text-[0.8125rem] text-slate-400 font-medium">Toont 1–4 van 80 betalingen</p>
+                    <div class="flex items-center gap-1">
+                        <span class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-slate-300 cursor-not-allowed">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </span>
+                        <span class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-[0.8125rem] font-semibold text-slate-500 hover:bg-slate-100 hover:text-[#1e3a8a] cursor-pointer transition-all duration-200">1</span>
+                        <span class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-[0.8125rem] font-semibold text-white bg-gradient-to-br from-[#1e3a8a] to-[#2563eb] shadow-[0_2px_6px_rgba(30,58,138,0.2)] cursor-default">2</span>
+                        <span class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-[0.8125rem] font-semibold text-slate-500 hover:bg-slate-100 hover:text-[#1e3a8a] cursor-pointer transition-all duration-200">3</span>
+                        <span class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-[0.8125rem] font-semibold text-slate-500 hover:bg-slate-100 hover:text-[#1e3a8a] cursor-pointer transition-all duration-200">4</span>
+                        <span class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-[0.8125rem] font-semibold text-slate-500 hover:bg-slate-100 hover:text-[#1e3a8a] cursor-pointer transition-all duration-200">5</span>
+                        <span class="text-slate-300 font-semibold text-xs tracking-widest px-1">•••</span>
+                        <span class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-[0.8125rem] font-semibold text-slate-500 hover:bg-slate-100 hover:text-[#1e3a8a] cursor-pointer transition-all duration-200">20</span>
+                        <a href="#" class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-[#1e3a8a] cursor-pointer transition-all duration-200">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    {{-- ApexCharts - Stacked Bar Chart --}}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var options = {
+            series: [{
+                name: 'Cash',
+                data: [4200, 3800, 4500, 3200, 4800, 5100, 4600]
+            }, {
+                name: 'Overmaking',
+                data: [3100, 2900, 3400, 2800, 3600, 3900, 3200]
+            }, {
+                name: 'Mobiel',
+                data: [1800, 2200, 1900, 2100, 2400, 2600, 2300]
+            }],
+            chart: {
+                type: 'bar',
+                height: 200,
+                stacked: true,
+                toolbar: { show: false },
+                fontFamily: 'Inter, sans-serif',
+            },
+            plotOptions: {
+                bar: {
+                    borderRadius: 4,
+                    columnWidth: '45%',
+                }
+            },
+            colors: ['#1e293b', '#64748b', '#cbd5e1'],
+            xaxis: {
+                categories: ['Jan', 'Feb', 'Maart', 'April', 'Mei', 'Juni', 'Juli'],
+                labels: {
+                    style: {
+                        colors: '#94a3b8',
+                        fontSize: '11px',
+                        fontWeight: 500,
+                    }
+                },
+                axisBorder: { show: false },
+                axisTicks: { show: false },
+            },
+            yaxis: {
+                show: false,
+            },
+            grid: {
+                show: false,
+            },
+            legend: {
+                show: false,
+            },
+            dataLabels: {
+                enabled: false,
+            },
+            tooltip: {
+                theme: 'dark',
+                y: {
+                    formatter: function(val) {
+                        return 'Srd ' + val.toLocaleString();
+                    }
+                }
+            },
+        };
+
+        var chart = new ApexCharts(document.querySelector("#contributieChart"), options);
+        chart.render();
+    });
+    </script>
+</body>
+</html>

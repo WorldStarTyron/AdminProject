@@ -29,15 +29,11 @@ Route::resource('ledenpagina/addlid', PostController::class);
 
 
 //betalingen routes
-Route::get('/betalingen',function(){
-    return view('betalingen');
-})->name('betalingen');
+Route::get('/betalingPagina', function() {
+    return view('BetalingPagina');
+})->name('betalingPagina');
 
+// dashboard routes
 Route::get('/dashboard',function(){
     return view('dashboard');
 })->name('dashboard');
-
-
-Route::get('/gebruiker_info',function(){
-    return view('gebruiker_info');
-})->name('gebruiker_info');

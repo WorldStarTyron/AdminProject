@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/css/totalleden.css', 'resources/css/Toevoegen.css', 'resources/js/app.js', 'resources/js/FormValidator.js', 'resources/js/AddLidModal.js'])
+    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/css/totalleden.css', 'resources/css/Toevoegen.css', 'resources/js/app.js', 'resources/js/FormValidator.js', 'resources/js/AddLidModal.js', 'resources/js/TotalLeden-Chart.js'])
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -147,145 +147,16 @@
                         </tbody>
                     </table>
                 </div>
-
-                {{-- Pagination Footer --}}
-                @if($leden->hasPages())
-                <div class="table-footer">
-                    <div class="pagination-info">
-                        Toont {{ $leden->firstItem() }}–{{ $leden->lastItem() }} van {{ $leden->total() }} leden
-                    </div>
-                    <div class="pagination">
-                        {{-- Previous Button --}}
-                        @if($leden->onFirstPage())
-                            <span class="page-nav disabled">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            </span>
-                        @else
-                            <a href="{{ $leden->previousPageUrl() }}" class="page-nav">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            </a>
-                        @endif
-
-                        @php
-                            $currentPage = $leden->currentPage();
-                            $lastPage = $leden->lastPage();
-                        @endphp
-
-                        {{-- Page Numbers --}}
-                        @for($i = 1; $i <= min(5, $lastPage); $i++)
-                            @if($i == $currentPage)
-                                <span class="page-link active">{{ $i }}</span>
-                            @else
-                                <a href="{{ $leden->url($i) }}" class="page-link">{{ $i }}</a>
-                            @endif
-                        @endfor
-
-                        @if($lastPage > 5)
-                            <span class="page-dots">•••</span>
-                            @if($currentPage == $lastPage)
-                                <span class="page-link active">{{ $lastPage }}</span>
-                            @else
-                                <a href="{{ $leden->url($lastPage) }}" class="page-link">{{ $lastPage }}</a>
-                            @endif
-                        @endif
-
-                        {{-- Next Button --}}
-                        @if($leden->hasMorePages())
-                            <a href="{{ $leden->nextPageUrl() }}" class="page-nav">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            </a>
-                        @else
-                            <span class="page-nav disabled">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            </span>
-                        @endif
-                    </div>
-                </div>
-                @endif
+                  @include('layouts.Table footer')
+              
+                
             </div>
         </main>
     </div>
 
 
     <!-- toevoegen -->
-    {{-- ===== Modal Overlay ===== --}}
-    <div class="modal-overlay" id="addLidModal">
-        <div class="modal-container">
-            <div class="form-container">
-                <div class="form-header">
-                    <div>
-                        <h2 class="form-title">Nieuw lid toevoegen</h2>
-                        <p class="form-description">Vul de gegevens in om een nieuw lid te registreren</p>
-                    </div>
-                    <button type="button" class="close-btn" id="closeModalBtn" aria-label="Sluiten">&times;</button>
-                </div>
-
-                <div class="form-section-title">Persoonlijke gegevens</div>
-
-                <div class="error-container" id="modalErrors" style="display: none;">
-                    <ul id="modalErrorList"></ul>
-                </div>
-
-                <form id="addLidForm" data-store-url="{{ route('addlid.store') }}">
-                    @csrf
-
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="name">Naam <span class="required">*</span></label>
-                            <input type="text" id="name" name="name" placeholder="Volledige naam" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="woonplaats">Woonplaats <span class="required">*</span></label>
-                            <select id="woonplaats" name="woonplaats" required>
-                                <option value="" disabled selected>Selecteer woonplaats</option>
-                                <option value="Latour">Latour</option>
-                                <option value="Paramaribo">Paramaribo</option>
-                                <option value="Wanica">Wanica</option>
-                                <option value="Nickerie">Nickerie</option>
-                                <option value="Commewijne">Commewijne</option>
-                                <option value="Saramacca">Saramacca</option>
-                                <option value="Para">Para</option>
-                                <option value="Coronie">Coronie</option>
-                                <option value="Marowijne">Marowijne</option>
-                                <option value="Brokopondo">Brokopondo</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="email">Email <span class="required">*</span></label>
-                            <input type="email" id="email" name="email" placeholder="email@voorbeeld.com" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="adres">Adres <span class="required">*</span></label>
-                            <input type="text" id="adres" name="adres" placeholder="Straatnaam en huisnummer" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="telefoonnummer">Telefoon <span class="required">*</span></label>
-                            <input type="text" id="telefoonnummer" name="telefoonnummer" placeholder="+597 ..." required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="geboortedatum">Geboortedatum <span class="required">*</span></label>
-                            <input type="date" id="geboortedatum" name="geboortedatum" value="{{ date('Y-m-d') }}" required>
-                        </div>
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="submit" class="btn-add-user" id="submitBtn">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            Lid toevoegen
-                        </button>
-                        <button type="button" class="btn-cancel" id="cancelModalBtn">Annuleren</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    @include('layouts.Add-Modal.add-lid-modal')
 
     {{-- Success Toast --}}
     <div class="toast-notification" id="successToast">

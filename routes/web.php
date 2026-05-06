@@ -33,7 +33,8 @@ Route::get('/betalingPagina', function() {
     return view('BetalingPagina');
 })->name('betalingPagina');
 
+
 // dashboard routes
 Route::get('/dashboard',function(){
-    return view('dashboard');
+    return view('MainDashboardPagina');
 })->name('dashboard');

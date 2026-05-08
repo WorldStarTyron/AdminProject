@@ -9,14 +9,15 @@ class LidController extends Controller
 {
     public function index(Request $request)
     {
+        // select data from leden table 
         $query = Lid::select(
             'leden.lid_id',
-            'gebruikers.naam',
+            'leden.Naam',
             'leden.telefoonnummer',
             'leden.adres',
             'leden.woonplaats',
-            'gebruikers.email'
-        )->join('gebruikers','leden.gebruiker_id','=','gebruikers.gebruiker_id');
+            'leden.email'
+        )->join('gebruikers', 'leden.lid_id', '=', 'gebruikers.gebruiker_id');
 
         // Filter by woonplaats if provided
         if ($request->filled('woonplaats')) {

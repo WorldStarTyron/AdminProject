@@ -17,12 +17,12 @@ class PostController extends Controller
     {
         $leden = Lid::select(
             'leden.lid_id',
-            'gebruikers.naam',
+            'leden.Naam',
             'leden.telefoonnummer',
             'leden.adres',
-            'gebruikers.email'
-        )->join('gebruikers','leden.gebruiker_id','=','gebruikers.gebruiker_id')
-        ->get(); // haalt de gegevens op met een join op de gebruikers tabel
+            'leden.email'
+        )->join('gebruikers', 'leden.gebruiker_id', '=', 'gebruikers.gebruiker_id')
+        ->get(); // haalt de gegevens op uit de leden tabel met join op gebruikers
         return view('ledenpagina', compact('leden')); // stuurt de gegevens door naar de view
     }
 
@@ -31,7 +31,7 @@ class PostController extends Controller
      */
     public function create()
     {
-        return view('posts/LidToevoegen'); // stuurt de gegevens door naar the view
+        return view('Add-Modal/add-lid-modal'); // stuurt de gegevens door naar the view
     }
 
     /**
@@ -45,8 +45,8 @@ class PostController extends Controller
     {
         // All validation already passed (handled by StoreLidRequest).
         // Now do an extra duplicate check: same name + same birthdate = probably same person.
-        $duplicatePerson = User::join('leden', 'gebruikers.gebruiker_id', '=', 'leden.gebruiker_id')
-            ->where('gebruikers.naam', $request->name)
+        $duplicatePerson = User::join('leden', 'gebruikers.gebruiker_id', '=', 'leden.lid_id')
+            ->where('leden.Naam', $request->Naam)
             ->where('leden.geboortedatum', $request->geboortedatum)
             ->exists();
 
@@ -67,8 +67,7 @@ class PostController extends Controller
                 'naam' => $request->name,
                 'email' => $request->email,
                 'wachtwoord_hash' => bcrypt('Welkom01!'), // Standaard wachtwoord
-                'rol' => 'lid',
-                'actief' => 1,
+                'rol' => 'admin',
             ]);
 
             // voegt de gegevens toe aan de leden tabel
@@ -96,7 +95,7 @@ class PostController extends Controller
      */
     public function show(string $id)
     {
-        //
+        
     }
 
     /**

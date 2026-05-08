@@ -16,13 +16,13 @@
                 <ul id="modalErrorList"></ul>
             </div>
 
-            <form id="addLidForm" data-store-url="{{ route('addlid.store') }}">
-                @csrf
+            <form id="addLidForm" data-store-url="{{ route('ledenpagina.addlid.store') }}">
+                @csrf  
 
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="name">Naam <span class="required">*</span></label>
-                        <input type="text" id="name" name="name" placeholder="Volledige naam" required>
+                        <label for="Naam">Naam <span class="required">*</span></label>
+                        <input type="text" id="Naam" name="Naam" placeholder="Volledige naam" required>
                     </div>
 
                     <div class="form-group">
@@ -43,8 +43,8 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="email">Email <span class="required">*</span></label>
-                        <input type="email" id="email" name="email" placeholder="email@voorbeeld.com" required>
+                        <label for="Email">Email <span class="required">*</span></label>
+                        <input type="email" id="Email" name="Email" placeholder="email@voorbeeld.com" required>
                     </div>
 
                     <div class="form-group">

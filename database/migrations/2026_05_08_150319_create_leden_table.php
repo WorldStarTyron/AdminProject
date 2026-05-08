@@ -15,8 +15,8 @@ return new class extends Migration
 
         Schema::create('leden', function (Blueprint $table) {
             $table->char('lid_id', 36)->primary();
-            $table->char('gebruiker_id', 36);
-            $table->foreign('gebruiker_id')->references('gebruiker_id')->on('gebruikers');
+            $table->char('Naam', 100);
+            $table->string('Email');
             $table->string('telefoonnummer', 20)->nullable();
             $table->string('adres', 255)->nullable();
             $table->string('woonplaats', 100)->nullable();

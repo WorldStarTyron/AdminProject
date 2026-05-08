@@ -25,7 +25,7 @@ Route::get('/', function () {
 Route::get('/ledenpagina', [LidController::class, 'index'])->name('ledenpagina');
 
 //Leden Toevoegen
-Route::resource('ledenpagina/addlid', PostController::class);
+Route::post('/ledenpagina/addlid', [PostController::class, 'store'])->name('ledenpagina.addlid.store');
 
 
 //betalingen routes
@@ -38,3 +38,8 @@ Route::get('/betalingPagina', function() {
 Route::get('/dashboard',function(){
     return view('MainDashboardPagina');
 })->name('dashboard');
+
+//Login
+Route::get('/login',function(){
+    return view('login');
+})->name('login');

@@ -11,16 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::disableForeignKeyConstraints();
+
         Schema::create('gebruikers', function (Blueprint $table) {
             $table->char('gebruiker_id', 36)->primary();
             $table->string('naam', 100);
             $table->string('email', 150)->unique();
             $table->string('wachtwoord_hash', 255);
-            $table->enum('rol', ["lid","admin","superadmin"]);
-            $table->tinyInteger('actief')->default(1);
+            $table->unsignedTinyInteger('rol_id')->default(1);
+            $table->foreign('rol_id')->references('rol_id')->on('rollen');
             $table->timestamp('aangemaakt_op')->useCurrent();
-            $table->timestamp('bijgewerkt_op')->useCurrent();
         });
+
+        Schema::enableForeignKeyConstraints();
     }
 
     /**

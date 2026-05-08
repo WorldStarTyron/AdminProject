@@ -18,8 +18,6 @@ return new class extends Migration
             $table->char('betaling_id', 36);
             $table->foreign('betaling_id')->references('betaling_id')->on('betalingen');
             $table->string('bon_nummer', 30);
-            $table->char('aangemaakt_door', 36);
-            $table->foreign('aangemaakt_door')->references('gebruiker_id')->on('gebruikers');
             $table->timestamp('aangemaakt_op')->useCurrent();
             $table->timestamp('gedownload_op')->nullable();
         });

@@ -31,7 +31,6 @@ class User extends Authenticatable
         'email',
         'wachtwoord_hash',
         'rol',
-        'actief',
     ];
 
     /**

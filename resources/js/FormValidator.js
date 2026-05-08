@@ -18,8 +18,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // STEP 1: Get all form fields
     // ==============================
     const fields = {
-        name:           document.getElementById('name'),
-        email:          document.getElementById('email'),
+        name:           document.getElementById('Name'),
+        email:          document.getElementById('Email'),
         telefoonnummer: document.getElementById('telefoonnummer'),
         woonplaats:     document.getElementById('woonplaats'),
         adres:          document.getElementById('adres'),

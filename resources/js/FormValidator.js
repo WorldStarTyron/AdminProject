@@ -16,10 +16,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ==============================
     // STEP 1: Get all form fields
+    // FIX: 'naam' → 'name' (moet overeenkomen met id="name" in de blade)
     // ==============================
     const fields = {
-        name:           document.getElementById('Name'),
-        email:          document.getElementById('Email'),
+        name:           document.getElementById('name'),
+        email:          document.getElementById('email'),
         telefoonnummer: document.getElementById('telefoonnummer'),
         woonplaats:     document.getElementById('woonplaats'),
         adres:          document.getElementById('adres'),

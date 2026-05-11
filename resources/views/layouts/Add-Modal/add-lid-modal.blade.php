@@ -17,12 +17,12 @@
             </div>
 
             <form id="addLidForm" data-store-url="{{ route('ledenpagina.addlid.store') }}">
-                @csrf  
+                @csrf
 
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="Naam">Naam <span class="required">*</span></label>
-                        <input type="text" id="Naam" name="Naam" placeholder="Volledige naam" required>
+                        <label for="name">Naam <span class="required">*</span></label>
+                        <input type="text" id="name" name="name" placeholder="Volledige naam" required>
                     </div>
 
                     <div class="form-group">
@@ -43,8 +43,8 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="Email">Email <span class="required">*</span></label>
-                        <input type="email" id="Email" name="Email" placeholder="email@voorbeeld.com" required>
+                        <label for="email">Email <span class="required">*</span></label>
+                        <input type="email" id="email" name="email" placeholder="email@voorbeeld.com" required>
                     </div>
 
                     <div class="form-group">
@@ -64,12 +64,7 @@
                 </div>
 
                 <div class="form-actions">
-                    <button type="submit" class="btn-add-user" id="submitBtn">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        Lid toevoegen
-                    </button>
+                    <button type="submit" class="btn-add-user" id="submitBtn">Lid toevoegen</button>
                     <button type="button" class="btn-cancel" id="cancelModalBtn">Annuleren</button>
                 </div>
             </form>

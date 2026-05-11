@@ -14,12 +14,12 @@ return new class extends Migration
         Schema::disableForeignKeyConstraints();
 
         Schema::create('bonnen', function (Blueprint $table) {
-            $table->char('bon_id', 36)->primary();
-            $table->char('betaling_id', 36);
+            $table->char('bon_id', 36)->primary()->default('(UUID())');
+            $table->char('betaling_id', 36)->index();
             $table->foreign('betaling_id')->references('betaling_id')->on('betalingen');
             $table->string('bon_nummer', 30);
             $table->timestamp('aangemaakt_op')->useCurrent();
-            $table->timestamp('gedownload_op')->nullable();
+            $table->timestamp('gedownload_op')->nullable()->default(null);
         });
 
         Schema::enableForeignKeyConstraints();

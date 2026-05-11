@@ -20,10 +20,8 @@
 
         {{-- Stats & Chart Row --}}
         @include('layouts.leden-overzicht')
-  
-        
-     
-        {{-- Main Table Section --}}
+
+        <!-- Main Table Section -->
         <main class="page-content">
             <div class="table-container">
                 {{-- Table Header --}}
@@ -68,7 +66,7 @@
                     </div>
                 </div>
 
-                {{-- Table with responsive wrapper --}}
+                <!-- Table with responsive wrapper -->
                 <div class="table-wrapper">
                     <table class="data-table" id="ledenTable">
                         <thead>
@@ -147,15 +145,14 @@
                         </tbody>
                     </table>
                 </div>
-                  @include('layouts.Table footer')
-              
-                
+
+                @include('layouts.Table footer')
+
             </div>
         </main>
     </div>
 
-
-    <!-- toevoegen -->
+    <!-- Modal: Lid toevoegen -->
     @include('layouts.Add-Modal.add-lid-modal')
 
     {{-- Success Toast --}}

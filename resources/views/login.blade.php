@@ -77,9 +77,8 @@
                         <!-- Login Button -->
                         <button
                             type="submit"
-                            class="w-full bg-gray-900 hover:bg-gray-800 text-white font-medium py-2.5 px-4 rounded-lg transition duration-200"
-                        >
-                            Sign in
+                            class="w-full bg-gray-900 hover:bg-gray-800 text-white font-medium py-2.5 px-4 rounded-lg transition duration-200">
+                           Login
                         </button>
                     </form>
 

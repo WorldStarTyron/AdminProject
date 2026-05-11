@@ -109,29 +109,63 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Collect form data (including file)
             var formData = new FormData(form);
+            var storeUrl = form.getAttribute('data-store-url');
 
-            // TODO: Replace with your actual store route when backend is ready
-            // var storeUrl = form.getAttribute('data-store-url');
-            // 
-            // fetch(storeUrl, {
-            //     method: 'POST',
-            //     headers: {
-            //         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            //         'Accept': 'application/json',
-            //     },
-            //     body: formData,
-            // })
-            // .then(function (response) { ... })
+            fetch(storeUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                },
+                body: formData,
+            })
+            .then(function (response) {
+                if (response.ok) {
+                    return response.json().then(function (data) {
+                        closeModal();
 
-            // For now, simulate success
-            setTimeout(function () {
-                closeModal();
+                        // Show success toast
+                        var toast = document.getElementById('betalingSuccessToast');
+                        if (toast) {
+                            toast.classList.add('show');
+                            setTimeout(function () {
+                                toast.classList.remove('show');
+                            }, 3000);
+                        }
+
+                        // Reload page to show new betaling in the table
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 1000);
+                    });
+                } else {
+                    return response.json().then(function (data) {
+                        // Show validation errors
+                        if (data.errors) {
+                            errorsDiv.style.display = 'block';
+                            errorsDiv.classList.remove('hidden');
+                            for (var field in data.errors) {
+                                data.errors[field].forEach(function (msg) {
+                                    var li = document.createElement('li');
+                                    li.textContent = msg;
+                                    errorList.appendChild(li);
+                                });
+                            }
+                        }
+                    });
+                }
+            })
+            .catch(function () {
+                errorsDiv.style.display = 'block';
+                errorsDiv.classList.remove('hidden');
+                var li = document.createElement('li');
+                li.textContent = 'Er is een fout opgetreden. Probeer het opnieuw.';
+                errorList.appendChild(li);
+            })
+            .finally(function () {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML =
-                    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none">' +
-                    '<path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2.5" ' +
-                    'stroke-linecap="round" stroke-linejoin="round"/></svg> Betaling toevoegen';
-            }, 600);
+                submitBtn.innerHTML = 'Betaling toevoegen';
+            });
         });
     }
 

@@ -34,48 +34,28 @@
                         </thead>
                         <tbody>
                             {{-- Demo rows --}}
-                            <tr class="transition-colors duration-150 hover:bg-slate-50">
-                                <td class="px-4 py-3.5 text-[0.8125rem] text-blue-600 font-medium border-b border-slate-100">Jerry Mattedi</td>
-                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-600 border-b border-slate-100">3 April 2026</td>
-                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-600 border-b border-slate-100">Srd 321</td>
-                                <td class="px-4 py-3.5 text-[0.8125rem] border-b border-slate-100">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700">Betaald</span>
+                             @foreach($betalingen as $betaling)
+                             <tr class="transition-colors duration-150 hover:bg-slate-50">
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="text-slate-800 font-semibold">{{ $betaling->user->name }}</span>
                                 </td>
-                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-600 border-b border-slate-100">Cash</td>
-                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-500 border-b border-slate-100">
-                                    <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[0.6875rem] font-mono font-semibold">BON KA-2026-0001</span>
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="text-slate-600 text-sm">{{ $betaling->datum }}</span>
                                 </td>
-                            </tr>
-                            <tr class="transition-colors duration-150 hover:bg-slate-50">
-                                <td class="px-4 py-3.5 text-[0.8125rem] text-blue-600 font-medium border-b border-slate-100">Elianora Vasilov</td>
-                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-600 border-b border-slate-100">9 April 2026</td>
-                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-600 border-b border-slate-100">Srd 313</td>
-                                <td class="px-4 py-3.5 text-[0.8125rem] border-b border-slate-100">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700">Betaald</span>
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="text-slate-600 text-sm">{{ $betaling->bedrag }}</span>
                                 </td>
-                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-600 border-b border-slate-100">Cash</td>
-                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-500 border-b border-slate-100"></td>
-                            </tr>
-                            <tr class="transition-colors duration-150 hover:bg-slate-50">
-                                <td class="px-4 py-3.5 text-[0.8125rem] text-blue-600 font-medium border-b border-slate-100">Alvis Daen</td>
-                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-600 border-b border-slate-100">2 April 2026</td>
-                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-600 border-b border-slate-100">Srd 421</td>
-                                <td class="px-4 py-3.5 text-[0.8125rem] border-b border-slate-100">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700">Betaald</span>
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="text-slate-600 text-sm">{{ $betaling->status }}</span>
                                 </td>
-                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-600 border-b border-slate-100">overmaking</td>
-                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-500 border-b border-slate-100"></td>
-                            </tr>
-                            <tr class="transition-colors duration-150 hover:bg-slate-50">
-                                <td class="px-4 py-3.5 text-[0.8125rem] text-blue-600 font-medium border-b border-slate-100">Lissa Shipsey</td>
-                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-600 border-b border-slate-100">10 April 2026</td>
-                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-600 border-b border-slate-100">Srd 536</td>
-                                <td class="px-4 py-3.5 text-[0.8125rem] border-b border-slate-100">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700">Betaald</span>
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="text-slate-600 text-sm">{{ $betaling->betaling_method }}</span>
                                 </td>
-                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-600 border-b border-slate-100">overmaking</td>
-                                <td class="px-4 py-3.5 text-[0.8125rem] text-slate-500 border-b border-slate-100"></td>
-                            </tr>
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="text-slate-600 text-sm">{{ $betaling->bonnummer }}</span>
+                                </td>
+                             </tr>
+                             @endforeach
                         </tbody>
                     </table>
                 </div>

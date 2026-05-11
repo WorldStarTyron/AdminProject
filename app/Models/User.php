@@ -52,4 +52,16 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'wachtwoord_hash' => 'hashed',
     ];
+
+
+
+
+
+
+
+
+
+
+
+    
 }

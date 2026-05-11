@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Lid;
-use App\Models\User;
 use App\Http\Requests\StoreLidRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class PostController extends Controller
 {
@@ -17,13 +17,12 @@ class PostController extends Controller
     {
         $leden = Lid::select(
             'leden.lid_id',
-            'leden.Naam',
+            'leden.naam',
             'leden.telefoonnummer',
             'leden.adres',
             'leden.email'
-        )->join('gebruikers', 'leden.gebruiker_id', '=', 'gebruikers.gebruiker_id')
-        ->get(); // haalt de gegevens op uit de leden tabel met join op gebruikers
-        return view('ledenpagina', compact('leden')); // stuurt de gegevens door naar de view
+        )->get();
+        return view('ledenpagina', compact('leden'));
     }
 
     /**
@@ -31,58 +30,50 @@ class PostController extends Controller
      */
     public function create()
     {
-        return view('Add-Modal/add-lid-modal'); // stuurt de gegevens door naar the view
+        return view('Add-Modal/add-lid-modal');
     }
 
     /**
      * Store a newly created resource in storage.
-     * 
-     * VALIDATION: The StoreLidRequest class (in app/Http/Requests/) 
+     *
+     * VALIDATION: The StoreLidRequest class (in app/Http/Requests/)
      * automatically validates ALL fields before this code runs.
      * If validation fails, Laravel sends back error messages automatically.
+     *
+     * FIX: Removed gebruiker_id and betaalstatus from Lid::create()
+     *      — deze kolommen bestaan niet meer in de leden tabel.
+     *      User::create() is ook verwijderd want leden en gebruikers
+     *      zijn nu losgekoppeld.
      */
     public function store(StoreLidRequest $request)
     {
-        // All validation already passed (handled by StoreLidRequest).
-        // Now do an extra duplicate check: same name + same birthdate = probably same person.
-        $duplicatePerson = User::join('leden', 'gebruikers.gebruiker_id', '=', 'leden.lid_id')
-            ->where('leden.Naam', $request->Naam)
-            ->where('leden.geboortedatum', $request->geboortedatum)
+        // Duplicate check: zelfde naam + geboortedatum = waarschijnlijk zelfde persoon
+        $duplicatePerson = Lid::where('naam', $request->name)
+            ->where('geboortedatum', $request->geboortedatum)
             ->exists();
 
         if ($duplicatePerson) {
             return response()->json([
                 'errors' => [
-                    'name' => ['Er bestaat al een lid met dezelfde naam en geboortedatum. Controleer of dit lid al geregistreerd is.']
+                    'name' => ['Er bestaat al een lid met dezelfde naam en geboortedatum.']
                 ]
             ], 422);
         }
 
-        \DB::transaction(function () use ($request) {
-            $gebruiker_id = (string) Str::uuid();
-            
-            // voegt de gegevens toe aan de gebruikers tabel
-            User::create([
-                'gebruiker_id' => $gebruiker_id,
-                'naam' => $request->name,
-                'email' => $request->email,
-                'wachtwoord_hash' => bcrypt('Welkom01!'), // Standaard wachtwoord
-                'rol' => 'admin',
-            ]);
-
-            // voegt de gegevens toe aan de leden tabel
+        DB::transaction(function () use ($request) {
+            // Voegt de gegevens toe aan de leden tabel
             Lid::create([
-                'lid_id' => (string) Str::uuid(),
-                'gebruiker_id' => $gebruiker_id,
+                'lid_id'         => (string) Str::uuid(),
+                'naam'           => $request->name,
+                'email'          => $request->email,
                 'telefoonnummer' => $request->telefoonnummer,
-                'adres' => $request->adres,
-                'woonplaats' => $request->woonplaats,
-                'geboortedatum' => $request->geboortedatum,
-                'betaalstatus' => 'Niet Betaald',
+                'adres'          => $request->adres,
+                'woonplaats'     => $request->woonplaats,
+                'geboortedatum'  => $request->geboortedatum,
             ]);
         });
 
-        // Return JSON for AJAX requests, redirect for regular form posts
+        // Return JSON voor AJAX requests, redirect voor normale form posts
         if ($request->expectsJson()) {
             return response()->json(['success' => true, 'message' => 'Lid toegevoegd'], 201);
         }
@@ -95,7 +86,7 @@ class PostController extends Controller
      */
     public function show(string $id)
     {
-        
+        //
     }
 
     /**
@@ -121,4 +112,4 @@ class PostController extends Controller
     {
         //
     }
-};
+}

@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::disableForeignKeyConstraints();
 
         Schema::create('wachtwoord_reset', function (Blueprint $table) {
-            $table->char('reset_id', 36)->primary();
-            $table->char('gebruiker_id', 36);
+            $table->char('reset_id', 36)->primary()->default('(UUID())');
+            $table->char('gebruiker_id', 36)->index();
             $table->foreign('gebruiker_id')->references('gebruiker_id')->on('gebruikers');
             $table->string('token', 255);
-            $table->timestamp('verlopen_op')->useCurrent();
+            $table->timestamp('verlopen_op')->default('(CURRENT_TIMESTAMP() + INTERVAL 1 HOUR)');
             $table->tinyInteger('gebruikt');
             $table->timestamp('aangemaakt_op')->useCurrent();
         });

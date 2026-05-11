@@ -1,10 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Models\Lid; // 1. Import the model
-use App\Http\Controllers\LidController;  // 2. Import the controller
-use App\Http\Controllers\PostController; // Import the Controller from PostController
+use App\Models\Lid;
+use App\Http\Controllers\LidController;
+use App\Http\Controllers\PostController;
 use App\Http\Controllers\ChartController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\BetalingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,25 +24,25 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-//leden routes
+// Leden routes
 Route::get('/ledenpagina', [LidController::class, 'index'])->name('ledenpagina');
 
-//Leden Toevoegen
+// Leden toevoegen
 Route::post('/ledenpagina/addlid', [PostController::class, 'store'])->name('ledenpagina.addlid.store');
 
+// Betalingen routes
+Route::get('/betalingPagina', [BetalingController::class, 'index'])->name('betalingPagina');
+Route::post('/betalingPagina/addBetaling', [BetalingController::class, 'store'])->name('betalingPagina.addBetaling.store');
 
-//betalingen routes
-Route::get('/betalingPagina', function() {
-    return view('BetalingPagina');
-})->name('betalingPagina');
-
-
-// dashboard routes
-Route::get('/dashboard',function(){
+// Dashboard routes
+Route::get('/dashboard', function () {
     return view('MainDashboardPagina');
 })->name('dashboard');
 
-//Login
-Route::get('/login',function(){
+// Login routes
+// FIX: GET en POST mogen niet dezelfde naam hebben → POST heet nu 'login.post'
+Route::get('/login', function () {
     return view('login');
 })->name('login');
+Route::post('/login', [LoginController::class, 'login'])->name('login.post');   // ✅ FIX: naam was duplicate
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');

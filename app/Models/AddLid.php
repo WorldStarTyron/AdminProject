@@ -16,7 +16,7 @@ class AddLid extends Model
         'woonplaats',
         'geboortedatum',
         'email',
-        'betaalstatus'
+        'lid_sinds'
     ];
 
     protected $table = 'leden';

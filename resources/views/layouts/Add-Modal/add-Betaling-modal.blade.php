@@ -23,7 +23,7 @@
                 <ul class="m-0 pl-5 text-[0.8125rem]" id="betalingModalErrorList"></ul>
             </div>
 
-            <form id="addBetalingForm">
+            <form id="addBetalingForm" data-store-url="{{ route('betalingPagina.addBetaling.store') }}">
                 @csrf
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 gap-x-7 mb-6">
@@ -66,6 +66,19 @@
                             class="px-3 py-2.5 border-[1.5px] border-slate-200 rounded-[10px] text-[0.8125rem] text-slate-700 bg-slate-50 w-full box-border transition-all duration-200 font-[inherit] focus:outline-none focus:border-blue-600 focus:bg-white focus:shadow-[0_0_0_3px_rgba(37,99,235,0.08)]">
                     </div>
 
+                    {{-- Methode --}}
+                    <div class="flex flex-col">
+                        <label for="betaling_methode" class="text-[0.8125rem] font-semibold text-slate-700 mb-1.5">
+                            Methode <span class="text-red-500">*</span>
+                        </label>
+                        <select id="betaling_methode" name="methode" required
+                            class="px-3 py-2.5 border-[1.5px] border-slate-200 rounded-[10px] text-[0.8125rem] text-slate-700 bg-slate-50 w-full box-border transition-all duration-200 font-[inherit] focus:outline-none focus:border-blue-600 focus:bg-white focus:shadow-[0_0_0_3px_rgba(37,99,235,0.08)]">
+                            <option value="" disabled selected>Select</option>
+                            <option value="Geld">Geld</option>
+                            <option value="Overmaking">Overmaking</option>
+                        </select>
+                    </div>
+
                     {{-- Status --}}
                     <div class="flex flex-col">
                         <label for="betaling_status" class="text-[0.8125rem] font-semibold text-slate-700 mb-1.5">
@@ -75,8 +88,8 @@
                             class="px-3 py-2.5 border-[1.5px] border-slate-200 rounded-[10px] text-[0.8125rem] text-slate-700 bg-slate-50 w-full box-border transition-all duration-200 font-[inherit] focus:outline-none focus:border-blue-600 focus:bg-white focus:shadow-[0_0_0_3px_rgba(37,99,235,0.08)]">
                             <option value="" disabled selected>Select</option>
                             <option value="Betaald">Betaald</option>
-                            <option value="In afwachting">In afwachting</option>
-                            <option value="Geannuleerd">Geannuleerd</option>
+                            <option value="Niet Betaald">Niet Betaald</option>
+                            <option value="Afwachting">Afwachting</option>
                         </select>
                     </div>
 
@@ -97,9 +110,7 @@
                 <div class="flex gap-3 mt-6 pt-6 border-t border-slate-100">
                     <button type="submit" id="submitBetalingBtn"
                         class="bg-gradient-to-br from-[#1e3a8a] to-[#2563eb] text-white px-6 py-2.5 border-none rounded-[10px] font-semibold text-[0.8125rem] cursor-pointer transition-all duration-[250ms] shadow-[0_2px_8px_rgba(30,58,138,0.2)] inline-flex items-center gap-2 font-[inherit] hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(30,58,138,0.3)] disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
+                    
                         Betaling toevoegen
                     </button>
                     <button type="button" id="cancelBetalingModalBtn"

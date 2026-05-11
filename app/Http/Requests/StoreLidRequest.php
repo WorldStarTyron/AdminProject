@@ -43,8 +43,8 @@ class StoreLidRequest extends FormRequest
     {
         return [
 
-            // --- NAAM (Name) ---
-            // Must be 2-255 characters, only letters and spaces allowed
+            // --- NAME ---
+            // FIX: was 'naam', maar de form stuurt name="name"
             'name' => [
                 'required',
                 'string',
@@ -59,7 +59,7 @@ class StoreLidRequest extends FormRequest
                 'required',
                 'email',
                 'max:255',
-                'unique:gebruikers,email',  // check the "gebruikers" table, "email" column
+                'unique:leden,email',  // check the "leden" table, "email" column
             ],
 
             // --- TELEFOONNUMMER (Phone) ---
@@ -69,8 +69,8 @@ class StoreLidRequest extends FormRequest
                 'string',
                 'min:7',
                 'max:20',
-                'regex:/^[\+]?[0-9\s\-]+$/',  // only numbers, +, spaces, hyphens
-                'unique:leden,telefoonnummer', // check the "leden" table for duplicates
+                'regex:/^[\+]?[0-9\s\-]+$/',      // only numbers, +, spaces, hyphens
+                'unique:leden,telefoonnummer',     // check the "leden" table for duplicates
             ],
 
             // --- WOONPLAATS (City) ---
@@ -104,21 +104,22 @@ class StoreLidRequest extends FormRequest
     /**
      * Custom error messages in Dutch.
      * These messages are shown to the admin when a field is wrong.
+     * FIX: alle 'name.*' messages kloppen nu met de rules hierboven
      */
     public function messages()
     {
         return [
-            // Naam
-            'name.required'    => 'Naam is verplicht.',
-            'name.min'         => 'Naam moet minstens 2 tekens bevatten.',
-            'name.max'         => 'Naam mag maximaal 255 tekens bevatten.',
-            'name.regex'       => 'Naam mag alleen letters, spaties en streepjes bevatten.',
+            // Name
+            'name.required' => 'Naam is verplicht.',
+            'name.min'      => 'Naam moet minstens 2 tekens bevatten.',
+            'name.max'      => 'Naam mag maximaal 255 tekens bevatten.',
+            'name.regex'    => 'Naam mag alleen letters, spaties en streepjes bevatten.',
 
             // Email
-            'email.required'   => 'Email is verplicht.',
-            'email.email'      => 'Voer een geldig e-mailadres in (bijv. naam@voorbeeld.com).',
-            'email.unique'     => 'Dit e-mailadres is al geregistreerd. Dit lid bestaat mogelijk al.',
-            'email.max'        => 'Email mag maximaal 255 tekens bevatten.',
+            'email.required' => 'Email is verplicht.',
+            'email.email'    => 'Voer een geldig e-mailadres in (bijv. naam@voorbeeld.com).',
+            'email.unique'   => 'Dit e-mailadres is al geregistreerd. Dit lid bestaat mogelijk al.',
+            'email.max'      => 'Email mag maximaal 255 tekens bevatten.',
 
             // Telefoon
             'telefoonnummer.required' => 'Telefoonnummer is verplicht.',

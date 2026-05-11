@@ -9,23 +9,23 @@ class LidController extends Controller
 {
     public function index(Request $request)
     {
-        // select data from leden table 
+        // Select data from leden table
+        // FIX: Removed 'betaalstatus' — kolom bestaat niet meer in leden tabel
         $query = Lid::select(
             'leden.lid_id',
-            'leden.Naam',
+            'leden.naam',
             'leden.telefoonnummer',
             'leden.adres',
             'leden.woonplaats',
             'leden.email'
-        )->join('gebruikers', 'leden.lid_id', '=', 'gebruikers.gebruiker_id');
+        );
 
         // Filter by woonplaats if provided
         if ($request->filled('woonplaats')) {
             $query->where('leden.woonplaats', $request->woonplaats);
         }
 
-        $leden = $query->paginate(6)->appends($request->query()); // paginatie op 6 leden per pagina
-      
+        $leden = $query->paginate(6)->appends($request->query()); // pagination: 6 members per page
 
         $totaalLeden = Lid::count();
 
@@ -36,7 +36,7 @@ class LidController extends Controller
             ->orderBy('woonplaats')
             ->pluck('woonplaats');
 
-        // Data for chart: count joins per month for the current year
+        // Data for chart: count members per month for the current year
         $chartData = Lid::selectRaw('MONTH(lid_sinds) as month, COUNT(*) as count')
             ->whereYear('lid_sinds', date('Y'))
             ->groupBy('month')
@@ -45,7 +45,7 @@ class LidController extends Controller
 
         $labels = [];
         $values = [];
-        
+
         // Initialize all months with 0
         for ($m = 1; $m <= 12; $m++) {
             $monthName = date('M', mktime(0, 0, 0, $m, 1));

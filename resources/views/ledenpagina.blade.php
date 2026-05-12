@@ -96,10 +96,12 @@
                                         <span>Adres</span>
                                     </div>
                                 </th>
-                                <th class="th-actions"></th>
+                                <th class="th-actions">Action</th>
                             </tr>
                         </thead>
                         <tbody>
+                            
+                            <!--this foreach loop is for showing the members -->
                             @forelse($leden as $lid)
                                 <tr class="table-row">
                                     <td>
@@ -116,17 +118,36 @@
                                         <span class="email-text">{{ $lid->email }}</span>
                                     </td>
                                     <td>{{ $lid->adres }}</td>
-                                    <td class="text-right">
+
+                                    <!-- More Button-->
+                                    <td class="dropdown-container">
                                         <button class="btn-more" title="Meer opties">
-                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                                                 <circle cx="12" cy="5" r="1.5" fill="currentColor"/>
                                                 <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
                                                 <circle cx="12" cy="19" r="1.5" fill="currentColor"/>
                                             </svg>
                                         </button>
+
+                                        <!-- Dropdown menu -->
+                                        <ul class="dropdown-menu hidden absolute right-0 shadow bg-white rounded p-2">
+                                            <li><a class="text-gray-800 hover:text-blue-600" href="{{ route('ledenpagina.show', $lid->lid_id) }}">Bewerken</a></li>
+                                            <li><a class="text-gray-800 hover:text-red-600">
+                                                <form action="{{ route('ledenpagina.delete', $lid->lid_id) }}" method="POST">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" 
+                                                    onclick="return confirm('Weet u zeker dat u dit lid wilt verwijderen?')">Verwijderen</button>
+                                                </form>
+                                            </a></li>
+                                            <li><a class="text-gray-800 hover:text-green-600" href="{{ route('ledenpagina.show', $lid->lid_id) }}">Bekijken</a></li>
+                                        </ul>
                                     </td>
-                                </tr>
+
+
+
                             @empty
+                            <!-- this is for showing the empty state when there are no members-->
                                 <tr>
                                     <td colspan="6" class="empty-state">
                                         <div class="empty-state-content">
@@ -164,5 +185,6 @@
     </div>
 
     {{-- JS files loaded via Vite in <head> --}}
+    @vite('resources/js/Button&More.js')
 </body>
 </html>

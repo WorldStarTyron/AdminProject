@@ -21,7 +21,7 @@ class BetalingController extends Controller
         // Basic validation
         $request->validate([
             'naam'             => 'required|string',
-            'betalingsdatum'   => 'required|date',
+            'datum'            => 'required|date',
             'methode'          => 'required|in:Geld,Overmaking',
             'status'           => 'required|in:Betaald,Niet Betaald,Afwachting',
             'bedrag'           => 'required|numeric|min:0',
@@ -45,13 +45,13 @@ class BetalingController extends Controller
             $bewijsPath = $request->file('betaling_bewijs')->store('bewijzen', 'public');
         }
 
-        // Auto-derive maand and jaar from betalingsdatum
-        $datum = Carbon::parse($request->betalingsdatum);
+        // Auto-derive maand and jaar from datum
+        $datum = Carbon::parse($request->datum);
 
         Betaling::create([
             'betaling_id'     => (string) Str::uuid(),
             'lid_id'          => $lid->lid_id,
-            'betalingsdatum'  => $request->betalingsdatum,
+            'betalingsdatum'  => $request->datum,
             'methode'         => $request->methode,
             'status'          => $request->status,
             'bewijs_bestand'  => $bewijsPath,

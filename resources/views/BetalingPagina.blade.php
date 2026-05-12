@@ -16,7 +16,7 @@
     @include('layouts.sidebar')
 
     <div class="main-content">
-        @include('layouts.header')
+        @include('layouts.header') 
 
         {{-- Stats & Chart Row --}}
         <div class="flex flex-col lg:flex-row items-stretch gap-6 p-6 px-8 animate-[fadeSlideUp_0.4s_ease-out]">

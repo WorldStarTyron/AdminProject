@@ -37,22 +37,22 @@
                              @foreach($betalingen as $betaling)
                              <tr class="transition-colors duration-150 hover:bg-slate-50">
                                 <td class="px-4 py-4 whitespace-nowrap">
-                                    <span class="text-slate-800 font-semibold">{{ $betaling->user->name }}</span>
+                                   <a href="#"> <span class="text-slate-800 font-semibold">{{ $betaling->lid->naam }}</span></a>
                                 </td>
                                 <td class="px-4 py-4 whitespace-nowrap">
-                                    <span class="text-slate-600 text-sm">{{ $betaling->datum }}</span>
+                                    <span class="text-slate-600 text-sm">{{ $betaling->betalingsdatum }}</span>
                                 </td>
                                 <td class="px-4 py-4 whitespace-nowrap">
-                                    <span class="text-slate-600 text-sm">{{ $betaling->bedrag }}</span>
+                                    <span class="text-slate-600 text-sm">SRD {{ $betaling->bedrag }}</span>
                                 </td>
                                 <td class="px-4 py-4 whitespace-nowrap">
                                     <span class="text-slate-600 text-sm">{{ $betaling->status }}</span>
                                 </td>
                                 <td class="px-4 py-4 whitespace-nowrap">
-                                    <span class="text-slate-600 text-sm">{{ $betaling->betaling_method }}</span>
+                                    <span class="text-slate-600 text-sm">{{ $betaling->methode }}</span>
                                 </td>
                                 <td class="px-4 py-4 whitespace-nowrap">
-                                    <span class="text-slate-600 text-sm">{{ $betaling->bonnummer }}</span>
+                                    <span class="text-slate-600 text-sm">{{ $betaling->bewijs }}</span>
                                 </td>
                              </tr>
                              @endforeach
@@ -67,8 +67,8 @@
                         <span class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-slate-300 cursor-not-allowed">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         </span>
-                        <span class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-[0.8125rem] font-semibold text-slate-500 hover:bg-slate-100 hover:text-[#1e3a8a] cursor-pointer transition-all duration-200">1</span>
-                        <span class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-[0.8125rem] font-semibold text-white bg-gradient-to-br from-[#1e3a8a] to-[#2563eb] shadow-[0_2px_6px_rgba(30,58,138,0.2)] cursor-default">2</span>
+                        <span class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-[0.8125rem] font-semibold text-white bg-gradient-to-br from-[#1e3a8a] to-[#2563eb] shadow-[0_2px_6px_rgba(30,58,138,0.2)] cursor-default">1</span>
+                        <span class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-[0.8125rem] font-semibold text-slate-500 hover:bg-slate-100 hover:text-[#1e3a8a] cursor-pointer transition-all duration-200">2</span>
                         <span class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-[0.8125rem] font-semibold text-slate-500 hover:bg-slate-100 hover:text-[#1e3a8a] cursor-pointer transition-all duration-200">3</span>
                         <span class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-[0.8125rem] font-semibold text-slate-500 hover:bg-slate-100 hover:text-[#1e3a8a] cursor-pointer transition-all duration-200">4</span>
                         <span class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-[0.8125rem] font-semibold text-slate-500 hover:bg-slate-100 hover:text-[#1e3a8a] cursor-pointer transition-all duration-200">5</span>

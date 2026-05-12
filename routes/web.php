@@ -30,6 +30,12 @@ Route::get('/ledenpagina', [LidController::class, 'index'])->name('ledenpagina')
 // Leden toevoegen
 Route::post('/ledenpagina/addlid', [PostController::class, 'store'])->name('ledenpagina.addlid.store');
 
+// Leden verwijderen
+Route::delete('/ledenpagina/delete/{lidId}', [PostController::class, 'destroy'])->name('ledenpagina.delete');
+
+// Lid bekijken / bewerken
+Route::get('/ledenpagina/{lidId}', [PostController::class, 'show'])->name('ledenpagina.show');
+
 // Betalingen routes
 Route::get('/betalingPagina', [BetalingController::class, 'index'])->name('betalingPagina');
 Route::post('/betalingPagina/addBetaling', [BetalingController::class, 'store'])->name('betalingPagina.addBetaling.store');

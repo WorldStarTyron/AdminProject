@@ -86,7 +86,13 @@ class PostController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $lid = Lid::where('lid_id', $id)->firstOrFail();
+
+        $betalingen = \App\Models\Betaling::where('lid_id', $id)
+            ->orderBy('betalingsdatum', 'desc')
+            ->paginate(5);
+
+        return view('EditLidPagina', compact('lid', 'betalingen'));
     }
 
     /**
@@ -105,11 +111,11 @@ class PostController extends Controller
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    // Remove the selected lid
+    public function destroy(string $lidId)
     {
-        //
+        $lid = Lid::where('lid_id', $lidId)->first();
+        $lid->delete();
+        return redirect()->route('ledenpagina')->with('success', 'Lid verwijderd');
     }
 }

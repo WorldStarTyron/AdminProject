@@ -23,7 +23,6 @@ return new class extends Migration
     $table->string('woonplaats', 100)->nullable();
     $table->date('geboortedatum')->nullable();
     $table->string('email', 255)->unique()->nullable();
-    $table->enum('betaalstatus', ['Betaald', 'Niet Betaald', 'Afwachting'])->default('Niet Betaald');
     $table->timestamp('lid_sinds')->useCurrent();
     $table->timestamp('bijgewerkt_op')->useCurrent()->useCurrentOnUpdate();
 });

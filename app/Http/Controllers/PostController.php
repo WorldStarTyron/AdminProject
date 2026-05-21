@@ -92,7 +92,7 @@ class PostController extends Controller
             ->orderBy('betalingsdatum', 'desc')
             ->paginate(5);
 
-        return view('EditLidPagina', compact('lid', 'betalingen'));
+        return view('LidOverzichtPagina', compact('lid', 'betalingen'));
     }
 
     /**
@@ -100,7 +100,8 @@ class PostController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $lid = Lid::where('lid_id', $id)->firstOrFail();
+        return view('EditLidPagina', compact('lid'));
     }
 
     /**
@@ -108,7 +109,18 @@ class PostController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $validated = $request->validate([
+            'naam' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'telefoonnummer' => 'required|string|max:255',
+            'adres' => 'required|string|max:255',
+            'woonplaats' => 'required|string|max:255',
+            'geboortedatum' => 'required|date',
+        ]);
+
+        $lid = Lid::where('lid_id', $id)->firstOrFail();
+        $lid->update($validated);
+        return redirect()->route('ledenpagina')->with('success', 'Lid bewerkt');
     }
 
     // Remove the selected lid

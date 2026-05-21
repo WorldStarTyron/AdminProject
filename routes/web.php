@@ -33,8 +33,12 @@ Route::post('/ledenpagina/addlid', [PostController::class, 'store'])->name('lede
 // Leden verwijderen
 Route::delete('/ledenpagina/delete/{lidId}', [PostController::class, 'destroy'])->name('ledenpagina.delete');
 
-// Lid bekijken / bewerken
+// Lid bekijken
 Route::get('/ledenpagina/{lidId}', [PostController::class, 'show'])->name('ledenpagina.show');
+
+// Leden Bewerken
+Route::get('/ledenpagina/{lidId}/edit', [PostController::class, 'edit'])->name('ledenpagina.edit');
+Route::put('/ledenpagina/{lidId}', [PostController::class, 'update'])->name('ledenpagina.update');
 
 // Betalingen routes
 Route::get('/betalingPagina', [BetalingController::class, 'index'])->name('betalingPagina');
@@ -44,6 +48,9 @@ Route::post('/betalingPagina/addBetaling', [BetalingController::class, 'store'])
 Route::get('/dashboard', function () {
     return view('MainDashboardPagina');
 })->name('dashboard');
+
+// Ledenpagina routes
+Route::get('/Lidpagina', function(){ return view('Lidpagina'); })->name('GegevensPagina')  ; 
 
 // Login routes
 // FIX: GET en POST mogen niet dezelfde naam hebben → POST heet nu 'login.post'

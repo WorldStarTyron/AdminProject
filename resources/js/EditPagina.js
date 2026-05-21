@@ -24,9 +24,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Update button — placeholder for future update modal
     const btnUpdate = document.getElementById('btnUpdate');
+    btnBack = document.getElementById('btnBack');
     if (btnUpdate) {
         btnUpdate.addEventListener('click', function () {
             alert('Update functionaliteit wordt binnenkort toegevoegd.');
+        });
+    }
+    // back button
+    if (btnBack) {
+        btnBack.addEventListener('click', function () {
+            window.location.href = '/ledenpagina';
         });
     }
 });

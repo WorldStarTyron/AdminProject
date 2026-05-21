@@ -130,16 +130,7 @@
                                         </button>
 
                                         <!-- Dropdown menu -->
-                                        <ul class="dropdown-menu hidden absolute right-0 shadow bg-white rounded p-2">
-                                            <li><a class="text-gray-800 hover:text-blue-600" href="{{ route('ledenpagina.show', $lid->lid_id) }}">Bewerken</a></li>
-                                            <li><a class="text-gray-800 hover:text-red-600">
-                                                <form action="{{ route('ledenpagina.delete', $lid->lid_id) }}" method="POST">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" 
-                                                    onclick="return confirm('Weet u zeker dat u dit lid wilt verwijderen?')">Verwijderen</button>
-                                                </form>
-                                            </a></li>
+                                        <ul class="dropdown-menu hidden absolute  shadow bg-white cursor-pointer rounded p-1">
                                             <li><a class="text-gray-800 hover:text-green-600" href="{{ route('ledenpagina.show', $lid->lid_id) }}">Bekijken</a></li>
                                         </ul>
                                     </td>

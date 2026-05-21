@@ -23,7 +23,7 @@ class BetalingController extends Controller
             'naam'             => 'required|string',
             'datum'            => 'required|date',
             'methode'          => 'required|in:Geld,Overmaking',
-            'status'           => 'required|in:Betaald,Niet Betaald,Afwachting',
+            'status'           => 'required|in:in_behandeling,betaald,niet_betaald',
             'bedrag'           => 'required|numeric|min:0',
             'betaling_bewijs'  => 'nullable|file|max:5120',
         ]);
@@ -51,13 +51,12 @@ class BetalingController extends Controller
         Betaling::create([
             'betaling_id'     => (string) Str::uuid(),
             'lid_id'          => $lid->lid_id,
-            'betalingsdatum'  => $request->datum,
+            'bedrag'          => $request->bedrag, 
             'methode'         => $request->methode,
             'status'          => $request->status,
-            'bewijs_bestand'  => $bewijsPath,
-            'bedrag'          => $request->bedrag,
             'maand'           => $datum->month,
             'jaar'            => $datum->year,
+            'betaling_bewijs'  => $bewijsPath,
         ]);
 
         return response()->json(['success' => true, 'message' => 'Betaling succesvol toegevoegd'], 201);

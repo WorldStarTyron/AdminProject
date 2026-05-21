@@ -52,10 +52,23 @@
                         <input type="text" id="adres" name="adres" placeholder="Straatnaam en huisnummer" required>
                     </div>
 
+
                     <div class="form-group">
                         <label for="telefoonnummer">Telefoon <span class="required">*</span></label>
                         <input type="text" id="telefoonnummer" name="telefoonnummer" placeholder="+597 ..." required>
                     </div>
+
+                     <div class="form-group">
+                        <label for="lid_type">Lid type <span class="required">*</span></label>
+                        <select id="lid_type" name="lid_type" required>
+                            <option value="" disabled selected>Selecteer lid type</option>
+                             <option value="Passief">Passief</option>
+                            <option value="Actief">Actief</option>
+                            <option value="Bijzonder">Bijzonder</option> 
+                        </select>
+                    </div>
+
+
 
                     <div class="form-group">
                         <label for="geboortedatum">Geboortedatum <span class="required">*</span></label>

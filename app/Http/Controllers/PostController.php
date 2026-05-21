@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Lid;
+use App\Models\Gebruiker;
 use App\Http\Requests\StoreLidRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -17,11 +18,12 @@ class PostController extends Controller
     {
         $leden = Lid::select(
             'leden.lid_id',
-            'leden.naam',
+            'gebruikers.naam',
             'leden.telefoonnummer',
             'leden.adres',
-            'leden.email'
-        )->get();
+            'gebruikers.email'
+        )->join('gebruikers', 'leden.gebruiker_id', '=', 'gebruikers.gebruiker_id')
+        ->get();
         return view('ledenpagina', compact('leden'));
     }
 
@@ -48,9 +50,7 @@ class PostController extends Controller
     public function store(StoreLidRequest $request)
     {
         // Duplicate check: zelfde naam + geboortedatum = waarschijnlijk zelfde persoon
-        $duplicatePerson = Lid::where('naam', $request->name)
-            ->where('geboortedatum', $request->geboortedatum)
-            ->exists();
+        $duplicatePerson = Gebruiker::where('naam', $request->name)->exists();
 
         if ($duplicatePerson) {
             return response()->json([
@@ -61,16 +61,23 @@ class PostController extends Controller
         }
 
         DB::transaction(function () use ($request) {
-            // Voegt de gegevens toe aan de leden tabel
+            //1. Maak eerst een Lid account aan.
+            $gebruiker = \App\Models\Gebruiker::create([
+                'naam' => $request->name,
+                'email' => $request->email,
+                'wachtwoord_hash' => bcrypt('Welkom123'),
+                'actief' => 1,
+            ]);
+
+              // 2.Voegt de gegevens toe aan de leden tabel
             Lid::create([
-                'lid_id'         => (string) Str::uuid(),
-                'naam'           => $request->name,
-                'email'          => $request->email,
+               'gebruiker_id' => $gebruiker->gebruiker_id,  // id van het nieuwe account
+                'lid_type' => $request->lid_type,
                 'telefoonnummer' => $request->telefoonnummer,
                 'adres'          => $request->adres,
                 'woonplaats'     => $request->woonplaats,
                 'geboortedatum'  => $request->geboortedatum,
-            ]);
+            ]); 
         });
 
         // Return JSON voor AJAX requests, redirect voor normale form posts
@@ -86,8 +93,10 @@ class PostController extends Controller
      */
     public function show(string $id)
     {
-        $lid = Lid::where('lid_id', $id)->firstOrFail();
-
+        $lid = Lid::where('lid_id', $id)
+        ->join('gebruikers', 'leden.gebruiker_id', '=', 'gebruikers.gebruiker_id')
+        ->Select('leden.*','gebruikers.naam', 'gebruikers.email')->firstOrFail();
+  
         $betalingen = \App\Models\Betaling::where('lid_id', $id)
             ->orderBy('betalingsdatum', 'desc')
             ->paginate(5);

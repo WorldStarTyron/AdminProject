@@ -11,8 +11,8 @@ class Lid extends Model
 
     protected $table = "leden"; // Members table in database
     protected $primaryKey = "lid_id"; // Primary key in database
-    public $incrementing = false;
-    protected $keyType = 'string';
+    public $incrementing = true; // True for auto-incrementing primary key
+    // protected $keyType = 'string'; // Primary key type
 
     public $timestamps = true; // Track creation and update times
     const CREATED_AT = 'lid_sinds';
@@ -20,17 +20,16 @@ class Lid extends Model
 
     /**
      * Fillable fields - these match the database table structure
-     * Form submits (lowercase): name, email, telefoonnummer, adres, woonplaats, geboortedatum
-     * Database expects (with capitals): Naam, Email
+     * Form submits (lowercase): lid_id, gebruiker_id, telefoonnummer, adres, woonplaats, geboortedatum
+     * Database expects (with capitals): lid_id, gebruiker_id, telefoonnummer, adres, woonplaats, geboortedatum
      * The PostController transforms the data before saving
      */
     protected $fillable = [
         "lid_id",
         "gebruiker_id",
-        "naam",
-        "email",
         "telefoonnummer",
         "adres",
+        "lid_type",
         "woonplaats",
         "geboortedatum",
     ];

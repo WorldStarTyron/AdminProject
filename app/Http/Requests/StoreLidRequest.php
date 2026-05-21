@@ -59,7 +59,7 @@ class StoreLidRequest extends FormRequest
                 'required',
                 'email',
                 'max:255',
-                'unique:leden,email',  // check the "leden" table, "email" column
+                'unique:gebruikers,email',  // check the "gebruikers" table, "email" column
             ],
 
             // --- TELEFOONNUMMER (Phone) ---
@@ -97,6 +97,12 @@ class StoreLidRequest extends FormRequest
                 'date',
                 'before:today',
                 'after:1920-01-01',  // nobody born before 1920
+            ],
+
+            'lid_type' => [
+                'required',
+                'string',
+                'in:Passief,Actief,Bijzonder',
             ],
         ];
     }
@@ -142,6 +148,10 @@ class StoreLidRequest extends FormRequest
             'geboortedatum.date'     => 'Voer een geldige datum in.',
             'geboortedatum.before'   => 'Geboortedatum moet in het verleden liggen.',
             'geboortedatum.after'    => 'Geboortedatum is ongeldig.',
+
+            // lid_type
+            'lid_type.required' => 'Lid type is verplicht.',
+            'lid_type.in'       => 'Selecteer een geldig lid type uit de lijst.',
         ];
     }
 }

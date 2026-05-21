@@ -13,12 +13,12 @@ class LidController extends Controller
         // FIX: Removed 'betaalstatus' — kolom bestaat niet meer in leden tabel
         $query = Lid::select(
             'leden.lid_id',
-            'leden.naam',
+            'gebruikers.naam',
             'leden.telefoonnummer',
             'leden.adres',
             'leden.woonplaats',
-            'leden.email'
-        );
+            'gebruikers.email'
+        )->join('gebruikers', 'leden.gebruiker_id', '=', 'gebruikers.gebruiker_id');
 
         // Filter by woonplaats if provided
         if ($request->filled('woonplaats')) {

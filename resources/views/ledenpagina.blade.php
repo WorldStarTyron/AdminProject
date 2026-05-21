@@ -8,146 +8,118 @@
     <title>Leden Overzicht | Administratie Panel</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/css/totalleden.css', 'resources/css/Toevoegen.css', 'resources/js/app.js', 'resources/js/FormValidator.js', 'resources/js/AddLidModal.js', 'resources/js/TotalLeden-Chart.js'])
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/css/ledenpagina-new.css', 'resources/css/Toevoegen.css', 'resources/js/app.js', 'resources/js/FormValidator.js', 'resources/js/AddLidModal.js'])
 </head>
 <body>
     @include('layouts.sidebar')
 
     <div class="main-content">
-        @include('layouts.header')
+        {{-- ===== Top Header Bar ===== --}}
+        @include('layouts.Header-layout.AddLid-Header')
 
-        {{-- Stats & Chart Row --}}
-        @include('layouts.leden-overzicht')
+        {{-- ===== Page Content ===== --}}
+        <main class="lp-page-content">
 
-        <!-- Main Table Section -->
-        <main class="page-content">
-            <div class="table-container">
-                {{-- Table Header --}}
-                <div class="table-header-top">
-                    <div class="table-title-section">
-                        <h2 class="table-title">Leden Overzicht</h2>
-                        <p class="table-subtitle">Beheer alle geregistreerde leden in het systeem</p>
-                    </div>
-                    <div class="table-actions">
-                        <div class="search-box" id="searchBox">
-                            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M21 21L16.65 16.65M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            <input type="text" id="searchInput" placeholder="Zoek op naam, email..." autocomplete="off">
+            {{-- Page Title + Filters --}}
+            <div class="lp-page-header">
+                <div class="lp-page-header-left">
+                    <h1 class="lp-page-title">Leden</h1>
+                    <p class="lp-page-subtitle">Beheer en bekijk alle geregistreerde leden van de organisatie.</p>
+                </div>
+                <div class="lp-page-header-right">
+                    <form method="GET" action="{{ route('ledenpagina') }}" class="lp-filter-form">
+                        <div class="lp-btn-filters" id="filterBtn">
+                            <i class="fa-solid fa-sliders"></i>
+                            <select name="woonplaats" id="filter" onchange="this.form.submit()">
+                                <option value="">Filters</option>
+                                @foreach ($woonplaatsen as $woonplaats)
+                                    <option value="{{ $woonplaats }}"
+                                        {{ request('woonplaats') == $woonplaats ? 'selected' : '' }}>
+                                        {{ $woonplaats }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
+                    </form>
+                </div>
+            </div>
 
-                        <!-- Filter Dropdown -->
-                        <form method="GET" action="{{ route('ledenpagina') }}" class="filter-form">
-                            <div class="btn-filter" id="filterBtn" title="Filter opties">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M3 6H21M6 12H18M10 18H14" stroke="currentColor" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                                <select name="woonplaats" id="filter" onchange="this.form.submit()">
-                                    <option value="">Woonplaats</option>
-                                    @foreach ($woonplaatsen as $woonplaats)
-                                        <option value="{{ $woonplaats }}"
-                                            {{ request('woonplaats') == $woonplaats ? 'selected' : '' }}>
-                                            {{ $woonplaats }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </form>
+            {{-- Info Banner --}}
+            <div class="lp-info-banner">
+                <div class="lp-info-icon">
+                    <i class="fa-solid fa-circle-info"></i>
+                </div>
+                <span>Er zijn momenteel <strong>{{ number_format($totaalLeden, 0, ',', '.') }}</strong> actieve leden geregistreerd in het systeem.</span>
+            </div>
 
-                        <button class="btn-add" id="openModalBtn" type="button">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            Voeg lid toe
-                        </button>
+            {{-- Performance Chart --}}
+            <div class="lp-chart-section">
+                <div class="lp-chart-header">
+                    <h3 class="lp-chart-title">Maandelijkse performance</h3>
+                    <div class="lp-chart-legend">
+                        <span class="lp-legend-dot"></span>
+                        <span class="lp-legend-label">Leden</span>
                     </div>
                 </div>
+                <div class="lp-chart-container">
+                    <canvas id="joinChart" data-labels='@json($labels)' data-values='@json($values)'></canvas>
+                </div>
+            </div>
 
-                <!-- Table with responsive wrapper -->
-                <div class="table-wrapper">
-                    <table class="data-table" id="ledenTable">
+            {{-- Data Table --}}
+            <div class="lp-table-section">
+                <div class="lp-table-wrapper">
+                    <table class="lp-data-table" id="ledenTable">
                         <thead>
                             <tr>
-                                <th>
-                                    <div class="th-content">
-                                        <span>ID</span>
-                                    </div>
-                                </th>
-                                <th>
-                                    <div class="th-content">
-                                        <span>Naam</span>
-                                    </div>
-                                </th>
-                                <th>
-                                    <div class="th-content">
-                                        <span>Telefoon</span>
-                                    </div>
-                                </th>
-                                <th>
-                                    <div class="th-content">
-                                        <span>Email</span>
-                                    </div>
-                                </th>
-                                <th>
-                                    <div class="th-content">
-                                        <span>Adres</span>
-                                    </div>
-                                </th>
-                                <th class="th-actions">Action</th>
+                                <th>ID</th>
+                                <th>NAAM</th>
+                                <th>TELEFOON</th>
+                                <th>EMAIL</th>
+                                <th>ADRES</th>
+                                <th>ACTIE</th>
                             </tr>
                         </thead>
                         <tbody>
-                            
-                            <!--this foreach loop is for showing the members -->
                             @forelse($leden as $lid)
-                                <tr class="table-row">
+                                <tr class="lp-table-row">
                                     <td>
-                                        <span class="id-badge">{{ Str::limit($lid->lid_id, 8, '…') }}</span>
+                                        <span class="lp-id-badge">{{ $lid->lid_id }}</span>
                                     </td>
                                     <td>
-                                        <div class="member-name">
-                                            <div class="member-avatar">{{ strtoupper(substr($lid->naam, 0, 1)) }}</div>
-                                            <span class="font-semibold">{{ $lid->naam }}</span>
+                                        <div class="lp-member-cell">
+                                            <div class="lp-member-avatar">
+                                                {{ strtoupper(substr($lid->naam, 0, 1)) }}{{ strtoupper(substr(explode(' ', $lid->naam)[1] ?? '', 0, 1)) }}
+                                            </div>
+                                            <span class="lp-member-name">{{ $lid->naam }}</span>
                                         </div>
                                     </td>
                                     <td>{{ $lid->telefoonnummer }}</td>
+                                    <td class="lp-email">{{ $lid->email }}</td>
+                                    <td>{{ $lid->adres }}{{ $lid->woonplaats ? ', ' . $lid->woonplaats : '' }}</td>
                                     <td>
-                                        <span class="email-text">{{ $lid->email }}</span>
+                                        <!-- action knopjes hier -->
+                                        <div class="dropdown-container">
+                                            <button class="btn-more" title="Meer opties">
+                                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                                            </button>
+                                            <ul class="dropdown-menu hidden">
+                                                <li><a href="{{ route('ledenpagina.show', $lid->lid_id) }}">
+                                                    <i class="fa-regular fa-eye"></i>
+                                                    Bekijken
+                                                </a></li>
+                                            </ul>
+                                        </div>
                                     </td>
-                                    <td>{{ $lid->adres }}</td>
-
-                                    <!-- More Button-->
-                                    <td class="dropdown-container">
-                                        <button class="btn-more" title="Meer opties">
-                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                                <circle cx="12" cy="5" r="1.5" fill="currentColor"/>
-                                                <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
-                                                <circle cx="12" cy="19" r="1.5" fill="currentColor"/>
-                                            </svg>
-                                        </button>
-
-                                        <!-- Dropdown menu -->
-                                        <ul class="dropdown-menu hidden absolute  shadow bg-white cursor-pointer rounded p-1">
-                                            <li><a class="text-gray-800 hover:text-green-600" href="{{ route('ledenpagina.show', $lid->lid_id) }}">Bekijken</a></li>
-                                        </ul>
-                                    </td>
-
-
-
+                                </tr>
                             @empty
-                            <!-- this is for showing the empty state when there are no members-->
                                 <tr>
-                                    <td colspan="6" class="empty-state">
-                                        <div class="empty-state-content">
-                                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.1609 15 13 15H5C3.93913 15 3.02174 15.4214 2.27157 16.1716C1.52143 16.9217 1 17.9391 1 19V21" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                                <circle cx="9" cy="7" r="4" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                                <path d="M23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                                <path d="M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25393 19.0078 6.11683 19.0078 7.005C19.0078 7.89318 18.7122 8.75607 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                            </svg>
+                                    <td colspan="7" class="lp-empty-state">
+                                        <div class="lp-empty-content">
+                                            <i class="fa-regular fa-users" style="font-size: 48px; color: #94a3b8;"></i>
                                             <p>Geen leden gevonden</p>
                                             <span>Voeg een nieuw lid toe om te beginnen</span>
                                         </div>
@@ -158,9 +130,92 @@
                     </table>
                 </div>
 
-                @include('layouts.Table footer')
+                {{-- Pagination --}}
+                @if($leden->hasPages())
+                <div class="lp-table-footer">
+                    <div class="lp-pagination-info">
+                        Weergeven van {{ $leden->firstItem() }} tot {{ $leden->lastItem() }} van {{ $leden->total() }} leden
+                    </div>
+                    <div class="lp-pagination">
+                        {{-- Previous --}}
+                        @if($leden->onFirstPage())
+                            <span class="lp-page-nav disabled">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </span>
+                        @else
+                            <a href="{{ $leden->previousPageUrl() }}" class="lp-page-nav">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </a>
+                        @endif
 
+                        @php
+                            $currentPage = $leden->currentPage();
+                            $lastPage = $leden->lastPage();
+                        @endphp
+
+                        @for($i = 1; $i <= min(3, $lastPage); $i++)
+                            @if($i == $currentPage)
+                                <span class="lp-page-link active">{{ $i }}</span>
+                            @else
+                                <a href="{{ $leden->url($i) }}" class="lp-page-link">{{ $i }}</a>
+                            @endif
+                        @endfor
+
+                        @if($lastPage > 3)
+                            <span class="lp-page-dots">...</span>
+                            @if($currentPage == $lastPage)
+                                <span class="lp-page-link active">{{ $lastPage }}</span>
+                            @else
+                                <a href="{{ $leden->url($lastPage) }}" class="lp-page-link">{{ $lastPage }}</a>
+                            @endif
+                        @endif
+
+                        {{-- Next --}}
+                        @if($leden->hasMorePages())
+                            <a href="{{ $leden->nextPageUrl() }}" class="lp-page-nav">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+                        @else
+                            <span class="lp-page-nav disabled">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </span>
+                        @endif
+                    </div>
+                </div>
+                @endif
             </div>
+
+            {{-- Bottom Stats Cards --}}
+            <div class="lp-stats-row">
+                {{-- New Members Card --}}
+                <div class="lp-stat-card lp-stat-card-light">
+                    <div class="lp-stat-card-header">
+                        <span class="lp-stat-label">NIEUWE LEDEN</span>
+                        <div class="lp-stat-icon-light">
+                            <i class="fa-solid fa-user-plus"></i>
+                        </div>
+                    </div>
+                    <div class="lp-stat-value-row">
+                        <span class="lp-stat-number">{{ $totaalLeden }}</span>
+                        <span class="lp-stat-trend lp-trend-up">↗+12%</span>
+                    </div>
+                </div>
+
+                <!-- Total Active Card -->
+                <div class="lp-stat-card lp-stat-card-dark">
+                    <div class="lp-stat-card-header">
+                        <span class="lp-stat-label-dark">TOTAAL ACTIEF</span>
+                    </div>
+                    <div class="lp-stat-value-row-dark">
+                        <span class="lp-stat-number-dark">{{ number_format($totaalLeden, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="lp-stat-retention">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>98% retentie dit jaar</span>
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
 
@@ -169,13 +224,10 @@
 
     {{-- Success Toast --}}
     <div class="toast-notification" id="successToast">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <i class="fa-solid fa-circle-check" style="color: #10b981;"></i>
         <span>Lid succesvol toegevoegd!</span>
     </div>
 
-    {{-- JS files loaded via Vite in <head> --}}
-    @vite('resources/js/Button&More.js')
+    @vite(['resources/js/Button&More.js', 'resources/js/TotalLeden-Chart.js'])
 </body>
 </html>

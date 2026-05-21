@@ -4,167 +4,205 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="description" content="Lid bewerken - Bekijk lid gegevens">
-    <title>Lid Overzicht | Administratie Panel</title>
+    <title>Lid Profiel | Administratie Panel</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/css/editpagina.css', 'resources/js/app.js'])
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/js/app.js'])
 </head>
-<body>
+
+
+<body class="font-sans bg-gray-50 text-gray-800">
     @include('layouts.sidebar')
 
     <div class="main-content">
         @include('layouts.header')
 
-        <!-- Edit Page Content -->
-        <section class="edit-page-content">
+        <div class="p-6 max-w-7xl mx-auto">
 
-            <!-- Back Button -->
-            <a href="{{ route('ledenpagina') }}" class="btn-back">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                Terug naar overzicht
-            </a>
+            <!-- Breadcrumb -->
+            <nav class="flex items-center gap-2 text-sm text-gray-400 mb-6">
+                <a href="{{ route('dashboard') }}" class="hover:text-gray-600 transition-colors">Dashboard</a>
+                <i class="fa-solid fa-chevron-right text-xs"></i>
+                <a href="{{ route('ledenpagina') }}" class="hover:text-gray-600 transition-colors">Members</a>
+                <i class="fa-solid fa-chevron-right text-xs"></i>
+                <span class="text-gray-700 font-medium">Lid Profiel</span>
+            </nav>
 
-            <!-- Top Row: Profile, Info, Actions -->
-            <div class="edit-top-row">
+            <!-- TOP ROW -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
 
                 <!-- Profile Card -->
-                <div class="edit-card profile-card">
-                    <div class="profile-avatar-wrapper">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M4 16L8.586 11.414C8.96106 11.0391 9.46967 10.8284 10 10.8284C10.5303 10.8284 11.0389 11.0391 11.414 11.414L16 16M14 14L15.586 12.414C15.9611 12.0391 16.4697 11.8284 17 11.8284C17.5303 11.8284 18.0389 12.0391 18.414 12.414L20 14M14 8H14.01M6 20H18C18.5304 20 19.0391 19.7893 19.4142 19.4142C19.7893 19.0391 20 18.5304 20 18V6C20 5.46957 19.7893 4.96086 19.4142 4.58579C19.0391 4.21071 18.5304 4 18 4H6C5.46957 4 4.96086 4.21071 4.58579 4.58579C4.21071 4.96086 4 5.46957 4 6V18C4 18.5304 4.21071 19.0391 4.58579 19.4142C4.96086 19.7893 5.46957 20 6 20Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
+                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col items-center text-center">
+                    <!-- Avatar -->
+                    <div class="relative mb-4">
+                        <div class="w-24 h-24 rounded-2xl bg-gray-100 flex items-center justify-center">
+                            <i class="fa-regular fa-user text-gray-400 text-4xl"></i>
+                        </div>
+                        <!-- Camera badge -->
+                        <button class="absolute -bottom-2 -right-2 w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors shadow">
+                            <i class="fa-solid fa-camera text-white text-xs"></i>
+                        </button>
                     </div>
-                    <h2 class="profile-name">{{ $lid->naam }}</h2>
+
+                    <h2 class="text-xl font-bold text-gray-900 leading-tight">{{ $lid->naam }}</h2>
+
+                    <!-- Lid ID badge -->
+                    <span class="mt-2 inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gray-100 text-gray-500 text-xs font-medium">
+                        Lid ID: #{{ $lid->lid_nummer ?? Str::limit($lid->lid_id, 4, '') }}
+                    </span>
                 </div>
 
                 <!-- Information Card -->
-                <div class="edit-card">
-                    <h3 class="info-card-title">Informatie:</h3>
-                    <ul class="info-list">
-                        <li>
-                            <span class="info-label">Email:</span>
-                            <span class="info-value">{{ $lid->email ?? '—' }}</span>
-                        </li>
-                        <li>
-                            <span class="info-label">Leeftijd:</span>
-                            <span class="info-value">
+                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                    <h3 class="flex items-center gap-2 text-base font-semibold text-gray-900 mb-5">
+                        <i class="fa-solid fa-circle-info text-gray-400"></i>
+                        Informatie:
+                    </h3>
+
+                    <div class="grid grid-cols-2 gap-x-6 gap-y-4">
+                        <div>
+                            <p class="text-xs text-gray-400 mb-0.5">Email</p>
+                            <p class="text-sm font-medium text-gray-800">{{ $lid->email ?? '—' }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400 mb-0.5">Leeftijd</p>
+                            <p class="text-sm font-medium text-gray-800">
                                 @if($lid->geboortedatum)
-                                    {{ \Carbon\Carbon::parse($lid->geboortedatum)->age }} jaar
+                                    {{ \Carbon\Carbon::parse($lid->geboortedatum)->age }}
                                 @else
                                     —
                                 @endif
-                            </span>
-                        </li>
-                        <li>
-                            <span class="info-label">Geboort datum:</span>
-                            <span class="info-value">
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400 mb-0.5">Geboortedatum</p>
+                            <p class="text-sm font-medium text-gray-800">
                                 @if($lid->geboortedatum)
-                                    {{ \Carbon\Carbon::parse($lid->geboortedatum)->format('d-m-Y') }}
+                                    {{ \Carbon\Carbon::parse($lid->geboortedatum)->translatedFormat('j F Y') }}
                                 @else
                                     —
                                 @endif
-                            </span>
-                        </li>
-                        <li>
-                            <span class="info-label">Lid ID:</span>
-                            <span class="info-value">{{ Str::limit($lid->lid_id, 8, '…') }}</span>
-                        </li>
-                    </ul>
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400 mb-0.5">Lid_Type</p>
+                            <p class="text-sm font-medium text-gray-800">{{ $lid->lid_type ?? '—' }}</p>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Action Card -->
-                <div class="edit-card">
-                    <h3 class="action-card-title">Action:</h3>
-                    <div class="action-buttons">
+                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                    <h3 class="flex items-center gap-2 text-base font-semibold text-gray-900 mb-5">
+                        Action:
+                    </h3> 
 
-                        <!-- edit button -->
-                        <a href="{{ route('ledenpagina.edit', $lid->lid_id) }}" type="button" class="btn-update" id="btnUpdate">Update</a>
+                    <div class="flex flex-col gap-3">
+                        <!-- Update button -->
+                        <a href="{{ route('ledenpagina.edit', $lid->lid_id) }}"
+                           class="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm">
+                            <i class="fa-solid fa-pen-to-square text-gray-500"></i>
+                            Update
+                        </a>
 
-                        <!-- delete button -->
-                        <form action="{{ route('ledenpagina.delete', $lid->lid_id) }}" method="POST" id="deleteForm">
+                        <!-- Delete button -->
+                        <form action="{{ route('ledenpagina.delete', $lid->lid_id) }}" method="POST">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn-delete" onclick="return confirm('Weet u zeker dat u dit lid wilt verwijderen?')">Verwijder</button>
+                            <button type="submit"
+                                    onclick="return confirm('Weet u zeker dat u dit lid wilt verwijderen?')"
+                                    class="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl border border-red-200 bg-white text-red-500 text-sm font-medium hover:bg-red-50 hover:border-red-300 transition-all shadow-sm">
+                                <i class="fa-regular fa-trash-can text-red-400"></i>
+                                Verwijder
+                            </button>
                         </form>
                     </div>
                 </div>
             </div>
 
-            <!-- Bottom Row: Contact + Betaling History -->
-            <div class="edit-bottom-row">
+            <!-- ── BOTTOM ROW -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
 
                 <!-- Contact Card -->
-                <div class="edit-card">
-                    <h3 class="contact-card-title">Contact:</h3>
-                    <ul class="contact-list">
+                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                    <h3 class="flex items-center gap-2 text-base font-semibold text-gray-900 mb-5">
+                        <i class="fa-regular fa-address-card text-gray-400"></i>
+                        Contact:
+                    </h3>
+
+                    <ul class="space-y-4">
                         <li>
-                            <strong>Adres:</strong>
-                            {{ $lid->adres ?? '—' }}
+                            <p class="text-xs text-gray-400 mb-0.5">Adres</p>
+                            <p class="text-sm font-medium text-gray-800">{{ $lid->adres ?? '—' }}</p>
                         </li>
                         <li>
-                            <strong>Woonplaats:</strong>
-                            {{ $lid->woonplaats ?? '—' }}
+                            <p class="text-xs text-gray-400 mb-0.5">Woonplaats</p>
+                            <p class="text-sm font-medium text-gray-800">{{ $lid->woonplaats ?? '—' }}</p>
                         </li>
                         <li>
-                            <strong>Telefoon:</strong>
-                            {{ $lid->telefoonnummer ?? '—' }}
+                            <p class="text-xs text-gray-400 mb-0.5">Telefoon</p>
+                            <p class="text-sm font-medium text-gray-800">{{ $lid->telefoonnummer ?? '—' }}</p>
                         </li>
                     </ul>
                 </div>
 
-                <!-- Betaling History Card -->
-                <div class="edit-card">
-                    <div class="history-header">
-                        <h3 class="history-title">Geschiedenis Betaling</h3>
-                        <button class="btn-history-filter" title="Filter">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M3 6H21M6 12H18M10 18H14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
+                <!-- Payment History Card -->
+                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 md:col-span-3">
+
+                    <!-- Card header -->
+                    <div class="flex items-center justify-between mb-5">
+                        <h3 class="flex items-center gap-2 text-base font-semibold text-gray-900">
+                            <i class="fa-solid fa-clock-rotate-left text-gray-400"></i>
+                            Geschiedenis Betaling
+                        </h3>
+                        <button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600">
+                            <i class="fa-solid fa-bars-staggered"></i>
                         </button>
                     </div>
 
-                    <div class="history-table-wrapper">
-                        <table class="history-table">
+                    <!-- Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
                             <thead>
-                                <tr>
-                                    <th>Betaling_ID</th>
-                                    <th>Datum</th>
-                                    <th>Contributiebedrag</th>
-                                    <th>Betaling</th>
-                                    <th>Status</th>
-                                    <th>Bonnummer</th>
+                                <tr class="border-b border-gray-100">
+                                    <th class="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider pb-3 pr-4">ID</th>
+                                    <th class="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider pb-3 pr-4">Datum</th>
+                                    <th class="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider pb-3 pr-4">Contributiebedrag</th>
+                                    <th class="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider pb-3 pr-4">Betaling</th>
+                                    <th class="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider pb-3 pr-4">Status</th>
+                                    <th class="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider pb-3">Bonnummer</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="divide-y divide-gray-50">
                                 @forelse($betalingen as $betaling)
-                                    <tr>
-                                        <td>
-                                            <span class="betaling-id-link">{{ $loop->iteration }}</span>
+                                    <tr class="hover:bg-gray-50/60 transition-colors">
+                                        <td class="py-3 pr-4 text-gray-500 font-medium">{{ $loop->iteration }}</td>
+                                        <td class="py-3 pr-4 text-gray-700">
+                                            {{ \Carbon\Carbon::parse($betaling->betalingsdatum)->translatedFormat('j F Y') }}
                                         </td>
-                                        <td>{{ \Carbon\Carbon::parse($betaling->betalingsdatum)->format('j F Y') }}</td>
-                                        <td>
-                                            <span class="contributiebedrag-text">Srd {{ number_format($betaling->bedrag, 0) }}</span>
+                                        <td class="py-3 pr-4 text-gray-700">
+                                            Srd {{ number_format($betaling->bedrag, 0) }}
                                         </td>
-                                        <td>
-                                            <span class="amount-text">SRD {{ number_format($betaling->bedrag, 0) }}</span>
+                                        <td class="py-3 pr-4 text-gray-700 font-medium">
+                                            SRD {{ number_format($betaling->bedrag, 0) }}
                                         </td>
-                                        <td>
+                                        <td class="py-3 pr-4">
                                             @php
-                                                $statusClass = match($betaling->status) {
-                                                    'Betaald' => 'betaald',
-                                                    'Niet Betaald' => 'niet-betaald',
-                                                    default => 'afwachting',
+                                                $statusStyles = match($betaling->status) {
+                                                    'Betaald'     => 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-200',
+                                                    'Niet Betaald'=> 'bg-red-50 text-red-500 ring-1 ring-red-200',
+                                                    default       => 'bg-amber-50 text-amber-600 ring-1 ring-amber-200',
                                                 };
                                             @endphp
-                                            <span class="status-badge {{ $statusClass }}">{{ $betaling->status }}</span>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold {{ $statusStyles }}">
+                                                {{ $betaling->status }}
+                                            </span>
                                         </td>
-                                        <td>
+                                        <td class="py-3 text-gray-500 text-xs font-mono">
                                             @if($betaling->bewijs_bestand)
-                                                <span class="bonnummer-badge">BON-{{ strtoupper(substr($betaling->betaling_id, 0, 4)) }}-{{ $betaling->jaar }}</span>
+                                                BON-KA-{{ $betaling->jaar }}-{{ str_pad($loop->iteration, 4, '0', STR_PAD_LEFT) }}
                                             @else
                                                 —
                                             @endif
@@ -172,7 +210,8 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" style="text-align: center; padding: 2rem; color: #94a3b8;">
+                                        <td colspan="6" class="py-10 text-center text-gray-400 text-sm">
+                                            <i class="fa-regular fa-folder-open text-2xl mb-2 block"></i>
                                             Geen betalingen gevonden voor dit lid.
                                         </td>
                                     </tr>
@@ -183,18 +222,59 @@
 
                     <!-- Pagination -->
                     @if($betalingen->hasPages())
-                        <div class="history-pagination">
-                            @foreach($betalingen->links()->elements[0] as $page => $url)
-                                <a href="{{ $url }}" class="history-page-link {{ $betalingen->currentPage() == $page ? 'active' : '' }}">{{ $page }}</a>
+                        <div class="flex items-center justify-center gap-1 mt-5 pt-4 border-t border-gray-100">
+                            {{-- Previous --}}
+                            @if($betalingen->onFirstPage())
+                                <span class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-300 text-sm cursor-not-allowed">
+                                    <i class="fa-solid fa-chevron-left text-xs"></i>
+                                </span>
+                            @else
+                                <a href="{{ $betalingen->previousPageUrl() }}"
+                                   class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 transition-colors text-sm">
+                                    <i class="fa-solid fa-chevron-left text-xs"></i>
+                                </a>
+                            @endif
+
+                            <!-- Page numbers-->
+                            @foreach($betalingen->links()->elements as $element)
+                                @if(is_string($element))
+                                    <span class="w-8 h-8 flex items-center justify-center text-gray-400 text-sm">{{ $element }}</span>
+                                @endif
+                                @if(is_array($element))
+                                    @foreach($element as $page => $url)
+                                        @if($page == $betalingen->currentPage())
+                                            <span class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-900 text-white text-sm font-semibold">
+                                                {{ $page }}
+                                            </span>
+                                        @else
+                                            <a href="{{ $url }}"
+                                               class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-600 hover:bg-gray-100 transition-colors text-sm">
+                                                {{ $page }}
+                                            </a>
+                                        @endif
+                                    @endforeach
+                                @endif
                             @endforeach
+
+                            {{-- Next --}}
+                            @if($betalingen->hasMorePages())
+                                <a href="{{ $betalingen->nextPageUrl() }}"
+                                   class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 transition-colors text-sm">
+                                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                                </a>
+                            @else
+                                <span class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-300 text-sm cursor-not-allowed">
+                                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                                </span>
+                            @endif
                         </div>
                     @endif
+
                 </div>
             </div>
 
-        </section>
-    </div>
-
+        </div>{{-- end max-w container --}}
+    </div>{{-- end main-content --}}
     @vite('resources/js/EditPagina.js')
 </body>
 </html>

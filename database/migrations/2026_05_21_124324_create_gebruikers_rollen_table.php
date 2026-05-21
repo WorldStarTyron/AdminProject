@@ -13,24 +13,24 @@ return new class extends Migration
     {
         Schema::disableForeignKeyConstraints();
 
-        Schema::create('wachtwoord_reset', function (Blueprint $table) {
-            $table->char('reset_id', 36)->primary()->default('(UUID())');
-            $table->char('gebruiker_id', 36)->index();
+        Schema::create('gebruikers_rollen', function (Blueprint $table) {
+            $table->unsignedInteger('gebruiker_id');
             $table->foreign('gebruiker_id')->references('gebruiker_id')->on('gebruikers');
-            $table->string('token', 255);
-            $table->timestamp('verlopen_op')->default('(CURRENT_TIMESTAMP() + INTERVAL 1 HOUR)');
-            $table->tinyInteger('gebruikt');
-            $table->timestamp('aangemaakt_op')->useCurrent();
+            $table->unsignedTinyInteger('rol_id');
+            $table->foreign('rol_id')->references('rol_id')->on('rollen');
+            $table->timestamp('toegewezen_op')->useCurrent();
+            $table->primary(['gebruiker_id', 'rol_id']);
         });
 
         Schema::enableForeignKeyConstraints();
     }
+ 
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('wachtwoord_reset');
+        Schema::dropIfExists('gebruikers_rollen');
     }
 };

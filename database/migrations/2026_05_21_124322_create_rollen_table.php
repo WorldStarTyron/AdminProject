@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('rollen', function (Blueprint $table) {
             $table->tinyIncrements('rol_id');
             $table->string('naam', 50)->unique();
-            $table->string('omschrijving', 255)->nullable()->default(null);
+            $table->string('omschrijving', 255)->nullable();
         });
     }
 

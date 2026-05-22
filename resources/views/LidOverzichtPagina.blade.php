@@ -90,6 +90,17 @@
                             <p class="text-xs text-gray-400 mb-0.5">Lid_Type</p>
                             <p class="text-sm font-medium text-gray-800">{{ $lid->lid_type ?? '—' }}</p>
                         </div>
+
+                        <div>
+                            <p class="text-xs text-gray-400 mb-0.5">Lid Sinds</p>
+                            <p class="text-sm font-medium text-gray-800">
+                                @if($lid->lid_sinds)
+                                    {{ \Carbon\Carbon::parse($lid->lid_sinds)->format('d-m-Y') }}
+                                @else
+                                    —
+                                @endif
+                            </p>
+                        </div>
                     </div>
                 </div>
 

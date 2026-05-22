@@ -17,7 +17,9 @@ class LidController extends Controller
             'leden.telefoonnummer',
             'leden.adres',
             'leden.woonplaats',
-            'gebruikers.email'
+            'gebruikers.email',
+            'leden.lid_sinds',
+            'leden.lid_type',
         )->join('gebruikers', 'leden.gebruiker_id', '=', 'gebruikers.gebruiker_id');
 
         // Filter by woonplaats if provided
@@ -37,8 +39,8 @@ class LidController extends Controller
             ->pluck('woonplaats');
 
         // Data for chart: count members per month for the current year
-        $chartData = Lid::selectRaw('MONTH(lid_sinds) as month, COUNT(*) as count')
-            ->whereYear('lid_sinds', date('Y'))
+        $chartData = Lid::selectRaw('MONTH(aangemaakt_op) as month, COUNT(*) as count')
+            ->whereYear('aangemaakt_op', date('Y'))
             ->groupBy('month')
             ->orderBy('month')
             ->get();

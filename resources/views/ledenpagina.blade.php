@@ -55,19 +55,8 @@
                 <span>Er zijn momenteel <strong>{{ number_format($totaalLeden, 0, ',', '.') }}</strong> actieve leden geregistreerd in het systeem.</span>
             </div>
 
-            {{-- Performance Chart --}}
-            <div class="lp-chart-section">
-                <div class="lp-chart-header">
-                    <h3 class="lp-chart-title">Maandelijkse performance</h3>
-                    <div class="lp-chart-legend">
-                        <span class="lp-legend-dot"></span>
-                        <span class="lp-legend-label">Leden</span>
-                    </div>
-                </div>
-                <div class="lp-chart-container">
-                    <canvas id="joinChart" data-labels='@json($labels)' data-values='@json($values)'></canvas>
-                </div>
-            </div>
+            {{--Leden Chart--}}
+            @include('layouts.Totalleden-Charts')
 
             {{-- Data Table --}}
             <div class="lp-table-section">

@@ -93,6 +93,20 @@
                         </select>
                     </div>
 
+                    <!--Lid Type-->
+                    <div class="flex flex-col">
+                        <label for="lid_type" class="text-[0.8125rem] font-semibold text-slate-700 mb-1.5">
+                            Lid Type <span class="text-red-500">*</span>
+                        </label>
+                        <select id="lid_type" name="lid_type" required
+                            class="px-3 py-2.5 border-[1.5px] border-slate-200 rounded-[10px] text-[0.8125rem] text-slate-700 bg-slate-50 w-full box-border transition-all duration-200 font-[inherit] focus:outline-none focus:border-blue-600 focus:bg-white focus:shadow-[0_0_0_3px_rgba(37,99,235,0.08)]">
+                            <option value="" disabled selected>Select</option>
+                            <option value="Lid">Actief</option>
+                            <option value="Ex Lid">Passief</option>
+                            <option value="Overleden">Bijzonder</option>
+                        </select>
+                    </div>
+
                     {{-- Bedrag --}}
                     <div class="flex flex-col">
                         <label for="betaling_bedrag" class="text-[0.8125rem] font-semibold text-slate-700 mb-1.5">

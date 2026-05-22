@@ -12,7 +12,7 @@ class BetalingController extends Controller
 {
     public function index()
     {
-        $betalingen = Betaling::all();
+        $betalingen = Betaling::orderBy('betalingsdatum', 'desc')->paginate(10);
         return view('BetalingPagina', compact('betalingen'));
     }
 
@@ -25,6 +25,7 @@ class BetalingController extends Controller
             'methode'          => 'required|in:Geld,Overmaking',
             'status'           => 'required|in:in_behandeling,betaald,niet_betaald',
             'bedrag'           => 'required|numeric|min:0',
+            'lid_type'         => 'required|in:Actief,Passief,Bijzonder',
             'betaling_bewijs'  => 'nullable|file|max:5120',
         ]);
 
@@ -51,6 +52,7 @@ class BetalingController extends Controller
         Betaling::create([
             'betaling_id'     => (string) Str::uuid(),
             'lid_id'          => $lid->lid_id,
+            'lid_type'        => $request->lid_type,
             'bedrag'          => $request->bedrag, 
             'methode'         => $request->methode,
             'status'          => $request->status,

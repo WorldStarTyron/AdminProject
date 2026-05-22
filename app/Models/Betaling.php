@@ -19,6 +19,7 @@ class Betaling extends Model
     protected $fillable = [
         'betaling_id',
         'lid_id',
+        'lid_type',
         'bedrag',
         'methode',
         'status',

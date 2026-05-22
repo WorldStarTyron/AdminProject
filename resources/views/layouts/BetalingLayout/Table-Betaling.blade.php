@@ -8,13 +8,17 @@
                         <h2 class="text-xl font-extrabold text-slate-800 tracking-tight">Betaling per lid</h2>
                     </div>
                     <div class="flex items-center gap-3">
-                        <button id="openBetalingModal" class="inline-flex items-center gap-2 bg-gradient-to-br from-[#1e3a8a] to-[#2563eb] text-white font-['Inter',sans-serif] text-[0.8125rem] font-semibold px-5 py-2.5 rounded-[10px] shadow-[0_2px_8px_rgba(30,58,138,0.2)] hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(30,58,138,0.3)] active:translate-y-0 transition-all duration-200 cursor-pointer border-none whitespace-nowrap">
-                            Voeg Betaling
-                        </button>
-                        <button class="bg-slate-100 border-[1.5px] border-slate-200 rounded-[10px] w-[38px] h-[38px] flex items-center justify-center cursor-pointer text-slate-500 hover:bg-slate-200 hover:border-slate-300 hover:text-[#1e3a8a] transition-all duration-200">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M3 6H21M6 12H18M10 18H14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <button class="inline-flex items-center gap-2 bg-white border-[1.5px] border-slate-200 text-slate-600 font-['Inter',sans-serif] text-[0.8125rem] font-semibold px-4 py-2.5 rounded-[10px] hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 cursor-pointer whitespace-nowrap">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M22 3H2L10 12.46V19L14 21V12.46L22 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
+                            Filter
+                        </button>
+                        <button id="openBetalingModal" class="inline-flex items-center gap-2 bg-gradient-to-br from-[#1e3a8a] to-[#2563eb] text-white font-['Inter',sans-serif] text-[0.8125rem] font-semibold px-5 py-2.5 rounded-[10px] shadow-[0_2px_8px_rgba(30,58,138,0.2)] hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(30,58,138,0.3)] active:translate-y-0 transition-all duration-200 cursor-pointer border-none whitespace-nowrap">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Voeg Betaling
                         </button>
                     </div>
                 </div>
@@ -24,60 +28,150 @@
                     <table class="w-full border-collapse text-left" id="betalingTable">
                         <thead>
                             <tr>
-                                <th class="px-4 py-3.5 text-[0.6875rem] font-bold text-slate-500 bg-slate-50 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Naam</th>
-                                <th class="px-4 py-3.5 text-[0.6875rem] font-bold text-slate-500 bg-slate-50 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Datum</th>
-                                <th class="px-4 py-3.5 text-[0.6875rem] font-bold text-slate-500 bg-slate-50 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Bedrag</th>
-                                <th class="px-4 py-3.5 text-[0.6875rem] font-bold text-slate-500 bg-slate-50 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Status</th>
-                                <th class="px-4 py-3.5 text-[0.6875rem] font-bold text-slate-500 bg-slate-50 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Betaling Method</th>
-                                <th class="px-4 py-3.5 text-[0.6875rem] font-bold text-slate-500 bg-slate-50 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Bonnummer</th>
+                                <th class="px-5 py-3.5 text-[0.6875rem] font-bold text-slate-500 bg-slate-50/80 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">ID</th>
+                                <th class="px-5 py-3.5 text-[0.6875rem] font-bold text-slate-500 bg-slate-50/80 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Naam</th>
+                                <th class="px-5 py-3.5 text-[0.6875rem] font-bold text-slate-500 bg-slate-50/80 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Datum</th>
+                                <th class="px-5 py-3.5 text-[0.6875rem] font-bold text-slate-500 bg-slate-50/80 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Bedrag</th>
+                                <th class="px-5 py-3.5 text-[0.6875rem] font-bold text-slate-500 bg-slate-50/80 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Status</th>
+                                <th class="px-5 py-3.5 text-[0.6875rem] font-bold text-slate-500 bg-slate-50/80 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Betaling Method</th>
+                                <th class="px-5 py-3.5 text-[0.6875rem] font-bold text-slate-500 bg-slate-50/80 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Bonnummer</th>
+                                <th class="px-5 py-3.5 text-[0.6875rem] font-bold text-slate-500 bg-slate-50/80 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap w-10"></th>
                             </tr>
                         </thead>
                         <tbody>
-                            {{-- Demo rows --}}
-                             @foreach($betalingen as $betaling)
-                             <tr class="transition-colors duration-150 hover:bg-slate-50">
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                   <a href="#"> <span class="text-slate-800 font-semibold">{{ $betaling->lid->naam }}</span></a>
+                             @forelse($betalingen as $betaling)
+                             <tr class="transition-colors duration-150 hover:bg-slate-50/60 border-b border-slate-100/80 last:border-b-0">
+                                <td class="px-5 py-4 whitespace-nowrap">
+                                    <span class="text-slate-500 text-sm font-medium">{{ $loop->iteration + ($betalingen->currentPage() - 1) * $betalingen->perPage() }}</span>
                                 </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <span class="text-slate-600 text-sm">{{ $betaling->betalingsdatum }}</span>
+                                <td class="px-5 py-4 whitespace-nowrap">
+                                   <a href="#" class="text-slate-800 font-semibold text-sm hover:text-[#1e3a8a] transition-colors">{{ $betaling->lid->naam }}</a>
                                 </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <span class="text-slate-600 text-sm">SRD {{ $betaling->bedrag }}</span>
+                                <td class="px-5 py-4 whitespace-nowrap">
+                                    <span class="text-slate-600 text-sm">{{ \Carbon\Carbon::parse($betaling->betalingsdatum)->translatedFormat('j F Y') }}</span>
                                 </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <span class="text-slate-600 text-sm">{{ $betaling->status }}</span>
+                                <td class="px-5 py-4 whitespace-nowrap">
+                                    <span class="text-slate-800 text-sm font-semibold">Srd {{ number_format($betaling->bedrag, 0) }}</span>
                                 </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <span class="text-slate-600 text-sm">{{ $betaling->methode }}</span>
+                                <td class="px-5 py-4 whitespace-nowrap">
+                                    @php
+                                        $statusStyles = match($betaling->status) {
+                                            'Betaald'      => 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/80',
+                                            'Niet Betaald' => 'bg-red-50 text-red-600 ring-1 ring-red-200/80',
+                                            'Openstaand'   => 'bg-amber-50 text-amber-700 ring-1 ring-amber-200/80',
+                                            default        => 'bg-slate-50 text-slate-600 ring-1 ring-slate-200/80',
+                                        };
+                                        $statusLabel = match($betaling->status) {
+                                            'Betaald'      => 'BETAALD',
+                                            'Niet Betaald' => 'NIET BETAALD',
+                                            'Openstaand'   => 'OPENSTAAND',
+                                            default        => strtoupper($betaling->status),
+                                        };
+                                    @endphp
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[0.6875rem] font-bold tracking-wide {{ $statusStyles }}">
+                                        {{ $statusLabel }}
+                                    </span>
                                 </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <span class="text-slate-600 text-sm">{{ $betaling->bewijs }}</span>
+                                <td class="px-5 py-4 whitespace-nowrap">
+                                    <span class="text-slate-600 text-sm">{{ $betaling->methode ?? '—' }}</span>
+                                </td>
+                                <td class="px-5 py-4 whitespace-nowrap">
+                                    @if($betaling->bewijs)
+                                        <span class="text-slate-700 text-sm font-mono font-medium">{{ $betaling->bewijs }}</span>
+                                    @else
+                                        <span class="text-slate-400 text-sm">—</span>
+                                    @endif
+                                </td>
+                                <td class="px-5 py-4 whitespace-nowrap text-right">
+                                    <div class="relative inline-block" x-data="{ open: false }">
+                                        <button @click="open = !open" @click.outside="open = false" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all duration-200 cursor-pointer">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <circle cx="12" cy="5" r="1.5" fill="currentColor"/>
+                                                <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+                                                <circle cx="12" cy="19" r="1.5" fill="currentColor"/>
+                                            </svg>
+                                        </button>
+                                        {{-- Dropdown menu --}}
+                                        <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute right-0 mt-1 w-40 bg-white rounded-xl shadow-lg border border-slate-200 py-1.5 z-50" style="display: none;">
+                                            <a href="#" class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" class="text-slate-400"><path d="M1 12S5 4 12 4S23 12 23 12S19 20 12 20S1 12 1 12Z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
+                                                Bekijk
+                                            </a>
+                                            <a href="#" class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" class="text-slate-400"><path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M18.5 2.50001C18.8978 2.10219 19.4374 1.87869 20 1.87869C20.5626 1.87869 21.1022 2.10219 21.5 2.50001C21.8978 2.89784 22.1213 3.43739 22.1213 4.00001C22.1213 4.56262 21.8978 5.10219 21.5 5.50001L12 15L8 16L9 12L18.5 2.50001Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                                Bewerk
+                                            </a>
+                                            <div class="border-t border-slate-100 my-1"></div>
+                                            <button class="flex items-center gap-2.5 px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors w-full text-left">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" class="text-red-400"><path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                                Verwijder
+                                            </button>
+                                        </div>
+                                    </div>
                                 </td>
                              </tr>
-                             @endforeach
+                             @empty
+                             <tr>
+                                 <td colspan="8" class="px-5 py-12 text-center">
+                                     <div class="flex flex-col items-center gap-3">
+                                         <div class="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center">
+                                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="text-slate-400"><path d="M22 19C22 19.5304 21.7893 20.0391 21.4142 20.4142C21.0391 20.7893 20.5304 21 20 21H4C3.46957 21 2.96086 20.7893 2.58579 20.4142C2.21071 20.0391 2 19.5304 2 19V5C2 4.46957 2.21071 3.96086 2.58579 3.58579C2.96086 3.21071 3.46957 3 4 3H9L11 6H20C20.5304 6 21.0391 6.21071 21.4142 6.58579C21.7893 6.96086 22 7.46957 22 8V19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                         </div>
+                                         <p class="text-sm text-slate-400 font-medium">Geen betalingen gevonden</p>
+                                     </div>
+                                 </td>
+                             </tr>
+                             @endforelse
                         </tbody>
                     </table>
                 </div>
 
                 {{-- Pagination --}}
+                @if($betalingen->hasPages())
                 <div class="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <p class="text-[0.8125rem] text-slate-400 font-medium">Toont 1–4 van 80 betalingen</p>
+                    <p class="text-[0.8125rem] text-slate-400 font-medium">
+                        Toont {{ $betalingen->firstItem() }}–{{ $betalingen->lastItem() }} van {{ $betalingen->total() }} betalingen
+                    </p>
                     <div class="flex items-center gap-1">
-                        <span class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-slate-300 cursor-not-allowed">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        </span>
-                        <span class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-[0.8125rem] font-semibold text-white bg-gradient-to-br from-[#1e3a8a] to-[#2563eb] shadow-[0_2px_6px_rgba(30,58,138,0.2)] cursor-default">1</span>
-                        <span class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-[0.8125rem] font-semibold text-slate-500 hover:bg-slate-100 hover:text-[#1e3a8a] cursor-pointer transition-all duration-200">2</span>
-                        <span class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-[0.8125rem] font-semibold text-slate-500 hover:bg-slate-100 hover:text-[#1e3a8a] cursor-pointer transition-all duration-200">3</span>
-                        <span class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-[0.8125rem] font-semibold text-slate-500 hover:bg-slate-100 hover:text-[#1e3a8a] cursor-pointer transition-all duration-200">4</span>
-                        <span class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-[0.8125rem] font-semibold text-slate-500 hover:bg-slate-100 hover:text-[#1e3a8a] cursor-pointer transition-all duration-200">5</span>
-                        <span class="text-slate-300 font-semibold text-xs tracking-widest px-1">•••</span>
-                        <span class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-[0.8125rem] font-semibold text-slate-500 hover:bg-slate-100 hover:text-[#1e3a8a] cursor-pointer transition-all duration-200">20</span>
-                        <a href="#" class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-[#1e3a8a] cursor-pointer transition-all duration-200">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        </a>
+                        {{-- Previous --}}
+                        @if($betalingen->onFirstPage())
+                            <span class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-slate-300 cursor-not-allowed">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </span>
+                        @else
+                            <a href="{{ $betalingen->previousPageUrl() }}" class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-[#1e3a8a] cursor-pointer transition-all duration-200">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </a>
+                        @endif
+
+                        {{-- Page Numbers --}}
+                        @foreach($betalingen->links()->elements as $element)
+                            @if(is_string($element))
+                                <span class="text-slate-300 font-semibold text-xs tracking-widest px-1">•••</span>
+                            @endif
+                            @if(is_array($element))
+                                @foreach($element as $page => $url)
+                                    @if($page == $betalingen->currentPage())
+                                        <span class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-[0.8125rem] font-semibold text-white bg-gradient-to-br from-[#1e3a8a] to-[#2563eb] shadow-[0_2px_6px_rgba(30,58,138,0.2)] cursor-default">{{ $page }}</span>
+                                    @else
+                                        <a href="{{ $url }}" class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-[0.8125rem] font-semibold text-slate-500 hover:bg-slate-100 hover:text-[#1e3a8a] cursor-pointer transition-all duration-200">{{ $page }}</a>
+                                    @endif
+                                @endforeach
+                            @endif
+                        @endforeach
+
+                        {{-- Next --}}
+                        @if($betalingen->hasMorePages())
+                            <a href="{{ $betalingen->nextPageUrl() }}" class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-[#1e3a8a] cursor-pointer transition-all duration-200">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </a>
+                        @else
+                            <span class="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-slate-300 cursor-not-allowed">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </span>
+                        @endif
                     </div>
                 </div>
+                @endif
             </div>
         </main>

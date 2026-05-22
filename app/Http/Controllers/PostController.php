@@ -21,7 +21,9 @@ class PostController extends Controller
             'gebruikers.naam',
             'leden.telefoonnummer',
             'leden.adres',
-            'gebruikers.email'
+            'leden.woonplaats',
+            'gebruikers.email',
+            'leden.lid_sinds'
         )->join('gebruikers', 'leden.gebruiker_id', '=', 'gebruikers.gebruiker_id')
         ->get();
         return view('ledenpagina', compact('leden'));
@@ -77,6 +79,8 @@ class PostController extends Controller
                 'adres'          => $request->adres,
                 'woonplaats'     => $request->woonplaats,
                 'geboortedatum'  => $request->geboortedatum,
+                'lid_sinds'      => $request->lid_sinds,
+    
             ]); 
         });
 
@@ -99,7 +103,7 @@ class PostController extends Controller
   
         $betalingen = \App\Models\Betaling::where('lid_id', $id)
             ->orderBy('betalingsdatum', 'desc')
-            ->paginate(5);
+            ->paginate(10);
 
         return view('LidOverzichtPagina', compact('lid', 'betalingen'));
     }
@@ -109,8 +113,12 @@ class PostController extends Controller
      */
     public function edit(string $id)
     {
-        $lid = Lid::where('lid_id', $id)->firstOrFail();
-        return view('EditLidPagina', compact('lid'));
+        $lid = Lid::where('lid_id', $id)
+        ->join('gebruikers', 'leden.gebruiker_id', '=', 'gebruikers.gebruiker_id')
+        ->select('leden.*', 'gebruikers.naam', 'gebruikers.email')
+        ->firstOrFail();
+
+          return view('EditLidPagina', compact('lid'));
     }
 
     /**
@@ -125,11 +133,34 @@ class PostController extends Controller
             'adres' => 'required|string|max:255',
             'woonplaats' => 'required|string|max:255',
             'geboortedatum' => 'required|date',
+            'lid_sinds' => 'required|date',
+            'lid_type' => 'required|string|max:255',
         ]);
 
-        $lid = Lid::where('lid_id', $id)->firstOrFail();
-        $lid->update($validated);
-        return redirect()->route('ledenpagina')->with('success', 'Lid bewerkt');
+        $lid = Lid::where('lid_id', $id)
+        ->join('gebruikers', 'leden.gebruiker_id', '=', 'gebruikers.gebruiker_id')
+        ->select('leden.*', 'gebruikers.naam', 'gebruikers.email')
+        ->firstOrFail();
+
+       
+
+        //Update gebruikers tabel (naam + email)
+        $gebruiker = Gebruiker::where('gebruiker_id', $lid->gebruiker_id)->update([
+            'naam' => $validated['naam'],
+            'email' => $validated['email'],
+        ]);
+
+       //update Leden table (De rest)
+        $lid->update([
+            'telefoonnummer' => $validated['telefoonnummer'],
+            'adres'          => $validated['adres'],
+            'woonplaats'     => $validated['woonplaats'],
+            'geboortedatum'  => $validated['geboortedatum'],
+            'lid_sinds'      => $validated['lid_sinds'],
+            'lid_type'       => $validated['lid_type'],
+        ]); 
+        return redirect()->route('ledenpagina.show', $lid->lid_id)->with('success', 'Lid bewerkt');
+        
     }
 
     // Remove the selected lid

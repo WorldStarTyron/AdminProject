@@ -32,6 +32,7 @@ class Lid extends Model
         "lid_type",
         "woonplaats",
         "geboortedatum",
+        "lid_sinds",
     ];
 }
 

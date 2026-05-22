@@ -125,6 +125,138 @@
             </div>
         </section>
 
+
+
+        <!--Lid gegevens-->
+        <div class="px-8 py-6">
+            <div class="flex flex-col lg:flex-row gap-6 w-full items-start">
+
+                <!--Contact Details Card-->
+                <div class="bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.03)] border border-slate-200/60 w-full lg:w-[320px] flex-shrink-0">
+                    <div class="flex items-center gap-3 p-6 pb-4">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" class="text-slate-700" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <h2 class="text-base font-bold text-slate-900">Contact Details</h2>
+                    </div>
+
+                    <div class="px-6 pb-6 space-y-5">
+                        <!-- Email -->
+                        <div>
+                            <p class="text-[11px] font-semibold tracking-[0.08em] uppercase text-slate-400 mb-1">Email Address</p>
+                            <p class="text-sm font-medium text-slate-800">Regeffio@gmail.com</p>
+                        </div>
+
+                        <!-- Phone -->
+                        <div>
+                            <p class="text-[11px] font-semibold tracking-[0.08em] uppercase text-slate-400 mb-1">Telefoon Number</p>
+                            <p class="text-sm font-medium text-slate-800">+597 334-2134</p>
+                        </div>
+
+                        <!-- Address -->
+                        <div>
+                            <p class="text-[11px] font-semibold tracking-[0.08em] uppercase text-slate-400 mb-1">Address</p>
+                            <p class="text-sm font-medium text-slate-800">Pronk weg</p>
+                            <p class="text-sm text-slate-500">Commewijne</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Payment History Card-->
+                <div class="bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.03)] border border-slate-200/60 flex-1 min-w-0">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between p-6 pb-4">
+                        <div class="flex items-center gap-3">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" class="text-slate-700" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <h2 class="text-base font-bold text-slate-900">Payment History</h2>
+                        </div>
+                        <button class="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer" title="Filter">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="text-slate-500" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M22 3H2L10 12.46V19L14 21V12.46L22 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm" id="paymentHistoryTable">
+                            <thead>
+                                <tr class="border-t border-b border-slate-100">
+                                    <th class="text-left text-[11px] font-semibold tracking-[0.08em] uppercase text-slate-400 px-6 py-3">ID</th>
+                                    <th class="text-left text-[11px] font-semibold tracking-[0.08em] uppercase text-slate-400 px-6 py-3">Date</th>
+                                    <th class="text-left text-[11px] font-semibold tracking-[0.08em] uppercase text-slate-400 px-6 py-3">Contribution</th>
+                                    <th class="text-left text-[11px] font-semibold tracking-[0.08em] uppercase text-slate-400 px-6 py-3">Status</th>
+                                    <th class="text-left text-[11px] font-semibold tracking-[0.08em] uppercase text-slate-400 px-6 py-3">Bonnummer</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-50">
+                                <tr class="hover:bg-slate-50/50 transition-colors">
+                                    <td class="px-6 py-4 text-slate-600 font-medium">1</td>
+                                    <td class="px-6 py-4 text-slate-600">12 Jun 2023</td>
+                                    <td class="px-6 py-4 text-slate-700 font-medium">SRD 45.00</td>
+                                    <td class="px-6 py-4">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold tracking-wide bg-emerald-50 text-emerald-600">BETAALD</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-slate-500">—</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50/50 transition-colors">
+                                    <td class="px-6 py-4 text-slate-600 font-medium">2</td>
+                                    <td class="px-6 py-4 text-slate-600">15 May 2023</td>
+                                    <td class="px-6 py-4 text-slate-700 font-medium">SRD 45.00</td>
+                                    <td class="px-6 py-4">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold tracking-wide bg-emerald-50 text-emerald-600">BETAALD</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-slate-500">—</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50/50 transition-colors">
+                                    <td class="px-6 py-4 text-slate-600 font-medium">3</td>
+                                    <td class="px-6 py-4 text-slate-600">10 Apr 2023</td>
+                                    <td class="px-6 py-4 text-slate-700 font-medium">SRD 45.00</td>
+                                    <td class="px-6 py-4">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold tracking-wide bg-red-50 text-red-600">NIET BETAALD</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-slate-500">—</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50/50 transition-colors">
+                                    <td class="px-6 py-4 text-slate-600 font-medium">4</td>
+                                    <td class="px-6 py-4 text-slate-600">12 Mar 2023</td>
+                                    <td class="px-6 py-4 text-slate-700 font-medium">SRD 45.00</td>
+                                    <td class="px-6 py-4">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold tracking-wide bg-emerald-50 text-emerald-600">BETAALD</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-slate-500">—</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50/50 transition-colors">
+                                    <td class="px-6 py-4 text-slate-600 font-medium">5</td>
+                                    <td class="px-6 py-4 text-slate-600">08 Feb 2023</td>
+                                    <td class="px-6 py-4 text-slate-700 font-medium">SRD 45.00</td>
+                                    <td class="px-6 py-4">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold tracking-wide bg-emerald-50 text-emerald-600">BETAALD</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-slate-500">—</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="flex items-center justify-between px-6 py-4 border-t border-slate-100">
+                        <p class="text-sm text-slate-400">Showing 1 to 5 of 24 entries</p>
+                        <div class="flex items-center gap-1.5">
+                            <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-900 text-white text-sm font-semibold shadow-sm">1</button>
+                            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 text-sm font-medium hover:bg-slate-50 transition-colors cursor-pointer">2</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
     </div>
 </body>
 </html>

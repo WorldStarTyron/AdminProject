@@ -68,6 +68,11 @@
                         </select>
                     </div>
 
+                    <div class="form-group">
+                        <label for="lid_sinds">Lid sinds <span class="required">*</span></label>
+                        <input type="date" id="lid_sinds" name="lid_sinds" value="{{ date('Y-m-d') }}" required>
+                    </div>
+
 
 
                     <div class="form-group">

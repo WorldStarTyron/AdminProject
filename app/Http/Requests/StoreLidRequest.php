@@ -104,6 +104,13 @@ class StoreLidRequest extends FormRequest
                 'string',
                 'in:Passief,Actief,Bijzonder',
             ],
+
+            'lid_sinds' => [
+                'required',
+                'date',
+                'before:today',
+                'after:1920-01-01',  // nobody born before 1920
+            ],
         ];
     }
 
@@ -152,6 +159,13 @@ class StoreLidRequest extends FormRequest
             // lid_type
             'lid_type.required' => 'Lid type is verplicht.',
             'lid_type.in'       => 'Selecteer een geldig lid type uit de lijst.',
+
+            // lid_sinds
+            'lid_sinds.required' => 'Lid sinds is verplicht.',
+            'lid_sinds.date'     => 'Voer een geldige datum in.',
+            'lid_sinds.before'   => 'Lid sinds moet in het verleden liggen.',
+            'lid_sinds.after'    => 'Lid sinds is ongeldig.',
         ];
+
     }
 }

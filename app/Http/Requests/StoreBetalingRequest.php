@@ -27,6 +27,7 @@ class StoreBetalingRequest extends FormRequest
             'bedrag'            => 'required|numeric|min:0',
             'methode'           => 'required|string',
             'status'            => 'required|string',
+            'lid_type'          => 'required|in:Actief,Passief,Bijzonder', 
             'omschrijving'      => 'nullable|string|max:255',
             'bonnummer'         => 'nullable|string|max:50',
         ];
@@ -42,6 +43,7 @@ class StoreBetalingRequest extends FormRequest
             'bedrag.min'          => 'Bedrag kan niet negatief zijn.',
             'methode.required'      => 'Betalingsmethode is verplicht.',
             'status.required'       => 'Status is verplicht.',
+            'lid_type.required'     => 'Lid type is verplicht.',
         ];
     }
 }

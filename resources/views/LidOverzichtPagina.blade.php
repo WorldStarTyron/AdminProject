@@ -212,11 +212,11 @@
                                             </span>
                                         </td>
                                         <td class="py-3 text-gray-500 text-xs font-mono">
-                                            @if($betaling->bewijs_bestand)
-                                                BON-KA-{{ $betaling->jaar }}-{{ str_pad($loop->iteration, 4, '0', STR_PAD_LEFT) }}
-                                            @else
-                                                —
-                                            @endif
+                                             @if($betaling->bon)
+                                                 {{ $betaling->bon->bon_nummer }}
+                                             @else
+                                                 —
+                                             @endif
                                         </td>
                                     </tr>
                                 @empty

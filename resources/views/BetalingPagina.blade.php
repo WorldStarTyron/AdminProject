@@ -29,9 +29,12 @@
 
                 <div class="flex justify-between items-center">
                     <div class="mt-5">
+                        <!-- Betaling Income elk Maand -->
                         <p class="text-sm font-semibold text-white/90 mb-1">Total Income</p>
-                        <p class="text-[2.5rem] font-extrabold text-white leading-none tracking-tight">Srd 34,323.30</p>
-                        <p class="text-xs text-white/50 mt-1">elk maand</p>
+                        <p class="text-[2.5rem] font-extrabold text-white leading-none tracking-tight">Srd {{number_format($maandTotaal, 2)}}</p>
+                        <p class="text-xs text-white/50 mt-1">
+                            {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
+                        </p>
                     </div>
                     <div class="w-10 h-10 bg-white/[0.12] rounded-xl flex items-center justify-center backdrop-blur-sm">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -62,5 +65,6 @@
 
    <!-- TotalBetaling-Chart -->
    @vite('resources/js/TotalBetaling-chart.js')
+   @vite('resources/js/OptieDisable.js')
 </body>
 </html>

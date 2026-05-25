@@ -26,4 +26,9 @@ class Gebruiker extends Model
     protected $hidden = [
         "wachtwoord_hash",
     ];
+    //this is to define the relationship between the gebruiker and lid model
+    public function lid()
+    {
+        return $this->hasOne(Lid::class, 'gebruiker_id', 'gebruiker_id');
+    }
 }

@@ -58,4 +58,4 @@ class LidController extends Controller
 
         return view('ledenpagina', compact('leden', 'totaalLeden', 'labels', 'values', 'woonplaatsen'));
     }
-}
+} 

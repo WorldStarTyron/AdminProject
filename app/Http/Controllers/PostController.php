@@ -99,13 +99,27 @@ class PostController extends Controller
     {
         $lid = Lid::where('lid_id', $id)
         ->join('gebruikers', 'leden.gebruiker_id', '=', 'gebruikers.gebruiker_id')
-        ->Select('leden.*','gebruikers.naam', 'gebruikers.email')->firstOrFail();
-  
-        $betalingen = \App\Models\Betaling::where('lid_id', $id)
-            ->orderBy('betalingsdatum', 'desc')
-            ->paginate(10);
+        ->select('leden.*', 'gebruikers.naam', 'gebruikers.email')
+        ->firstOrFail();
 
-        return view('LidOverzichtPagina', compact('lid', 'betalingen'));
+    $betalingen = \App\Models\Betaling::where('lid_id', $id)
+        ->with('bon')
+        ->orderBy('ingediend_op', 'desc')
+        ->paginate(10);
+
+    // Haal alle betaling_ids op van dit lid
+    $betalingIds = \App\Models\Betaling::where('lid_id', $id)
+        ->pluck('betaling_id');
+
+    // Bonnen ophalen via de betaling_ids
+    $bonnen = \App\Models\Bonnen::whereIn('bonnen.betaling_id', $betalingIds)
+        ->join('betalingen', 'bonnen.betaling_id', '=', 'betalingen.betaling_id')
+        ->join('leden', 'betalingen.lid_id', '=', 'leden.lid_id')
+        ->join('gebruikers', 'leden.gebruiker_id', '=', 'gebruikers.gebruiker_id')
+        ->orderBy('bonnen.betaling_id', 'desc')
+        ->paginate(10);
+
+    return view('LidOverzichtPagina', compact('lid', 'betalingen', 'bonnen'));
     }
 
     /**

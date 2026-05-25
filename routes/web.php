@@ -44,6 +44,9 @@ Route::put('/ledenpagina/{lidId}', [PostController::class, 'update'])->name('led
 Route::get('/betalingPagina', [BetalingController::class, 'index'])->name('betalingPagina');
 Route::post('/betalingPagina/addBetaling', [BetalingController::class, 'store'])->name('betalingPagina.addBetaling.store');
 
+//Betalingen Chart Data
+Route::get('/betalingen/chart-data', [ChartController::class, 'chartData'])->name('betalingen.chartData');
+
 // Dashboard routes
 Route::get('/dashboard', function () {
     return view('MainDashboardPagina');

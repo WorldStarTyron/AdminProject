@@ -28,7 +28,7 @@
     <div class="sidebar-divider"></div>
 
     {{-- Navigation --}}
-    <p class="nav-section-label">Menu</p>
+    <p class="nav-section-label">Algemeen</p>
     <nav class="sidebar-nav">
         <ul>
             <li class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
@@ -41,6 +41,7 @@
                     <span class="nav-text">Dashboard</span>
                 </a>
             </li>
+            <p class="nav-section-label">Menu</p>
             <li class="nav-item {{ request()->routeIs('ledenpagina') ? 'active' : '' }}">
                 <a href="{{ route('ledenpagina') }}" data-tooltip="Leden">
                     <span class="nav-icon">
@@ -48,7 +49,7 @@
                             <path d="M17 21V19C17 17.9391 16.5786 17.0217 15.8284 16.2716C15.0783 15.5214 14.1609 15.1 13.1 15.1H6.9C5.83913 15.1 4.92174 15.5214 4.17157 16.2716C3.42143 17.0217 3 17.9391 3 19V21M16 3.12999C17.4273 3.51199 18.6738 4.3814 19.5401 5.59922C20.4063 6.81704 20.8385 8.2933 20.767 9.78918C20.6955 11.285 20.1245 12.7031 19.1466 13.8122C18.1687 14.9213 16.8437 15.6517 15.39 15.91M15 7C15 9.20914 13.2091 11 11 11C8.79086 11 7 9.20914 7 7C7 4.79086 8.79086 3 11 3C13.2091 3 15 4.79086 15 7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </span>
-                    <span class="nav-text">Leden</span>
+                    <span class="nav-text">Leden</span> 
                 </a>
             </li>
             <li class="nav-item {{ request()->routeIs('betalingPagina') ? 'active' : '' }}">
@@ -71,7 +72,14 @@
                     </span>
                     <span class="nav-text">Rapport</span>
                 </a>
-            </li>
+            </li> 
+                
+            
+
+
+
+
+
         </ul>
     </nav>
 

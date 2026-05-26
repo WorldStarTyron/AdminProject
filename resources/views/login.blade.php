@@ -26,8 +26,15 @@
                         <p class="text-gray-600 mt-2">Log in to your account</p>
                     </div>
 
+                    <!-- Display generic error messages (wrong credentials / inactive account) -->
+                    @if(session('error'))
+                        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                            {{ session('error') }}
+                        </div>
+                    @endif
+
                     <!-- Login Form -->
-                    <form method="POST" action="{{ route('login') }}" class="space-y-5">
+                    <form method="POST" action="{{ route('login.post') }}" class="space-y-5">
                         @csrf
 
                         <!-- Email Input -->
@@ -81,16 +88,6 @@
                            Login
                         </button>
                     </form>
-
-                    <!-- Additional Links
-                    <div class="pt-5 border-t border-gray-200 text-center">
-                        <p class="text-gray-600 text-sm">
-                            Don't have an account?
-                            <a href="" class="text-gray-900 hover:text-gray-700 font-medium transition">
-                                Create one
-                            </a>
-                        </p>
-                    </div>  -->
                 </div>
             </div>
         </div>

@@ -73,6 +73,7 @@ class ChartController extends Controller
             $overmaking[] = (int) ($rijen[$sleutel]['overmaking']->aantal ?? 0);
         }
  
+        // Deze data stuur je naar je Blade component
         return response()->json([
             'labels' => $labels,
             'series' => [
@@ -81,30 +82,6 @@ class ChartController extends Controller
             ],
         ]);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     }
 

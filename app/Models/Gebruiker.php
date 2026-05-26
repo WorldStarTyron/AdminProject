@@ -4,8 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class Gebruiker extends Model
+class Gebruiker extends Authenticatable
 {
     use HasFactory;
     protected $table = "gebruikers";
@@ -26,9 +27,43 @@ class Gebruiker extends Model
     protected $hidden = [
         "wachtwoord_hash",
     ];
-    //this is to define the relationship between the gebruiker and lid model
+
+    protected $casts = [
+        'aangemaakt_op' => 'datetime',
+        'bijgewerkt_op' => 'datetime',
+    ];
+
+    //this is to define the relationship between the gebruiker and lid model 
     public function lid()
     {
         return $this->hasOne(Lid::class, 'gebruiker_id', 'gebruiker_id');
     }
+
+
+//Many to many Relation with Rol
+public function rollen()
+{
+    return $this->belongsToMany(Rol::class, 'gebruikers_rollen', 'gebruiker_id', 'rol_id')
+        ->withPivot('toegewezen_op'); // alleen wat echt bestaat
+}
+
+//Set password and hash it
+public function setPasswordAttribute($plainPassword)
+{
+    $this->attributes['wachtwoord_hash'] = Hash::make($plainPassword);
+}
+
+//check password
+  public function verifyPassword($plainPassword)
+    {
+        return Hash::check($plainPassword, $this->wachtwoord_hash);
+    }
+
+    //vertel Laravel dat dit de wachtwoord kolom is.
+    public function getAuthPassword()
+    {
+        return $this->wachtwoord_hash;
+    }
+
+
 }

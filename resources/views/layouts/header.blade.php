@@ -1,21 +1,44 @@
+
 <header class="main-header">
     <div class="header-container">
         <div class="header-left">
             <h1 class="header-title">Administratie Panel</h1>
         </div>
-        <div class="header-right">
-            <div class="user-info">
-                <span class="user-name">Renee McKelvey</span>
-                <span class="user-role">Admin</span>
-            </div>
-            <div class="user-avatar">
-                <div class="avatar-placeholder">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 12C14.2091 12 16 10.2091 16 8C16 5.79086 14.2091 4 12 4C9.79086 4 8 5.79086 8 8C8 10.2091 9.79086 12 12 12Z" fill="#A0AEC0"/>
-                        <path d="M12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" fill="#A0AEC0"/>
-                    </svg>
+        <div class="header-right flex items-center gap-4">
+
+            {{-- Notificatie bel --}}
+            <button class="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-gray-700 transition">
+                <i class="fa-regular fa-bell text-lg"></i>
+            </button>
+
+            {{-- Naam + Rollen --}}
+            <div class="flex flex-col text-right">
+                <span class="text-sm font-semibold text-gray-900">{{ Auth::user()->naam }}</span>
+                <div class="flex items-center justify-end gap-1 flex-wrap mt-0.5">
+                    @forelse(Auth::user()->rollen as $rol)
+                        <span class="text-xs text-gray-500">
+                            @if($rol->naam === 'Admin')
+                                <i class="fa-solid fa-shield-halved"></i>
+                            @elseif($rol->naam === 'Voorzitter')
+                                <i class="fa-solid fa-star"></i>
+                            @elseif($rol->naam === 'Lid')
+                                <i class="fa-solid fa-user"></i>
+                            @else
+                                <i class="fa-solid fa-circle-user"></i>
+                            @endif
+                            {{ $rol->naam }}
+                        </span>
+                    @empty
+                        <span class="text-xs text-gray-400">Geen rol</span>
+                    @endforelse
                 </div>
             </div>
+
+            {{-- Avatar --}}
+            <div class="w-9 h-9 rounded-full bg-gray-800 flex items-center justify-center">
+                <i class="fa-regular fa-circle-user text-white text-lg"></i>
+            </div>
+
         </div>
     </div>
 </header>

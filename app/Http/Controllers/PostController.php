@@ -81,7 +81,17 @@ class PostController extends Controller
                 'geboortedatum'  => $request->geboortedatum,
                 'lid_sinds'      => $request->lid_sinds,
     
-            ]); 
+            ]);
+
+            // 3. Ken de rol "Lid" toe aan de gebruiker
+            $lidRol = \App\Models\Rol::where('naam', 'Lid')->first();
+            if (!$lidRol) {
+                $lidRol = \App\Models\Rol::create([
+                    'naam' => 'Lid',
+                    'omschrijving' => 'Standaard lidmaatschap',
+                ]);
+            }
+            $gebruiker->rollen()->attach($lidRol->rol_id);
         });
 
         // Return JSON voor AJAX requests, redirect voor normale form posts

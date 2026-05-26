@@ -3,38 +3,81 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Gebruiker;
 
 class AuthController extends Controller
 {
+ 
+// show login form
+public function showLogin()
+{
+    return view('login');
+}
+
+
     //login
     public function login(Request $request)
-    {
-        $credentials = $request->only('email', 'password');
+     {
+        $credentials =[
+            'email' => $request->email,
+            'password' => $request->password,
+        ];
 
-        if (Auth::attempt($credentials)) {
-            $user = Auth::user();
+       if (Auth::attempt($credentials)) {
+    $user = Auth::user();
 
-            if ($user->is_admin == 1) {
-                // Admin user - redirect to admin dashboard
-                return redirect()->route('admin.dashboard')
-                    ->with('success', 'Welkom bij het beheerdersdashboard!');
-            } else {
-                // Regular user - redirect to regular dashboard
-                Auth::logout();
-                return redirect()->route('login')
-                    ->with('error', 'Je hebt geen toegang tot het beheerdersdashboard. Dit is een beveiligde pagina voor beheerders.');
-            }
-        }
-
-        // Authentication failed
+    // ✅ Eerst checken of account actief is
+    if ($user->actief == 0) {
+        Auth::logout();
         return redirect()->route('login')
-            ->with('error', 'Ongeldige inloggegevens. Probeer opnieuw.');
+            ->with('error', 'Je account is gedeactiveerd.');
     }
 
-    // In je AuthController.php
-public function logout(Request $request)
-{
-    Auth::logout();
-    return redirect()->route('login');
+    // ✅ Dan pas doorsturen
+    return redirect()->route('dashboard')
+        ->with('success', 'Welkom ' . $user->naam);
+    }
+
+        return redirect()->route('login')->with('error', 'Ongeldige inloggegevens');
+     }
+
+      
+     public function redirectBasedOnRole()
+    {
+    $user = Auth::user();
+
+    // Als rol 1 -> lidpagina
+    if ($user->rol == 2) {
+        return redirect()->route('lidpagina');
+    }
+
+    // Als rol 2 -> dashboard
+    if ($user->rol == 1) {
+        return redirect()->route('dashboard');
+    }
+
+    if ($user->rol == 3) {
+        return redirect()->route('dashboard');
+    }
+
+    if ($user->rol == 4) {
+        return redirect()->route('dashboard');
+    }
+
+    // Standaard fallback
+    return redirect()->route('dashboard');
 }
+
+
+// ----------------------Logout----------------------
+  public function logout (Request $request)
+  {
+    Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+    return redirect()->route('login');
+  } 
+
+  
 }

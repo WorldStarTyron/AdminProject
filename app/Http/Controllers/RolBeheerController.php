@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Gebruiker;
-use App\Models\Rol;
+use App\Models\Rol; 
 
 class RolBeheerController extends Controller
 {

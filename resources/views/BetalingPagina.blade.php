@@ -61,5 +61,7 @@
 
     @vite('resources/js/TotalBetaling-chart.js')
     @vite('resources/js/OptieDisable.js')
+    @vite('resources/js/Button&More.js')
+    
 </body>
 </html>

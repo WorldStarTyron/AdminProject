@@ -19,7 +19,8 @@
 
         <div class="flex-1 ml-0 md:ml-64 transition-all duration-300 min-w-0 overflow-x-hidden">
             @include('layouts.Header-layout.AddLid-Header')
-
+               
+            <!-- Main Leden Overzicht Table with all details -->
             <main class="lp-page-content">
                 <div class="lp-page-header">
                     <div class="lp-page-header-left">
@@ -43,7 +44,7 @@
                         </form>
                     </div>
                 </div>
-
+ 
                 <div class="lp-info-banner">
                     <div class="lp-info-icon">
                         <i class="fa-solid fa-circle-info"></i>
@@ -52,7 +53,7 @@
                 </div>
 
                 @include('layouts.Totalleden-Charts')
-
+                  <!--- Leden Table with all details -->
                 <div class="lp-table-section">
                     <div class="lp-table-wrapper">
                         <table class="lp-data-table" id="ledenTable">
@@ -112,6 +113,8 @@
                         </table>
                     </div>
 
+
+                           <!-- Pagination --> 
                     @if($leden->hasPages())
                     <div class="lp-table-footer">
                         <div class="lp-pagination-info">
@@ -154,8 +157,9 @@
                         </div>
                     </div>
                     @endif
-                </div>
+                </div> 
 
+                <!-- Stats: Total members, active members -->
                 <div class="lp-stats-row">
                     <div class="lp-stat-card lp-stat-card-light">
                         <div class="lp-stat-card-header">

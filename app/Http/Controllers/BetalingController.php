@@ -50,10 +50,6 @@ class BetalingController extends Controller
         ->whereYear('ingediend_op', now()->year)
         ->sum('bedrag');
 
-
-
-
-
     return view('BetalingPagina', compact('betalingen', 'maandTotaal'));
     }
 
@@ -196,6 +192,14 @@ class BetalingController extends Controller
    }
  
 
-
+   // Delete Betalingen
+   public function destroy($betaling_id)
+    {
+   $Betaling = Betaling::where('betaling_id', $betaling_id)->first();
+   $Betaling->delete();  
+   $Bon = Bon::where('betaling_id', $betaling_id)->first();
+   $Bon->delete();
+    return response()->json(['success' => true, 'message' => 'Betaling succesvol verwijderd']);
+   }
 
 }

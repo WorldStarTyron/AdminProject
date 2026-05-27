@@ -10,16 +10,16 @@ document.addEventListener('DOMContentLoaded', function () {
     // ==============================
     // STEP 1: Get all elements
     // ==============================
-    var modal       = document.getElementById('addBetalingModal');
-    var openBtn     = document.getElementById('openBetalingModal');
-    var closeBtn    = document.getElementById('closeBetalingModalBtn');
-    var cancelBtn   = document.getElementById('cancelBetalingModalBtn');
-    var form        = document.getElementById('addBetalingForm');
-    var errorsDiv   = document.getElementById('betalingModalErrors');
-    var errorList   = document.getElementById('betalingModalErrorList');
-    var submitBtn   = document.getElementById('submitBetalingBtn');
-    var fileInput   = document.getElementById('betaling_bewijs');
-    var fileText    = document.getElementById('fileUploadText');
+    var modal = document.getElementById('addBetalingModal');
+    var openBtn = document.getElementById('openBetalingModal');
+    var closeBtn = document.getElementById('closeBetalingModalBtn');
+    var cancelBtn = document.getElementById('cancelBetalingModalBtn');
+    var form = document.getElementById('addBetalingForm');
+    var errorsDiv = document.getElementById('betalingModalErrors');
+    var errorList = document.getElementById('betalingModalErrorList');
+    var submitBtn = document.getElementById('submitBetalingBtn');
+    var fileInput = document.getElementById('betaling_bewijs');
+    var fileText = document.getElementById('fileUploadText');
 
 
     // ==============================
@@ -59,8 +59,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // ==============================
     // STEP 4: Button click listeners
     // ==============================
-    if (openBtn)   openBtn.addEventListener('click', openModal);
-    if (closeBtn)  closeBtn.addEventListener('click', closeModal);
+    if (openBtn) openBtn.addEventListener('click', openModal);
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
     if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
 
     // Close when clicking the dark overlay behind the modal
@@ -119,53 +119,53 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 body: formData,
             })
-            .then(function (response) {
-                if (response.ok) {
-                    return response.json().then(function (data) {
-                        closeModal();
+                .then(function (response) {
+                    if (response.ok) {
+                        return response.json().then(function (data) {
+                            closeModal();
 
-                        // Show success toast
-                        var toast = document.getElementById('betalingSuccessToast');
-                        if (toast) {
-                            toast.classList.add('show');
-                            setTimeout(function () {
-                                toast.classList.remove('show');
-                            }, 3000);
-                        }
-
-                        // Reload page to show new betaling in the table
-                        setTimeout(function () {
-                            window.location.reload();
-                        }, 1000);
-                    });
-                } else {
-                    return response.json().then(function (data) {
-                        // Show validation errors
-                        if (data.errors) {
-                            errorsDiv.style.display = 'block';
-                            errorsDiv.classList.remove('hidden');
-                            for (var field in data.errors) {
-                                data.errors[field].forEach(function (msg) {
-                                    var li = document.createElement('li');
-                                    li.textContent = msg;
-                                    errorList.appendChild(li);
-                                });
+                            // Show success toast
+                            var toast = document.getElementById('betalingSuccessToast');
+                            if (toast) {
+                                toast.classList.add('show');
+                                setTimeout(function () {
+                                    toast.classList.remove('show');
+                                }, 3000);
                             }
-                        }
-                    });
-                }
-            })
-            .catch(function () {
-                errorsDiv.style.display = 'block';
-                errorsDiv.classList.remove('hidden');
-                var li = document.createElement('li');
-                li.textContent = 'Er is een fout opgetreden. Probeer het opnieuw.';
-                errorList.appendChild(li);
-            })
-            .finally(function () {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = 'Betaling toevoegen';
-            });
+
+                            // Reload page to show new betaling in the table
+                            setTimeout(function () {
+                                window.location.reload();
+                            }, 1000);
+                        });
+                    } else {
+                        return response.json().then(function (data) {
+                            // Show validation errors
+                            if (data.errors) {
+                                errorsDiv.style.display = 'block';
+                                errorsDiv.classList.remove('hidden');
+                                for (var field in data.errors) {
+                                    data.errors[field].forEach(function (msg) {
+                                        var li = document.createElement('li');
+                                        li.textContent = msg;
+                                        errorList.appendChild(li);
+                                    });
+                                }
+                            }
+                        });
+                    }
+                })
+                .catch(function () {
+                    errorsDiv.style.display = 'block';
+                    errorsDiv.classList.remove('hidden');
+                    var li = document.createElement('li');
+                    li.textContent = 'Er is een fout opgetreden. Probeer het opnieuw.';
+                    errorList.appendChild(li);
+                })
+                .finally(function () {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Betaling toevoegen';
+                });
         });
     }
 

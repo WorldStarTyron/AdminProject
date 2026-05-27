@@ -13,6 +13,8 @@
 </head>
 
 <body class="font-sans bg-gray-50 text-gray-800">
+
+       <!-- Main Container -->
     <div class="flex min-h-screen">
         @include('layouts.Sidebars.sidebar')
 
@@ -101,10 +103,11 @@
                             </a>
                             <form action="{{ route('ledenpagina.delete', $lid->lid_id) }}" method="POST">
                                 @csrf
-                                @method('DELETE')
+                                @method('DELETE') 
                                 <button type="submit"
                                         onclick="return confirm('Weet u zeker dat u dit lid wilt verwijderen?')"
-                                        class="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl border border-red-200 bg-white text-red-500 text-sm font-medium hover:bg-red-50 hover:border-red-300 transition-all shadow-sm">
+                                        class="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl border border-red-200 bg-white text-red-500 text-sm font-medium
+                                        hover:bg-red-50 hover:border-red-300 transition-all shadow-sm">
                                     <i class="fa-regular fa-trash-can text-red-400"></i>
                                     Verwijder
                                 </button>
@@ -146,6 +149,8 @@
                             </button>
                         </div>
 
+
+                         <!-- Betalingen Table of lid with all details -->
                         <div class="overflow-x-auto">
                             <table class="w-full text-sm">
                                 <thead>
@@ -202,7 +207,8 @@
                                 </tbody>
                             </table>
                         </div>
-
+                             
+                        <!-- Pagination -->
                         @if($betalingen->hasPages())
                             <div class="flex items-center justify-center gap-1 mt-5 pt-4 border-t border-gray-100">
                                 @if($betalingen->onFirstPage())

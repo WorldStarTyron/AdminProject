@@ -33,42 +33,28 @@ public function showLogin()
         return redirect()->route('login')
             ->with('error', 'Je account is gedeactiveerd.');
     }
+    // De rol checken en de juiste pagina teruggeven
+    return $this->redirectBasedOnRole();
 
-    // ✅ Dan pas doorsturen
-    return redirect()->route('dashboard')
-        ->with('success', 'Welkom ' . $user->naam);
-    }
-
-        return redirect()->route('login')->with('error', 'Ongeldige inloggegevens');
-     }
-
-      
-     public function redirectBasedOnRole()
+    }   
+    return redirect()->route('login')->with('error', 'Ongeldige inloggegevens');
+    }  
+    public function redirectBasedOnRole()
     {
-    $user = Auth::user();
+        $user = Auth::user();
+        
+        // Zorg dat de rollen van de gebruiker geladen zijn
+        $user->load('rollen');
 
-    // Als rol 1 -> lidpagina
-    if ($user->rol == 2) {
-        return redirect()->route('lidpagina');
-    }
+        // Check of de gebruiker de rol 'Lid' heeft
+        if ($user->rollen->contains('naam', 'Lid')) {
+            return redirect()->route('GegevensPagina')
+                ->with('success', 'Welkom ' . $user->naam); 
+        }
 
-    // Als rol 2 -> dashboard
-    if ($user->rol == 1) {
+        // Alle andere rollen (Beheerders, Voorzitter, etc.) gaan naar het dashboard
         return redirect()->route('dashboard');
     }
-
-    if ($user->rol == 3) {
-        return redirect()->route('dashboard');
-    }
-
-    if ($user->rol == 4) {
-        return redirect()->route('dashboard');
-    }
-
-    // Standaard fallback
-    return redirect()->route('dashboard');
-}
-
 
 // ----------------------Logout----------------------
   public function logout (Request $request)

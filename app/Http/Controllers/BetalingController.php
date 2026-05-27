@@ -7,6 +7,7 @@ use App\Models\Betaling;
 use App\Models\Gebruiker;  
 use App\Http\Controllers\BonController;
 use Carbon\Carbon;
+use App\Models\Bon;
 
 class BetalingController extends Controller
 {
@@ -196,9 +197,17 @@ class BetalingController extends Controller
    public function destroy($betaling_id)
     {
    $Betaling = Betaling::where('betaling_id', $betaling_id)->first();
-   $Betaling->delete();  
+   
+
+   // Check if bon exists and delete it
    $Bon = Bon::where('betaling_id', $betaling_id)->first();
-   $Bon->delete();
+   if($Bon){
+$Bon->delete();
+   }
+
+     $betaling->delete();
+
+
     return response()->json(['success' => true, 'message' => 'Betaling succesvol verwijderd']);
    }
 

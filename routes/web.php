@@ -48,6 +48,7 @@ Route::middleware(['auth'])->group(function(){
     Route::post('/betalingPagina/addBetaling', [BetalingController::class, 'store'])->name('betalingPagina.addBetaling.store');
     //Betalingen Chart Data
     Route::get('/betalingen/chart-data', [ChartController::class, 'chartData'])->name('betalingen.chartData');
+    Route::delete('/betalingPagina/delete/{betaling_id}', [BetalingController::class, 'destroy'])->name('betalingPagina.delete');
     // Dashboard routes
     Route::get('/dashboard', function () {return view('MainDashboardPagina');})->name('dashboard');
 });

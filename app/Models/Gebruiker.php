@@ -21,7 +21,7 @@ class Gebruiker extends Authenticatable
         "naam",
         "email",
         "wachtwoord_hash",
-        "actief",
+        "status",
     ];
 
     protected $hidden = [
@@ -64,6 +64,12 @@ public function setPasswordAttribute($plainPassword)
     {
         return $this->wachtwoord_hash;
     }
-
-
+   
+   // this function is to define the relationship between the gebruiker and rol model 
+    public function rol()
+    {
+        return $this->belongsTo(Rol::class, 'rol_id');
+    }
+  
+    
 }

@@ -13,15 +13,15 @@ return new class extends Migration
     {
         Schema::disableForeignKeyConstraints();
 
-        Schema::create('gebruikers', function (Blueprint $table) {
-            $table->increments('gebruiker_id');
-            $table->string('naam', 100);
-            $table->string('email', 150)->unique();
-            $table->string('wachtwoord_hash', 255);
-            $table->tinyInteger('actief')->default(1);
-            $table->timestamp('aangemaakt_op')->useCurrent();
-            $table->timestamp('bijgewerkt_op')->useCurrent();
-        });
+       Schema::create('gebruikers', function (Blueprint $table) {
+    $table->increments('gebruiker_id');
+    $table->string('naam', 100);
+    $table->string('email', 150)->unique();
+    $table->string('wachtwoord_hash', 255);
+    $table->enum('status', ['Actief', 'Inactief'])->default('Actief');
+    $table->timestamp('aangemaakt_op')->useCurrent();
+    $table->timestamp('bijgewerkt_op')->useCurrent();
+});
 
         Schema::enableForeignKeyConstraints();
     }

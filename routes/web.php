@@ -8,6 +8,7 @@ use App\Http\Controllers\ChartController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BetalingController;
 use App\Http\Controllers\RolBeheerController;
+use App\Http\Controllers\GebruikerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,7 +26,7 @@ Route::get('/', function () {
 });
 
 
- 
+
 Route::middleware(['auth'])->group(function(){
     // Leden routes
     Route::get('/ledenpagina', [LidController::class, 'index'])->name('ledenpagina');
@@ -39,8 +40,9 @@ Route::middleware(['auth'])->group(function(){
     Route::get('/ledenpagina/{lidId}/edit', [PostController::class, 'edit'])->name('ledenpagina.edit');
     Route::put('/ledenpagina/{lidId}', [PostController::class, 'update'])->name('ledenpagina.update');
     // Ledenpagina routes
-Route::get('/Lidpagina', function(){ return view('Lidpagina'); })->name('GegevensPagina')  ; 
-});
+    Route::get('/Lidpagina', [LidController::class, 'show'])->name('GegevensPagina'); 
+}); 
+
 
 Route::middleware(['auth'])->group(function(){
     // Betalingen routes
@@ -63,12 +65,18 @@ Route::middleware(['auth'])->group(function () { // Add your own auth middleware
     Route::get('/rollen-beheer/search-users', [RolBeheerController::class, 'searchUsers'])->name('rollen-beheer.search');
 });
 
+// GebruikerBeheer Route
+Route::middleware(['auth'])->group(function () {
+    Route::get('/GebruikersBeheerPagina', [GebruikerController::class, 'index'])->name('GebruikersBeheer');
+});
+
 
 // Login routes
-// FIX: GET en POST mogen niet dezelfde naam hebben → POST heet nu 'login.post'
 Route::get('/login', function () {return view('login');})->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');  
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+
 
     Route::middleware(['auth'])->group(function (){
     Route::get('/RollenBeheerPagina', function(){ return view('RollenBeheerPagina'); })->name('RollenBeheerPagina'); 

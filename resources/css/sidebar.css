@@ -305,3 +305,83 @@
     .sidebar { transform: translateX(-100%); }
     .sidebar.mobile-open { transform: translateX(0); }
 }
+
+/* ===== Collapsed Light Sidebar Adjustments ===== */
+#mainSidebar.collapsed {
+    width: 64px !important;
+}
+
+#mainSidebar.collapsed nav {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+}
+
+#mainSidebar.collapsed .nav-text {
+    display: none !important;
+}
+
+#mainSidebar.collapsed p.uppercase,
+#mainSidebar.collapsed p.tracking-wider,
+#mainSidebar.collapsed p.font-semibold {
+    display: none !important;
+}
+
+#mainSidebar.collapsed a {
+    justify-content: center !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    gap: 0 !important;
+}
+
+#mainSidebar.collapsed .border-t {
+    margin-left: 4px !important;
+    margin-right: 4px !important;
+}
+
+#mainSidebar.collapsed .px-4 {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+}
+
+#mainSidebar.collapsed #sidebarToggle {
+    margin: 0 auto;
+}
+
+#mainSidebar.collapsed button[type="submit"] {
+    justify-content: center !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    gap: 0 !important;
+}
+
+/* Tooltip style for collapsed links */
+#mainSidebar.collapsed a,
+#mainSidebar.collapsed button {
+    position: relative;
+}
+
+#mainSidebar.collapsed a:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #1f2937;
+    color: #f3f4f6;
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 200;
+    pointer-events: none;
+    margin-left: 12px;
+}
+
+/* Adjust Main Content when sidebar is collapsed */
+@media (min-width: 768px) {
+    .main-content-collapsed {
+        margin-left: 64px !important;
+    }
+}

@@ -62,7 +62,7 @@
 
             <!-- Gebruikers beheren -->
             <li class="rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors" data-tooltip="Gebruikers">
+                <a href="{{ route('GebruikersBeheer') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors" data-tooltip="Gebruikers">
                     <span class="shrink-0 w-5 text-center">
                         <i class="fa-solid fa-user-gear text-base"></i>
                     </span>
@@ -96,7 +96,7 @@
     <div class="px-3 pb-4 pt-2 border-t border-gray-200 mt-auto">
     <form method="POST" action="{{ route('logout') }}">
         @csrf
-        <button type="submit" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors w-full">
+        <button type="submit" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors w-full" data-tooltip="Uitloggen">
             <span class="shrink-0 w-5 text-center">
                 <i class="fa-solid fa-right-from-bracket text-base"></i>
             </span>

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 use App\Models\Lid;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+
 
 class LidController extends Controller
 {
@@ -57,5 +59,40 @@ class LidController extends Controller
         }
 
         return view('ledenpagina', compact('leden', 'totaalLeden', 'labels', 'values', 'woonplaatsen'));
+
+
+
+  
+   
+
+
     }
-} 
+
+    // haal lid op
+    public function show(Request $request, $id = null)
+    {
+        $lid = \App\Models\Lid::where('gebruiker_id', Auth::id())->firstOrFail();
+
+        // Haal echte betalingen op voor dit lid
+        $betalingen = \App\Models\Betaling::where('lid_id', $lid->lid_id)
+            ->with('bon')
+            ->orderBy('ingediend_op', 'desc')
+            ->paginate(5);
+
+        // Bereken openstaande balans (niet betaald)
+        $openstaandeBalans = \App\Models\Betaling::where('lid_id', $lid->lid_id)
+            ->where('status', 'niet_betaald')
+            ->sum('bedrag');
+
+        // Haal de laatste succesvolle betaling op
+        $laatsteBetaling = \App\Models\Betaling::where('lid_id', $lid->lid_id)
+            ->where('status', 'betaald')
+            ->orderBy('ingediend_op', 'desc')
+            ->first();
+
+        return view('lidpagina', compact('lid', 'betalingen', 'openstaandeBalans', 'laatsteBetaling'));
+    }
+
+}
+
+ 

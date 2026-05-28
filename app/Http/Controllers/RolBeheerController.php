@@ -20,7 +20,7 @@ class RolBeheerController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('naam', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%");
-            });
+            }); 
         }
 
         // Role filter: show users that have a specific role

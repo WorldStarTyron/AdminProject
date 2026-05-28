@@ -68,7 +68,7 @@ class PostController extends Controller
                 'naam' => $request->name,
                 'email' => $request->email,
                 'wachtwoord_hash' => bcrypt('Welkom123'),
-                'actief' => 1,
+                'status' => 'Actief',
             ]);
 
               // 2.Voegt de gegevens toe aan de leden tabel
@@ -120,6 +120,8 @@ class PostController extends Controller
     // Haal alle betaling_ids op van dit lid
     $betalingIds = \App\Models\Betaling::where('lid_id', $id)
         ->pluck('betaling_id');
+ 
+ 
 
     // Bonnen ophalen via de betaling_ids
     $bonnen = \App\Models\Bonnen::whereIn('bonnen.betaling_id', $betalingIds)

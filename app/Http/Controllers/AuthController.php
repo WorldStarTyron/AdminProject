@@ -28,7 +28,7 @@ public function showLogin()
     $user = Auth::user();
 
     // ✅ Eerst checken of account actief is
-    if ($user->actief == 0) {
+    if ($user->status === 'Inactief') {
         Auth::logout();
         return redirect()->route('login')
             ->with('error', 'Je account is gedeactiveerd.');

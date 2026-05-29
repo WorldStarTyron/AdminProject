@@ -35,7 +35,7 @@
     <div class="w-full max-w-sm bg-white rounded-xl shadow-sm border border-gray-200 p-6">
 
         <!-- Verification Form -->
-        <form method="POST" action="" class="space-y-5">
+        <form method="POST" action="{{route('verify-code.post')}}" class="space-y-5">
             @csrf
 
             <!-- 6-Digit Code Input Fields -->

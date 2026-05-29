@@ -10,6 +10,7 @@ use App\Http\Controllers\BetalingController;
 use App\Http\Controllers\RolBeheerController;
 use App\Http\Controllers\GebruikerController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\RapportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -52,6 +53,13 @@ Route::middleware(['auth'])->group(function(){
     //Betalingen Chart Data
     Route::get('/betalingen/chart-data', [ChartController::class, 'chartData'])->name('betalingen.chartData');
     Route::delete('/betalingPagina/delete/{betaling_id}', [BetalingController::class, 'destroy'])->name('betalingPagina.delete');
+
+    // Betaling status updaten (bv. van niet_betaald naar betaald)
+    Route::patch('/betalingen/{betaling_id}', [BetalingController::class, 'update'])->name('betalingen.update');
+
+    // Handmatig de subscriptie check starten
+    Route::post('/betalingen/check-subscriptie', [BetalingController::class, 'checkSubscriptie'])->name('betalingen.checkSubscriptie');
+
     // Dashboard routes
     Route::get('/dashboard', function () {return view('MainDashboardPagina');})->name('dashboard');
 });
@@ -72,9 +80,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/gebruikers', [GebruikerController::class, 'index'])->name('gebruikers.index');
 });
 
-//Rapportage Route
+//Rapport Route
 Route::middleware(['auth'])->group(function(){
-    Route::get('/RapportagePagina', [RapportageController::class, 'index'])->name('RapportagePagina');
+    Route::get('/RapportPagina', [RapportController::class, 'index'])->name('Rapport');
 });
 
 // Login routes
@@ -84,13 +92,13 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 
 Route::get('/Recover-password',[PasswordResetController::class, 'show'])->name('recover-password');
-//Route::post('/Recover-password',[PasswordResetController::class, 'sendResetCode'])->name('recover-password.post');
+Route::post('/Recover-password',[PasswordResetController::class, 'sendResetCode'])->name('recover-password.post');
 
 Route::get('/verify-code',[PasswordResetController::class, 'verifyCode'])->name('verify-code');
-//Route::post('/verify-code',[PasswordResetController::class, 'postVerifyCode'])->name('verify-code.post');
+Route::post('/verify-code',[PasswordResetController::class, 'postVerifyCode'])->name('verify-code.post');
 
 Route::get('/Recover-password/new-password',[PasswordResetController::class, 'newPassword'])->name('new-password');
-//Route::post('/Recover-password/new-password',[PasswordResetController::class, 'postNewPassword'])->name('new-password.post');
+Route::post('/Recover-password/new-password',[PasswordResetController::class, 'postNewPassword'])->name('new-password.post');
 
     Route::middleware(['auth'])->group(function (){
     Route::get('/RollenBeheerPagina', function(){ return view('RollenBeheerPagina'); })->name('RollenBeheerPagina'); 

@@ -41,7 +41,7 @@
         </p>
 
         <!-- New Password Form -->
-        <form method="POST" action="" class="space-y-5">
+        <form method="POST" action=" {{route('new-password.post')}}" class="space-y-5">
             @csrf
 
             <!-- New Password Field -->

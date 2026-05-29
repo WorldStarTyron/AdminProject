@@ -12,7 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Elke 1e van de maand om 00:00 -> check of leden betaald hebben
+        $schedule->command('subscriptie:check')->monthlyOn(1, '00:00');
     }
 
     /**

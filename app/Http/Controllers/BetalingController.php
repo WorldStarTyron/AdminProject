@@ -211,4 +211,69 @@ $Bon->delete();
     return response()->json(['success' => true, 'message' => 'Betaling succesvol verwijderd']);
    }
 
+
+   // Handmatige subscriptie check - dit kan je vanuit de browser starten
+   // Het checkt of alle leden betaald hebben voor de huidige maand
+   public function checkSubscriptie(Request $request)
+   {
+       // Welke maand en jaar checken we?
+       $maand = $request->input('maand', now()->month);
+       $jaar  = $request->input('jaar', now()->year);
+
+       // Pak alle leden
+       $leden = \App\Models\Lid::with('gebruiker')->get();
+
+       // Tellers
+       $nietBetaald = 0;
+       $alBetaald   = 0;
+
+       foreach ($leden as $lid) {
+
+           // Check of dit lid al een betaling heeft voor deze maand
+           $betaling = Betaling::where('lid_id', $lid->lid_id)
+               ->where('maand', $maand)
+               ->where('jaar', $jaar)
+               ->first();
+
+           // Als er al een betaling is met status "betaald" -> skip
+           if ($betaling && $betaling->status === 'betaald') {
+               $alBetaald++;
+               continue;
+           }
+
+           // Als er al een "niet_betaald" record is -> skip
+           if ($betaling && $betaling->status === 'niet_betaald') {
+               continue;
+           }
+
+           // Als er een betaling is met andere status -> update naar niet_betaald
+           if ($betaling) {
+               $betaling->update(['status' => 'niet_betaald']);
+               $nietBetaald++;
+               continue;
+           }
+
+           // Geen betaling gevonden -> maak een "niet_betaald" record
+           Betaling::create([
+               'lid_id'  => $lid->lid_id,
+               'bedrag'  => 0,
+               'methode' => 'fysiek',
+               'status'  => 'niet_betaald',
+               'maand'   => $maand,
+               'jaar'    => $jaar,
+           ]);
+
+           $nietBetaald++;
+       }
+
+       // Stuur resultaat terug
+       return response()->json([
+           'success' => true,
+           'message' => "Check klaar! {$nietBetaald} leden als 'niet betaald' gemarkeerd, {$alBetaald} leden al betaald.",
+           'niet_betaald' => $nietBetaald,
+           'al_betaald'   => $alBetaald,
+           'totaal'       => $leden->count(),
+       ]);
+   }
+
 }

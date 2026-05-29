@@ -72,7 +72,7 @@
 
             <!-- Rapport -->
             <li class="rounded-lg {{ request()->routeIs('rapport') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors" data-tooltip="Rapport">
+                <a href="{{ route('Rapport') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors" data-tooltip="Rapport">
                     <span class="shrink-0 w-5 text-center">
                         <i class="fa-solid fa-chart-bar text-base"></i>
                     </span>

@@ -59,9 +59,80 @@
         <span>Betaling succesvol toegevoegd!</span>
     </div>
 
+    <!-- Toast voor subscriptie check resultaat -->
+    <div class="toast-notification" id="subscriptieToast">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span id="subscriptieToastText">Check klaar!</span>
+    </div>
+
     @vite('resources/js/TotalBetaling-chart.js')
     @vite('resources/js/OptieDisable.js')
     @vite('resources/js/Button&More.js')
+
+    <!-- Script voor de subscriptie check knop -->
+    <script>
+        // Deze functie stuurt een request om te checken of leden betaald hebben
+        function checkSubscriptie() {
+            // Pak de knop en het icon
+            const btn = document.getElementById('checkSubscriptieBtn');
+            const icon = document.getElementById('subscriptieIcon');
+
+            // Zet de knop uit zodat je niet dubbel kan klikken
+            btn.disabled = true;
+            btn.style.opacity = '0.7';
+
+            // Laat het icon draaien (loading animatie)
+            icon.style.animation = 'spin 1s linear infinite';
+
+            // Stuur het request naar de server
+            fetch('{{ route("betalingen.checkSubscriptie") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Zet de knop weer aan
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                icon.style.animation = '';
+
+                // Laat het resultaat zien in een toast
+                const toast = document.getElementById('subscriptieToast');
+                const text = document.getElementById('subscriptieToastText');
+                text.textContent = data.message;
+                toast.classList.add('show');
+
+                // Toast verdwijnt na 4 seconden
+                setTimeout(() => toast.classList.remove('show'), 4000);
+
+                // Pagina herladen zodat je de nieuwe status ziet in de tabel
+                setTimeout(() => location.reload(), 1500);
+            })
+            .catch(error => {
+                // Bij een fout: zet de knop weer aan
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                icon.style.animation = '';
+
+                alert('Er ging iets mis bij de subscriptie check.');
+                console.error('Fout:', error);
+            });
+        }
+    </script>
+
+    <!-- Animatie voor het draaiende icon -->
+    <style>
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
     
 </body>
 </html>

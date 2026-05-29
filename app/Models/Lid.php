@@ -34,5 +34,17 @@ class Lid extends Model
         "geboortedatum",
         "lid_sinds",
     ];
+
+    // Een lid heeft veel betalingen
+    public function betalingen()
+    {
+        return $this->hasMany(Betaling::class, 'lid_id', 'lid_id');
+    }
+
+    // Een lid hoort bij een gebruiker
+    public function gebruiker()
+    {
+        return $this->belongsTo(Gebruiker::class, 'gebruiker_id', 'gebruiker_id');
+    }
 }
 

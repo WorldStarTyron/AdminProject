@@ -43,8 +43,8 @@
         </p>
 
         <!-- Recovery Form  -->
-        <form method="POST" action="" class="space-y-5">
-            @csrf
+        <form method="POST" action="{{route('recover-password.post')}}" class="space-y-5">
+            @csrf 
 
             <!-- Email Address Field -->
             <div>

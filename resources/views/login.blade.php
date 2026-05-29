@@ -76,7 +76,7 @@
 
                         <!-- Forgot Password Link -->
                         <div class="flex justify-end mr-5">
-                           <a href="" class="text-sm text-gray-700 hover:text-blue-900 font-medium transition">
+                           <a href="{{ route('recover-password') }}" class="text-sm text-gray-700 hover:text-blue-900 font-medium transition">
                                 Forgot password?
                             </a>
                         </div>

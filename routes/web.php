@@ -9,6 +9,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BetalingController;
 use App\Http\Controllers\RolBeheerController;
 use App\Http\Controllers\GebruikerController;
+use App\Http\Controllers\PasswordResetController;
 
 /*
 |--------------------------------------------------------------------------
@@ -68,8 +69,13 @@ Route::middleware(['auth'])->group(function () { // Add your own auth middleware
 // GebruikerBeheer Route
 Route::middleware(['auth'])->group(function () {
     Route::get('/GebruikersBeheerPagina', [GebruikerController::class, 'index'])->name('GebruikersBeheer');
+    Route::get('/gebruikers', [GebruikerController::class, 'index'])->name('gebruikers.index');
 });
 
+//Rapportage Route
+Route::middleware(['auth'])->group(function(){
+    Route::get('/RapportagePagina', [RapportageController::class, 'index'])->name('RapportagePagina');
+});
 
 // Login routes
 Route::get('/login', function () {return view('login');})->name('login');
@@ -77,6 +83,14 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 
+Route::get('/Recover-password',[PasswordResetController::class, 'show'])->name('recover-password');
+//Route::post('/Recover-password',[PasswordResetController::class, 'sendResetCode'])->name('recover-password.post');
+
+Route::get('/verify-code',[PasswordResetController::class, 'verifyCode'])->name('verify-code');
+//Route::post('/verify-code',[PasswordResetController::class, 'postVerifyCode'])->name('verify-code.post');
+
+Route::get('/Recover-password/new-password',[PasswordResetController::class, 'newPassword'])->name('new-password');
+//Route::post('/Recover-password/new-password',[PasswordResetController::class, 'postNewPassword'])->name('new-password.post');
 
     Route::middleware(['auth'])->group(function (){
     Route::get('/RollenBeheerPagina', function(){ return view('RollenBeheerPagina'); })->name('RollenBeheerPagina'); 

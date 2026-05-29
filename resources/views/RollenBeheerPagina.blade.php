@@ -17,7 +17,7 @@
             @include('layouts.header')
             <main class="flex-1 p-8">
 
-                {{-- Flash messages --}}
+                <!-- Flash messages -->
                 @if(session('success'))
                     <div class="mb-4 p-3 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm flex items-center gap-2">
                         <i class="fa-solid fa-circle-check text-green-500"></i>
@@ -43,7 +43,7 @@
                     </div>
                 </div>
 
-                {{-- Snel Rol Toewijzen --}}
+                 <!-- Snel Rol Toewijzen -->
                 <div class="bg-white border border-gray-200 rounded-xl p-5 mb-5">
                     <h2 class="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
                         <i class="fa-solid fa-bolt text-yellow-500"></i>
@@ -68,7 +68,7 @@
                                 </div>
                             </div>
 
-                            {{-- Selecteer Rol --}}
+                            <!-- Selecteer Rol -->
                             <div class="flex flex-col gap-1.5 flex-1 min-w-[160px]">
                                 <label class="text-xs text-gray-500 flex items-center gap-1">
                                     <i class="fa-solid fa-tag"></i>
@@ -82,7 +82,7 @@
                                 </select>
                             </div>
 
-                            {{-- Tijdelijk Wachtwoord --}}
+                            <!-- Tijdelijk Wachtwoord -->
                             <div class="flex flex-col gap-1.5 flex-1 min-w-[160px]">
                                 <label class="text-xs text-gray-500 flex items-center gap-1">
                                     <i class="fa-solid fa-key"></i>
@@ -109,7 +109,7 @@
                     </form>
                 </div>
 
-                {{-- Bottom section: table + tips --}}
+                <!-- Bottom section: table + tips -->
                 <div class="flex gap-5 items-start">
                     {{-- Gebruikers & Rollen tabel --}}
                     <div class="flex-1 bg-white border border-gray-200 rounded-xl overflow-hidden">
@@ -201,7 +201,7 @@
                                         <div class="flex flex-wrap gap-1">
                                             @forelse($gebruiker->rollen as $rol)
                                                 <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium 
-                                                    {{ $rol->naam == 'Applicatie Beheerder' ? 'bg-gray-800 text-white' : 
+                                                    {{ $rol->naam == 'Applicatie Beheerder' ? 'bg-red-800 text-white' : 
                                                        ($rol->naam == 'Voorzitter' ? 'bg-gray-100 text-gray-700 border border-gray-200' : 
                                                        ($rol->naam == 'Administratie Medewerker' ? 'bg-blue-100 text-blue-700 border border-blue-200' : 
                                                        'bg-gray-100 text-gray-700 border border-gray-200')) }}">

@@ -33,7 +33,7 @@
                         </div>
                         <div class="flex flex-col gap-0.5">
                             <span class="text-xs text-gray-500 font-medium">Totaal Gebruikers</span>
-                            <strong class="text-3xl font-bold text-gray-900">123</strong>
+                            <strong class="text-3xl font-bold text-gray-900">{{$totaalGebruikers}}</strong>
                         </div>
                     </div>
 
@@ -44,7 +44,7 @@
                         </div>
                         <div class="flex flex-col gap-0.5">
                             <span class="text-xs text-gray-500 font-medium">Administratie Medewerker</span>
-                            <strong class="text-3xl font-bold text-gray-900">12</strong>
+                            <strong class="text-3xl font-bold text-gray-900">{{$totaalAdmins}}</strong>
                         </div>
                     </div>
 
@@ -55,29 +55,104 @@
                         </div>
                         <div class="flex flex-col gap-0.5">
                             <span class="text-xs text-gray-500 font-medium">Voorzitter</span>
-                            <strong class="text-3xl font-bold text-gray-900">5</strong>
+                            <strong class="text-3xl font-bold text-gray-900">{{$totaalVoorzitters}}</strong>
                         </div>
                     </div>
                 </div>
                
 
-          <!-- user search bar -->
-          <div class="flex-row justify-center mt-5 gap-4 px-5">
-                <div class="flex-1 bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition-shadow duration-200">
-                    <div class="flex flex-row items-center gap-2 w-full">
-                        <div class="relative w-full">
+                <!-- Search bar + Filter button -->
+                <form method="GET" action="{{ route('gebruikers.index') }}" id="filterForm">
+                    <div class="flex flex-row items-center gap-3 w-full mt-5 px-5">
+                        <div class="relative flex-1">
                             <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-                            <input type="text" class="border border-gray-200 w-full rounded-xl p-2 pl-9" placeholder="Zoek op naam, email of rol...">
+                            <input 
+                                type="text" 
+                                name="zoek"
+                                value="{{ request('zoek') }}"
+                                class="border border-gray-200 w-full rounded-xl p-2 pl-9" 
+                                placeholder="Zoek op naam, email of rol..."
+                            >
                         </div>
-            
-                <!--Filter button-->
-                    <button class="px-6 py-2 rounded-full bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm transition-all duration-200 flex items-center gap-2 whitespace-nowrap" id="filterBtn" type="button">
-                        <i class="fas fa-sliders-h"></i>
-                        <span>Filters</span>
-                    </button>
-                </div>
-            </div> 
-          </div>
+
+                        <!-- Filter button -->
+                        <button class="px-6 py-2 rounded-full {{ request('status') || request('rol') ? 'bg-orange-600' : 'bg-orange-500' }} hover:bg-orange-600 text-white font-bold text-sm transition-all duration-200 flex items-center gap-2 whitespace-nowrap" id="filterBtn" type="button">
+                            <i class="fas fa-sliders-h"></i>
+                            <span>Filters</span>
+                            @if(request('status') || request('rol'))
+                                <span class="w-5 h-5 rounded-full bg-white text-orange-600 text-xs font-bold flex items-center justify-center">
+                                    {{ (request('status') ? 1 : 0) + (request('rol') ? 1 : 0) }}
+                                </span>
+                            @endif
+                        </button>
+                    </div>
+
+                    <!-- Filter dropdown panel -->
+                    <div id="filterPanel" class="px-5 mt-3 {{ request('status') || request('rol') ? '' : 'hidden' }}">
+                        <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                            <div class="flex flex-row items-end gap-4">
+                                <!-- Status filter -->
+                                <div class="flex-1">
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Status</label>
+                                    <select name="status" id="statusFilter" class="w-full border border-gray-200 rounded-lg p-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400">
+                                        <option value="">Alle statussen</option>
+                                        <option value="Actief" {{ request('status') == 'Actief' ? 'selected' : '' }}>Actief</option>
+                                        <option value="Inactief" {{ request('status') == 'Inactief' ? 'selected' : '' }}>Inactief</option>
+                                    </select>
+                                </div>
+
+                                <!-- Rol filter -->
+                                <div class="flex-1">
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Rol</label>
+                                    <select name="rol" id="rolFilter" class="w-full border border-gray-200 rounded-lg p-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400">
+                                        <option value="">Alle rollen</option>
+                                        @foreach($rollen as $rol)
+                                            <option value="{{ $rol->naam }}" {{ request('rol') == $rol->naam ? 'selected' : '' }}>{{ $rol->naam }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Apply & Reset buttons -->
+                                <div class="flex items-center gap-2">
+                                    <button type="submit" class="px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm transition-all duration-200">
+                                        Toepassen
+                                    </button>
+                                    <a href="{{ route('gebruikers.index') }}" class="px-4 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 font-semibold text-sm transition-all duration-200">
+                                        Reset
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Active filter tags -->
+                            @if(request('status') || request('rol'))
+                                <div class="flex items-center gap-2 mt-3 pt-3 border-t border-gray-200">
+                                    <span class="text-xs text-gray-500 font-medium">Actieve filters:</span>
+                                    @if(request('status'))
+                                        <a href="{{ route('gebruikers.index', array_merge(request()->except('status'), ['page' => null])) }}" 
+                                           class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-medium hover:bg-orange-200 transition-colors">
+                                            Status: {{ request('status') }}
+                                            <i class="fas fa-times text-[10px]"></i>
+                                        </a>
+                                    @endif
+                                    @if(request('rol'))
+                                        <a href="{{ route('gebruikers.index', array_merge(request()->except('rol'), ['page' => null])) }}" 
+                                           class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-medium hover:bg-orange-200 transition-colors">
+                                            Rol: {{ request('rol') }}
+                                            <i class="fas fa-times text-[10px]"></i>
+                                        </a>
+                                    @endif
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </form>
+
+                <script>
+                    document.getElementById('filterBtn').addEventListener('click', function() {
+                        const panel = document.getElementById('filterPanel');
+                        panel.classList.toggle('hidden');
+                    });
+                </script>
 
           <!-- Users Table -->
             <div class="mt-5 px-5">
@@ -113,12 +188,14 @@
                                 <td class="px-6 py-4 text-gray-600">{{ $gebruiker->email }}</td>
 
                                 <!-- Rol -->
-                                <td class="px-6 py-4">
-                                    <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-xs font-medium">
-                                        {{ $gebruiker->rol->naam ?? '-' }}
-                                    </span>
-                                </td>
-
+                               <td>
+                                 @forelse($gebruiker->rollen as $rol)
+                                  <span>{{ $rol->naam }}</span>
+                                   @empty
+                                  <span class="text-red-600">Geen rol</span>
+                                @endforelse
+                                    </td>
+                           
                                 <!-- Status -->
                                 <td class="px-6 py-4">
                                     @if($gebruiker->status === 'Actief')

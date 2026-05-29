@@ -68,7 +68,7 @@ public function setPasswordAttribute($plainPassword)
    // this function is to define the relationship between the gebruiker and rol model 
     public function rol()
     {
-        return $this->belongsTo(Rol::class, 'rol_id');
+        return $this->belongsTo(Rol::class, 'rol_id', 'rol_id');
     }
   
     

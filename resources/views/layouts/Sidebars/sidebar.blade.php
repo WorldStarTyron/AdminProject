@@ -81,8 +81,8 @@
             </li>
 
             <!-- Log Activiteit -->
-            <li class="rounded-lg {{ request()->routeIs('log-activiteit') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors" data-tooltip="Log Activiteit">
+            <li class="rounded-lg {{ request()->routeIs('ActiviteitLog') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                <a href="{{ route('ActiviteitLog') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors" data-tooltip="Log Activiteit">
                     <span class="shrink-0 w-5 text-center">
                         <i class="fa-solid fa-clipboard-list text-base"></i>
                     </span>

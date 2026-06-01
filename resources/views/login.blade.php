@@ -55,7 +55,7 @@
                     <!-- Title -->
                     <div>
                         <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Welcome back</h1>
-                        <p class="text-slate-500 mt-2 font-medium">Log in to your admin account</p>
+                        <p class="text-slate-500 mt-2 font-medium">Log in to your  account</p>
                     </div>
 
                     <!-- Error Message -->

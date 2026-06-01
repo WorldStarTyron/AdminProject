@@ -11,6 +11,7 @@ use App\Http\Controllers\RolBeheerController;
 use App\Http\Controllers\GebruikerController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\RapportController;
+use App\Http\Controllers\ActiviteitController;
 
 /*
 |--------------------------------------------------------------------------
@@ -59,7 +60,6 @@ Route::middleware(['auth'])->group(function(){
 
     // Handmatig de subscriptie check starten
     Route::post('/betalingen/check-subscriptie', [BetalingController::class, 'checkSubscriptie'])->name('betalingen.checkSubscriptie');
-
     // Dashboard routes
     Route::get('/dashboard', function () {return view('MainDashboardPagina');})->name('dashboard');
 });
@@ -82,7 +82,12 @@ Route::middleware(['auth'])->group(function () {
 
 //Rapport Route
 Route::middleware(['auth'])->group(function(){
-    Route::get('/RapportPagina', [RapportController::class, 'index'])->name('Rapport');
+    Route::get('/RapportPagina', [BetalingController::class, 'rapportageData'])->name('Rapport');
+});
+
+//ActiviteitLog Route
+Route::middleware(['auth'])->group(function(){
+    Route::get('/ActiviteitLogPagina', [ActiviteitController::class, 'activiteitLogData'])->name('ActiviteitLog');
 });
 
 // Login routes

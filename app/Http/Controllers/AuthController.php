@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Gebruiker;
+use App\Models\Activiteit;
 
 class AuthController extends Controller
 {
@@ -33,6 +34,14 @@ public function showLogin()
         return redirect()->route('login')
             ->with('error', 'Je account is gedeactiveerd.');
     }
+
+    // Log the successful login event
+    Activiteit::log($user->gebruiker_id, 'ingelogd', [
+        'ip' => $request->ip(),
+        'user_agent' => $request->userAgent(),
+        'details' => 'Gebruiker ' . $user->naam . ' heeft ingelogd.'
+    ]);
+
     // De rol checken en de juiste pagina teruggeven
     return $this->redirectBasedOnRole();
 
@@ -59,6 +68,15 @@ public function showLogin()
 // ----------------------Logout----------------------
   public function logout (Request $request)
   {
+    $user = Auth::user();
+    if ($user) {
+        // Log the logout event before clearing session
+        Activiteit::log($user->gebruiker_id, 'uitgelogd', [
+            'ip' => $request->ip(),
+            'details' => 'Gebruiker ' . $user->naam . ' heeft uitgelogd.'
+        ]);
+    }
+
     Auth::logout();
     $request->session()->invalidate();
     $request->session()->regenerateToken();

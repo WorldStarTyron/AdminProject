@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Lid;
 use App\Models\Gebruiker;
+use App\Models\Activiteit;
 use App\Http\Requests\StoreLidRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -92,6 +93,23 @@ class PostController extends Controller
                 ]);
             }
             $gebruiker->rollen()->attach($lidRol->rol_id);
+
+            // 4. Log the activity under the authenticated admin or system
+            if (auth()->check()) {
+                Activiteit::log(auth()->id(), 'lid_aangemaakt', [
+                    'lid_naam'  => $request->name,
+                    'lid_email' => $request->email,
+                    'lid_type'  => $request->lid_type,
+                    'details'   => 'Gebruiker ' . auth()->user()->naam . ' heeft een nieuw lid toegevoegd: ' . $request->name . '.'
+                ]);
+            } else {
+                Activiteit::log($gebruiker->gebruiker_id, 'lid_aangemaakt', [
+                    'lid_naam'  => $request->name,
+                    'lid_email' => $request->email,
+                    'lid_type'  => $request->lid_type,
+                    'details'   => 'Gebruiker Systeem heeft een nieuw lid toegevoegd: ' . $request->name . '.'
+                ]);
+            }
         });
 
         // Return JSON voor AJAX requests, redirect voor normale form posts
@@ -185,6 +203,16 @@ class PostController extends Controller
             'lid_sinds'      => $validated['lid_sinds'],
             'lid_type'       => $validated['lid_type'],
         ]); 
+
+        // Log the activity under the authenticated admin
+        if (auth()->check()) {
+            Activiteit::log(auth()->id(), 'lid_bijgewerkt', [
+                'lid_id'   => $id,
+                'lid_naam' => $validated['naam'],
+                'details'  => 'Gebruiker ' . auth()->user()->naam . ' heeft de gegevens van ' . $validated['naam'] . ' bijgewerkt.'
+            ]);
+        }
+
         return redirect()->route('ledenpagina.show', $lid->lid_id)->with('success', 'Lid bewerkt');
         
     }
@@ -192,8 +220,20 @@ class PostController extends Controller
     // Remove the selected lid
     public function destroy(string $lidId)
     {
-        $lid = Lid::where('lid_id', $lidId)->first();
-        $lid->delete();
+        $lid = Lid::with('gebruiker')->where('lid_id', $lidId)->first();
+        if ($lid) {
+            $naam = $lid->gebruiker ? $lid->gebruiker->naam : 'Onbekend';
+            $lid->delete();
+
+            // Log the activity under the authenticated admin
+            if (auth()->check()) {
+                Activiteit::log(auth()->id(), 'lid_verwijderd', [
+                    'lid_id'   => $lidId,
+                    'lid_naam' => $naam,
+                    'details'  => 'Gebruiker ' . auth()->user()->naam . ' heeft lid ' . $naam . ' verwijderd.'
+                ]);
+            }
+        }
         return redirect()->route('ledenpagina')->with('success', 'Lid verwijderd');
     }
 }

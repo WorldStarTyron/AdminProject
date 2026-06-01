@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Gebruiker;
 use App\Models\Rol; 
+use App\Models\Activiteit; 
 
 class RolBeheerController extends Controller
 {
@@ -66,17 +67,39 @@ class RolBeheerController extends Controller
         ]);
 
         $gebruiker = Gebruiker::findOrFail($validated['gebruiker_id']);
+        $rol = Rol::find($validated['rol_id']);
+        $rolNaam = $rol ? $rol->naam : 'Onbekend';
 
         // Attach role if not already assigned
-        if (!$gebruiker->rollen->contains('rol_id', $validated['rol_id'])) {
+        $alreadyHasRole = $gebruiker->rollen->contains('rol_id', $validated['rol_id']);
+        if (!$alreadyHasRole) {
             $gebruiker->rollen()->attach($validated['rol_id']);
         }
 
         // Handle temporary password
+        $pwChanged = false;
         if (!empty($validated['tijdelijk_wachtwoord'])) {
             $gebruiker->wachtwoord_hash = bcrypt($validated['tijdelijk_wachtwoord']);
             $gebruiker->force_password_change = $validated['verplicht_wijzigen'] ?? false;
             $gebruiker->save();
+            $pwChanged = true;
+        }
+
+        // Log the activity
+        if (auth()->check()) {
+            if (!$alreadyHasRole) {
+                Activiteit::log(auth()->id(), 'lid_bijgewerkt', [
+                    'doel_gebruiker' => $gebruiker->naam,
+                    'rol_toegevoegd' => $rolNaam,
+                    'details'        => 'Rol ' . $rolNaam . ' toegewezen aan gebruiker ' . $gebruiker->naam . '.'
+                ]);
+            }
+            if ($pwChanged) {
+                Activiteit::log(auth()->id(), 'wachtwoord_gewijzigd', [
+                    'doel_gebruiker' => $gebruiker->naam,
+                    'details'        => 'Tijdelijk wachtwoord ingesteld voor gebruiker ' . $gebruiker->naam . ' door beheerder.'
+                ]);
+            }
         }
 
         return redirect()->route('rollen-beheer')
@@ -105,6 +128,15 @@ class RolBeheerController extends Controller
 
         $gebruiker = Gebruiker::findOrFail($userId);
         $gebruiker->rollen()->sync($validated['rollen'] ?? []);
+
+        // Log the activity
+        if (auth()->check()) {
+            Activiteit::log(auth()->id(), 'lid_bijgewerkt', [
+                'gebruiker_id'   => $userId,
+                'gebruiker_naam' => $gebruiker->naam,
+                'details'        => 'Rollen bijgewerkt voor gebruiker ' . $gebruiker->naam . ' door beheerder.'
+            ]);
+        }
 
         return redirect()->route('rollen-beheer')
                          ->with('success', 'Rollen voor ' . $gebruiker->naam . ' zijn bijgewerkt.');

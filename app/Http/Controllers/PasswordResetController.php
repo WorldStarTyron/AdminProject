@@ -130,10 +130,20 @@ class PasswordResetController extends Controller
                 ->with('error', 'Sessie verlopen. Begin opnieuw.');
         }
 
+        // Get the gebruiker record to log
+        $gebruiker = DB::table('gebruikers')->where('email', $email)->first();
+
         // Update the password in the gebruikers table
         DB::table('gebruikers')
             ->where('email', $email)
             ->update(['wachtwoord_hash' => Hash::make($request->password)]);
+
+        if ($gebruiker) {
+            \App\Models\Activiteit::log($gebruiker->gebruiker_id, 'wachtwoord_gewijzigd', [
+                'email'   => $email,
+                'details' => 'Wachtwoord succesvol hersteld via e-mail herstelcode verificatie.'
+            ]);
+        }
 
         // Clear all reset session data
         session()->forget(['reset_email', 'reset_verified']);

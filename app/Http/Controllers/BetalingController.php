@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Betaling;
 use App\Models\Gebruiker;  
+use App\Models\Activiteit;
 use App\Http\Controllers\BonController;
 use Carbon\Carbon;
 use App\Models\Bon;
@@ -164,6 +165,24 @@ class BetalingController extends Controller
             $datum->translatedFormat('F Y')
         );
 
+        // Log the activity
+        if (auth()->check()) {
+            Activiteit::log(auth()->id(), 'betaling_geregistreerd', [
+                'betaling_id' => $betaling->betaling_id,
+                'lid_naam'    => $gebruiker->naam,
+                'bedrag'      => $request->bedrag,
+                'methode'     => $request->methode,
+                'status'      => $request->status,
+                'details'     => 'Betaling van SRD ' . $request->bedrag . ' geregistreerd voor lid ' . $gebruiker->naam . '.'
+            ]);
+
+            Activiteit::log(auth()->id(), 'bon_aangemaakt', [
+                'betaling_id' => $betaling->betaling_id,
+                'lid_naam'    => $gebruiker->naam,
+                'details'     => 'Factuurbon automatisch aangemaakt voor betaling #' . $betaling->betaling_id . '.'
+            ]);
+        }
+
         return response()->json(['success' => true, 'message' => 'Betaling succesvol toegevoegd'], 201);
     }
 
@@ -188,6 +207,34 @@ class BetalingController extends Controller
         BonController::genereer($betaling, $gebruiker->naam, $datum);
     }
 
+    // Log the activity
+    if (auth()->check()) {
+        $actie = 'betaling_geregistreerd';
+        $detailsMsg = 'Betaling #' . $id . ' bijgewerkt door beheerder.';
+
+        if ($betaling->status === 'betaald') {
+            $actie = 'betaling_goedgekeurd';
+            $detailsMsg = 'Betaling #' . $id . ' goedgekeurd en gemarkeerd als betaald.';
+        } elseif ($betaling->status === 'afgewezen') {
+            $actie = 'betaling_afgewezen';
+            $detailsMsg = 'Betaling #' . $id . ' is afgewezen door beheerder.';
+        }
+
+        Activiteit::log(auth()->id(), $actie, [
+            'betaling_id' => $id,
+            'status'      => $betaling->status,
+            'details'     => $detailsMsg
+        ]);
+
+        if ($oudStatus !== 'betaald' && $betaling->status === 'betaald' && isset($gebruiker)) {
+            Activiteit::log(auth()->id(), 'bon_aangemaakt', [
+                'betaling_id' => $id,
+                'lid_naam'    => $gebruiker->naam,
+                'details'     => 'Factuurbon automatisch gegenereerd na betalingsgoedkeuring.'
+            ]);
+        }
+    }
+
     return response()->json(['success' => true, 'message' => 'Betaling bijgewerkt']);
 
    }
@@ -205,6 +252,14 @@ class BetalingController extends Controller
                $bon->delete();
            }
            $betaling->delete();
+
+           // Log the deletion activity
+           if (auth()->check()) {
+               Activiteit::log(auth()->id(), 'betaling_afgewezen', [
+                   'betaling_id' => $betaling_id,
+                   'details'     => 'Betalingsrecord #' . $betaling_id . ' en bijbehorende bon zijn verwijderd.'
+               ]);
+           }
        }
 
        return response()->json(['success' => true, 'message' => 'Betaling succesvol verwijderd']);
@@ -263,6 +318,17 @@ class BetalingController extends Controller
            ]);
 
            $nietBetaald++;
+       }
+
+       // Log the subscriptie check completed
+       if (auth()->check()) {
+           Activiteit::log(auth()->id(), 'betaling_geregistreerd', [
+               'maand'         => $maand,
+               'jaar'          => $jaar,
+               'niet_betaald'  => $nietBetaald,
+               'al_betaald'    => $alBetaald,
+               'details'       => 'Subscriptiecheck uitgevoerd voor ' . $maand . '/' . $jaar . '. ' . $nietBetaald . ' leden als niet-betaald gemarkeerd.'
+           ]);
        }
 
        // Stuur resultaat terug

@@ -53,3 +53,6 @@ $app->singleton(
 */
 
 return $app;
+
+// bootstrap/app.php (onderaan, voor de return)
+require_once __DIR__ . '/../app/Enums/RoleHelper.php';

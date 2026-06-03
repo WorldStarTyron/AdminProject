@@ -15,11 +15,13 @@
                 <i class="fa-regular fa-bell text-lg"></i>
             </button>
 
+            @can('leden-beheren')
             <!-- Add Button (triggers modal) -->
             <button class="bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium px-4 py-2 rounded-lg flex items-center gap-2 transition-all shadow-sm hover:shadow-md" id="openModalBtn" type="button">
                 <i class="fa-solid fa-plus text-xs"></i>
                 Voeg lid toe
             </button>
+            @endcan
 
         </div>
     </div>

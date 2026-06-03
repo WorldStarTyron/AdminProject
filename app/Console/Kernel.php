@@ -25,4 +25,11 @@ class Kernel extends ConsoleKernel
 
         require base_path('routes/console.php');
     }
+   
+    protected $routeMiddleware = [
+        'checkrole' => \App\Http\Middleware\CheckRole::class,
+    ];
+
+
+
 }

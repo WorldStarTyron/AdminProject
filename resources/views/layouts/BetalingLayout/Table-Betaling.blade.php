@@ -70,6 +70,7 @@
                     </div>
                 </div>
 
+                @can('betalingen-beheren')
                 <!-- Check Subscriptie knop - checkt of alle leden betaald hebben deze maand -->
                 <button
                     id="checkSubscriptieBtn"
@@ -91,6 +92,7 @@
                     </svg>
                     Voeg Betaling
                 </button>
+                @endcan
             </div>
         </div>
 
@@ -106,7 +108,9 @@
                         <th class="px-5 py-3.5 text-[0.6875rem] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Status</th>
                         <th class="px-5 py-3.5 text-[0.6875rem] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-200">Betaling <br> Method</th>
                         <th class="px-5 py-3.5 text-[0.6875rem] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Bonnummer</th>
+                        @can('betalingen-beheren')
                         <th class="px-5 py-3.5 text-[0.6875rem] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap w-10"></th>
+                        @endcan
                     </tr>
                 </thead>
                 <tbody>
@@ -170,6 +174,7 @@
                             @endif
                         </td>
 
+                        @can('betalingen-beheren')
                         {{-- Actions --}}
                         <td class="px-5 py-4 whitespace-nowrap text-right">
                             <div class="relative inline-block">
@@ -190,6 +195,7 @@
                                 </div>
                             </div>
                         </td>
+                        @endcan
 
                     </tr>
                     @empty

@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Activiteit;
 use App\Models\Gebruiker;
+use Illuminate\Support\Facades\Gate;
 
 class ActiviteitController extends Controller
+
 {
     /**
      * Retrieve and filter activity log data for the admin view.
@@ -16,6 +18,9 @@ class ActiviteitController extends Controller
      */
     public function activiteitLogData(Request $request)
     {
+
+        Gate::authorize('activiteitlog-bekijken'); 
+        
         // Get active filters from request
         $search = $request->input('search');
         $tab = $request->input('tab', 'Alle');

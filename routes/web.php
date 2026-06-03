@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Gate;
 use App\Models\Lid;
 use App\Http\Controllers\LidController;
 use App\Http\Controllers\PostController;
@@ -13,98 +14,67 @@ use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\RapportController;
 use App\Http\Controllers\ActiviteitController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
-
 Route::get('/', function () {
     return view('welcome');
 });
-
-
-
-Route::middleware(['auth'])->group(function(){
-    // Leden routes
-    Route::get('/ledenpagina', [LidController::class, 'index'])->name('ledenpagina');
-    // Leden toevoegen
-    Route::post('/ledenpagina/addlid', [PostController::class, 'store'])->name('ledenpagina.addlid.store');
-    // Leden verwijderen
-    Route::delete('/ledenpagina/delete/{lidId}', [PostController::class, 'destroy'])->name('ledenpagina.delete');
-    // Lid bekijken
-    Route::get('/ledenpagina/{lidId}', [PostController::class, 'show'])->name('ledenpagina.show');
-    // Leden Bewerken
-    Route::get('/ledenpagina/{lidId}/edit', [PostController::class, 'edit'])->name('ledenpagina.edit');
-    Route::put('/ledenpagina/{lidId}', [PostController::class, 'update'])->name('ledenpagina.update');
-    // Ledenpagina routes
-    Route::get('/Lidpagina', [LidController::class, 'show'])->name('GegevensPagina'); 
-}); 
-
-
-Route::middleware(['auth'])->group(function(){
-    // Betalingen routes
-    Route::get('/betalingPagina', [BetalingController::class, 'index'])->name('betalingPagina');
-    Route::post('/betalingPagina/addBetaling', [BetalingController::class, 'store'])->name('betalingPagina.addBetaling.store');
-    //Betalingen Chart Data
-    Route::get('/betalingen/chart-data', [ChartController::class, 'chartData'])->name('betalingen.chartData');
-    Route::delete('/betalingPagina/delete/{betaling_id}', [BetalingController::class, 'destroy'])->name('betalingPagina.delete');
-
-    // Betaling status updaten (bv. van niet_betaald naar betaald)
-    Route::patch('/betalingen/{betaling_id}', [BetalingController::class, 'update'])->name('betalingen.update');
-
-    // Handmatig de subscriptie check starten
-    Route::post('/betalingen/check-subscriptie', [BetalingController::class, 'checkSubscriptie'])->name('betalingen.checkSubscriptie');
-    // Dashboard routes
-    Route::get('/dashboard', function () {return view('MainDashboardPagina');})->name('dashboard');
-});
-  
-
-// Rol routes
-Route::middleware(['auth'])->group(function () { // Add your own auth middleware if needed
-    Route::get('/rollen-beheer', [RolBeheerController::class, 'index'])->name('rollen-beheer');
-    Route::post('/rollen-beheer/assign', [RolBeheerController::class, 'assignRole'])->name('rollen-beheer.assign');
-    Route::get('/rollen-beheer/gebruiker/{userId}/roles', [RolBeheerController::class, 'getUserRoles'])->name('rollen-beheer.user-roles');
-    Route::put('/rollen-beheer/gebruiker/{userId}/roles', [RolBeheerController::class, 'updateUserRoles'])->name('rollen-beheer.update');
-    Route::get('/rollen-beheer/search-users', [RolBeheerController::class, 'searchUsers'])->name('rollen-beheer.search');
-});
-
-// GebruikerBeheer Route
+// Dashboard
 Route::middleware(['auth'])->group(function () {
-    Route::get('/GebruikersBeheerPagina', [GebruikerController::class, 'index'])->name('GebruikersBeheer');
-    Route::get('/gebruikers', [GebruikerController::class, 'index'])->name('gebruikers.index');
+    Route::get('/MainDashboardPagina', function () {
+        return view('MainDashboardPagina');
+    })->name('dashboard')->middleware('can:dashboard');
 });
 
-//Rapport Route
-Route::middleware(['auth'])->group(function(){
-    Route::get('/RapportPagina', [BetalingController::class, 'rapportageData'])->name('Rapport');
-});
+// Leden, Betalingen, Rapport, Log, Rollen & Gebruikers routes
+Route::middleware(['auth'])->group(function () {
+    
+    // Lid — eigen profiel
+    Route::get('/Lidpagina', [LidController::class, 'show'])->name('GegevensPagina')->middleware('can:eigen-profiel');
 
-//ActiviteitLog Route
-Route::middleware(['auth'])->group(function(){
-    Route::get('/ActiviteitLogPagina', [ActiviteitController::class, 'activiteitLogData'])->name('ActiviteitLog');
-});
+    // Leden — lezen
+    Route::get('/ledenpagina', [LidController::class, 'index'])->name('ledenpagina')->middleware('can:leden-bekijken');
+    Route::get('/ledenpagina/{lidId}', [PostController::class, 'show'])->name('ledenpagina.show')->middleware('can:leden-bekijken');
+
+    // Leden — schrijven
+    Route::post('/ledenpagina/addlid', [PostController::class, 'store'])->name('ledenpagina.addlid.store')->middleware('can:leden-beheren');
+    Route::get('/ledenpagina/{lidId}/edit', [PostController::class, 'edit'])->name('ledenpagina.edit')->middleware('can:leden-beheren');
+    Route::put('/ledenpagina/{lidId}', [PostController::class, 'update'])->name('ledenpagina.update')->middleware('can:leden-beheren');
+
+    // Leden — verwijderen (alleen beheerder)
+    Route::delete('/ledenpagina/delete/{lidId}', [PostController::class, 'destroy'])->name('ledenpagina.delete')->middleware('can:leden-verwijderen');
+
+    // Betalingen
+    Route::get('/betalingPagina', [BetalingController::class, 'index'])->name('betalingPagina')->middleware('can:betalingen-bekijken');
+    Route::post('/betalingPagina/addBetaling', [BetalingController::class, 'store'])->name('betalingPagina.addBetaling.store')->middleware('can:betalingen-beheren');
+    Route::patch('/betalingen/{betaling_id}', [BetalingController::class, 'update'])->name('betalingen.update')->middleware('can:betalingen-beheren');
+    Route::delete('/betalingPagina/delete/{betaling_id}', [BetalingController::class, 'destroy'])->name('betalingPagina.delete')->middleware('can:betalingen-beheren');
+    Route::post('/betalingen/check-subscriptie', [BetalingController::class, 'checkSubscriptie'])->name('betalingen.checkSubscriptie')->middleware('can:betalingen-beheren');
+    Route::get('/betalingen/chart-data', [ChartController::class, 'chartData'])->name('betalingen.chartData')->middleware('can:betalingen-bekijken');
+
+    // Rapport & log
+    Route::get('/RapportPagina', [BetalingController::class, 'rapportageData'])->name('Rapport')->middleware('can:rapport-bekijken');
+    Route::get('/ActiviteitLogPagina', [ActiviteitController::class, 'activiteitLogData'])->name('ActiviteitLog')->middleware('can:activiteitlog-bekijken');
+
+    // Rollen & gebruikers
+    Route::prefix('/rollen-beheer')->middleware('can:rollenbeheer')->group(function () {
+        Route::get('/', [RolBeheerController::class, 'index'])->name('rollen-beheer');
+        Route::post('/assign', [RolBeheerController::class, 'assignRole'])->name('rollen-beheer.assign');
+        Route::get('/gebruiker/{userId}/roles', [RolBeheerController::class, 'getUserRoles'])->name('rollen-beheer.user-roles');
+        Route::put('/gebruiker/{userId}/roles', [RolBeheerController::class, 'updateUserRoles'])->name('rollen-beheer.update');
+        Route::get('/search-users', [RolBeheerController::class, 'searchUsers'])->name('rollen-beheer.search');
+    });
+    
+    Route::get('/GebruikersBeheerPagina', [GebruikerController::class, 'index'])->name('GebruikersBeheer')->middleware('can:gebruikersbeheer');
+});  
 
 // Login routes
-Route::get('/login', function () {return view('login');})->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.post');  
+Route::get('/login', function () { return view('login'); })->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-
-Route::get('/Recover-password',[PasswordResetController::class, 'show'])->name('recover-password');
-Route::post('/Recover-password',[PasswordResetController::class, 'sendResetCode'])->name('recover-password.post');
-
-Route::get('/verify-code',[PasswordResetController::class, 'verifyCode'])->name('verify-code');
-Route::post('/verify-code',[PasswordResetController::class, 'postVerifyCode'])->name('verify-code.post');
-
-Route::get('/Recover-password/new-password',[PasswordResetController::class, 'newPassword'])->name('new-password');
-Route::post('/Recover-password/new-password',[PasswordResetController::class, 'postNewPassword'])->name('new-password.post');
-
-    Route::middleware(['auth'])->group(function (){
-    Route::get('/RollenBeheerPagina', function(){ return view('RollenBeheerPagina'); })->name('RollenBeheerPagina'); 
-});
+// Wachtwoord herstel routes (geen auth vereist)
+Route::get('/Recover-password', [PasswordResetController::class, 'show'])->name('recover-password');
+Route::post('/Recover-password', [PasswordResetController::class, 'sendResetCode'])->name('recover-password.post');
+Route::get('/verify-code', [PasswordResetController::class, 'verifyCode'])->name('verify-code');
+Route::post('/verify-code', [PasswordResetController::class, 'postVerifyCode'])->name('verify-code.post');
+Route::get('/Recover-password/new-password', [PasswordResetController::class, 'newPassword'])->name('new-password');
+Route::post('/Recover-password/new-password', [PasswordResetController::class, 'postNewPassword'])->name('new-password.post');

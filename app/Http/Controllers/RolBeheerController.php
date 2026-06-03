@@ -6,14 +6,18 @@ use Illuminate\Http\Request;
 use App\Models\Gebruiker;
 use App\Models\Rol; 
 use App\Models\Activiteit; 
+use Illuminate\Support\Facades\Gate;
 
 class RolBeheerController extends Controller
 {
+
+    
     /**
      * Display the role management page with list of users and their roles.
      */
     public function index(Request $request)
     {
+        Gate::authorize('rollenbeheer');
         $query = Gebruiker::with('rollen');
 
         // Search filter (naam or email)

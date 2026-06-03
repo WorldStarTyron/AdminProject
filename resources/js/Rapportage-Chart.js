@@ -36,7 +36,7 @@ if (ctx) {
                     categoryPercentage: 0.8
                 },
                 { 
-                    label: 'Fysieke inname', 
+                    label: 'Fysieke', 
                     data: fysiekData, 
                     backgroundColor: activityGradient, 
                     borderRadius: 6,

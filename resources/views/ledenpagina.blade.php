@@ -19,7 +19,6 @@
 
         <div class="flex-1 ml-0 md:ml-64 transition-all duration-300 min-w-0 overflow-x-hidden">
             @include('layouts.Header-layout.AddLid-Header')
-               
             <!-- Main Leden Overzicht Table with all details -->
             <main class="lp-page-content">
                 <div class="lp-page-header">
@@ -189,7 +188,9 @@
         </div>
     </div>
 
-    @include('layouts.Add-Modal.add-lid-modal')
+    @can('leden-beheren')
+        @include('layouts.Add-Modal.add-lid-modal')
+    @endcan
 
     <div class="toast-notification" id="successToast">
         <i class="fa-solid fa-circle-check" style="color: #10b981;"></i>

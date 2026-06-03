@@ -5,11 +5,14 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Gebruiker;
 use App\Models\Rol;
+use Illuminate\Support\Facades\Gate;
+
 
 class GebruikerController extends Controller
 {
     public function index(Request $request)
     {
+        Gate::authorize('gebruikersbeheer'); 
         //Searchbare
         $zoek = $request->input('zoek');
 

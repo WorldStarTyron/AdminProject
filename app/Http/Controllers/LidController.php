@@ -5,12 +5,18 @@ use App\Models\Lid;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\Gate;
 
 class LidController extends Controller
 {
+   
+
+
     public function index(Request $request)
     {
+
+        Gate::authorize('leden-bekijken');
+
         // Select data from leden table
         // FIX: Removed 'betaalstatus' — kolom bestaat niet meer in leden tabel
         $query = Lid::select(
@@ -60,12 +66,6 @@ class LidController extends Controller
 
         return view('ledenpagina', compact('leden', 'totaalLeden', 'labels', 'values', 'woonplaatsen'));
 
-
-
-  
-   
-
-
     }
 
     // haal lid op
@@ -79,9 +79,9 @@ class LidController extends Controller
             ->orderBy('ingediend_op', 'desc')
             ->paginate(5);
 
-        // Bereken openstaande balans (niet betaald)
+        // Bereken openstaande balans (betaald)
         $openstaandeBalans = \App\Models\Betaling::where('lid_id', $lid->lid_id)
-            ->where('status', 'niet_betaald')
+            ->where('status', 'betaald')
             ->sum('bedrag');
 
         // Haal de laatste succesvolle betaling op
@@ -90,7 +90,26 @@ class LidController extends Controller
             ->orderBy('ingediend_op', 'desc')
             ->first();
 
-        return view('lidpagina', compact('lid', 'betalingen', 'openstaandeBalans', 'laatsteBetaling'));
+        //Subcription betaling berekenen wanneer het lid weer moet betalen per maand.
+        $UpcomingBetaling = \App\Models\Betaling::where('lid_id', $lid->lid_id)
+        ->where('status', 'niet_betaald')
+        ->orderBy('ingediend_op', 'asc')
+        ->first();
+  
+        //  Subcription Betaling berekenen wanneer het lid weer moet betalen per maand
+         $UpcomingBetaling = \App\Models\Betaling::where('lid_id', $lid->lid_id)
+        ->where('status', 'betaald')
+        ->orderBy('ingediend_op', 'asc')
+        ->first();
+
+        //wanneer lid lid wordt dan moet hij over 1 maand zijn contributie betalen.
+       $deadline = $UpcomingBetaling
+    ? \Carbon\Carbon::parse($UpcomingBetaling->ingediend_op)->addMonth()
+    : null;
+        // $Datum = Subscriptie::where('lid_id', $lid->lid_id)->first();
+        
+
+        return view('lidpagina', compact('lid', 'betalingen', 'openstaandeBalans', 'laatsteBetaling', 'UpcomingBetaling', 'deadline'));
     }
 
 }

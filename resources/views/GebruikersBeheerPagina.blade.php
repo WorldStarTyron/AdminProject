@@ -62,7 +62,7 @@
                
 
                 <!-- Search bar + Filter button -->
-                <form method="GET" action="{{ route('gebruikers.index') }}" id="filterForm">
+                <form method="GET" action="{{ route('GebruikersBeheer') }}" id="filterForm">
                     <div class="flex flex-row items-center gap-3 w-full mt-5 px-5">
                         <div class="relative flex-1">
                             <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
@@ -117,7 +117,7 @@
                                     <button type="submit" class="px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm transition-all duration-200">
                                         Toepassen
                                     </button>
-                                    <a href="{{ route('gebruikers.index') }}" class="px-4 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 font-semibold text-sm transition-all duration-200">
+                                    <a href="{{ route('GebruikersBeheer') }}" class="px-4 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 font-semibold text-sm transition-all duration-200">
                                         Reset
                                     </a>
                                 </div>
@@ -128,14 +128,14 @@
                                 <div class="flex items-center gap-2 mt-3 pt-3 border-t border-gray-200">
                                     <span class="text-xs text-gray-500 font-medium">Actieve filters:</span>
                                     @if(request('status'))
-                                        <a href="{{ route('gebruikers.index', array_merge(request()->except('status'), ['page' => null])) }}" 
+                                        <a href="{{ route('GebruikersBeheer', array_merge(request()->except('status'), ['page' => null])) }}" 
                                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-medium hover:bg-orange-200 transition-colors">
                                             Status: {{ request('status') }}
                                             <i class="fas fa-times text-[10px]"></i>
                                         </a>
                                     @endif
                                     @if(request('rol'))
-                                        <a href="{{ route('gebruikers.index', array_merge(request()->except('rol'), ['page' => null])) }}" 
+                                        <a href="{{ route('GebruikersBeheer', array_merge(request()->except('rol'), ['page' => null])) }}" 
                                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-medium hover:bg-orange-200 transition-colors">
                                             Rol: {{ request('rol') }}
                                             <i class="fas fa-times text-[10px]"></i>

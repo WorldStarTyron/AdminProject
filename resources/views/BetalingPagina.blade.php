@@ -50,7 +50,9 @@
         </div>
     </div>
 
-    @include('layouts.Add-Modal.add-Betaling-modal')
+    @can('betalingen-beheren')
+        @include('layouts.Add-Modal.add-Betaling-modal')
+    @endcan
 
     <div class="toast-notification" id="betalingSuccessToast">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

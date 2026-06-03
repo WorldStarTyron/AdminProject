@@ -9,6 +9,7 @@ use App\Http\Requests\StoreLidRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class PostController extends Controller
 {
@@ -52,6 +53,8 @@ class PostController extends Controller
      */
     public function store(StoreLidRequest $request)
     {
+        Gate::authorize('leden-beheren');
+
         // Duplicate check: zelfde naam + geboortedatum = waarschijnlijk zelfde persoon
         $duplicatePerson = Gebruiker::where('naam', $request->name)->exists();
 
@@ -125,6 +128,8 @@ class PostController extends Controller
      */
     public function show(string $id)
     {
+        Gate::authorize('leden-bekijken');
+
         $lid = Lid::where('lid_id', $id)
         ->join('gebruikers', 'leden.gebruiker_id', '=', 'gebruikers.gebruiker_id')
         ->select('leden.*', 'gebruikers.naam', 'gebruikers.email')
@@ -157,6 +162,8 @@ class PostController extends Controller
      */
     public function edit(string $id)
     {
+        Gate::authorize('leden-beheren');
+
         $lid = Lid::where('lid_id', $id)
         ->join('gebruikers', 'leden.gebruiker_id', '=', 'gebruikers.gebruiker_id')
         ->select('leden.*', 'gebruikers.naam', 'gebruikers.email')
@@ -170,6 +177,7 @@ class PostController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        Gate::authorize('leden-beheren');
         $validated = $request->validate([
             'naam' => 'required|string|max:255',
             'email' => 'required|email|max:255',
@@ -220,6 +228,8 @@ class PostController extends Controller
     // Remove the selected lid
     public function destroy(string $lidId)
     {
+        Gate::authorize('leden-verwijderen');
+
         $lid = Lid::with('gebruiker')->where('lid_id', $lidId)->first();
         if ($lid) {
             $naam = $lid->gebruiker ? $lid->gebruiker->naam : 'Onbekend';

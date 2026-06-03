@@ -9,11 +9,14 @@ use App\Models\Activiteit;
 use App\Http\Controllers\BonController;
 use Carbon\Carbon;
 use App\Models\Bon;
+use Illuminate\Support\Facades\Gate;
 
 class BetalingController extends Controller
 {
     public function index(Request $request)
     {
+
+        Gate::authorize('betalingen-bekijken');
         $betalingen = Betaling::select(
                 'betalingen.*',
                 'gebruikers.naam as gebruiker_naam',
@@ -117,6 +120,9 @@ class BetalingController extends Controller
     // Store Betalingen
     public function store(Request $request)
     {
+
+        Gate::authorize('betalingen-beheren');
+
         $request->validate([
             'naam'            => 'required|string',
             'datum'           => 'required|date',
@@ -243,6 +249,7 @@ class BetalingController extends Controller
    // Delete Betalingen
    public function destroy($betaling_id)
    {
+     Gate::authorize('betalingen-beheren');
        $betaling = Betaling::where('betaling_id', $betaling_id)->first();
 
        if ($betaling) {
@@ -346,6 +353,8 @@ class BetalingController extends Controller
     //Rapportage Pagina Data
     public function rapportageData(Request $request)
     {
+         Gate::authorize('rapport-bekijken'); 
+         
         // We zoeken de oudste en nieuwste betaling in de database
         $oudsteDatum = Betaling::min('ingediend_op');
         $nieuwsteDatum = Betaling::max('ingediend_op');
@@ -361,6 +370,8 @@ class BetalingController extends Controller
         // We filteren de betalingen op de gekozen datums
         $query = Betaling::query()->whereBetween('ingediend_op', [$fromStart, $toEnd]);
 
+
+        
         // Card 1: Totale inkomsten (som van alle betaalde betalingen)
         $totaleInkomsten = (clone $query)->where('status', 'betaald')->sum('bedrag');
 
@@ -382,7 +393,9 @@ class BetalingController extends Controller
         $overmakingBedrag = (clone $query)->where('status', 'betaald')->where('methode', 'overmaking')->sum('bedrag');
         $fysiekBedrag = (clone $query)->where('status', 'betaald')->where('methode', 'fysiek')->sum('bedrag');
         $totaalBedragMethoden = $overmakingBedrag + $fysiekBedrag;
+ 
 
+        //Berekening van de dekkingsgraad op basis van overmakingen en fysieke betalingen.
         if ($totaalBedragMethoden > 0) {
             $overmakingPercentage = round(($overmakingBedrag / $totaalBedragMethoden) * 100);
             $fysiekPercentage = 100 - $overmakingPercentage;
@@ -400,7 +413,7 @@ class BetalingController extends Controller
             ->join('gebruikers', 'leden.gebruiker_id', '=', 'gebruikers.gebruiker_id')
             ->whereBetween('betalingen.ingediend_op', [$fromStart, $toEnd])
             ->orderBy('betalingen.ingediend_op', 'desc')
-            ->limit(10)
+            ->limit(6)
             ->get()
             ->map(function ($b) {
                 $b->datum = $b->ingediend_op;

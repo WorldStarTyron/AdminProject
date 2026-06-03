@@ -12,190 +12,202 @@
     @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/js/app.js'])
 </head>
 <body>
-    <div class="flex jusitfy-center min-h-screen">
+    <div class="flex justify-center min-h-screen">
         @include('layouts.Sidebars.sidebar')
 
         <div class="flex-1 ml-0 md:ml-64 transition-all duration-300 min-w-0 overflow-x-hidden">
             @include('layouts.header')
 
             <section class="px-8 py-6">
-                <div class="bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.03)] border border-slate-200/60 p-8 animate-[fadeSlideUp_0.5s_ease-out]">
-                    <div class="flex flex-col lg:flex-row items-start lg:items-center gap-8">
-                        <div class="flex items-start gap-6 flex-1">
+
+                <!-- Profile header card -->
+                <div class="bg-white rounded-2xl border border-slate-200/60 shadow-sm p-6 mb-6">
+                    <div class="flex items-start justify-between">
+
+                        <!-- Avatar + naam + info -->
+                        <div class="flex items-start gap-5">
                             <div class="relative flex-shrink-0">
-                                <div class="w-[120px] h-[120px] rounded-2xl overflow-hidden border-2 border-slate-200 shadow-sm">
-                                    <img src="https://ui-avatars.com/api/?name=R+B&size=120&background=e0e7ff&color=1e3a8a&bold=true&font-size=0.4" alt="Profiel foto" class="w-full h-full object-cover" id="profilePhoto">
+                                <div class="w-[72px] h-[72px] rounded-xl overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center">
+                                    <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->naam) }}&size=72&background=e2e8f0&color=475569&bold=true&font-size=0.4" alt="Profiel foto" class="w-full h-full object-cover" id="profilePhoto">
                                 </div>
-                                <button class="absolute -bottom-1.5 -right-1.5 w-8 h-8 bg-slate-800 hover:bg-slate-700 rounded-full flex items-center justify-center shadow-lg transition-colors cursor-pointer" title="Foto wijzigen">
-                                    <i class="fa-solid fa-camera text-white text-xs"></i>
+                                <button class="absolute -bottom-1.5 -right-1.5 w-7 h-7 bg-slate-800 hover:bg-slate-700 rounded-full flex items-center justify-center shadow transition-colors cursor-pointer" title="Foto wijzigen">
+                                    <i class="fa-solid fa-camera text-white" style="font-size:10px;"></i>
                                 </button>
                             </div>
-                            
-                            <!-- lid  info-->
-                            <div class="flex flex-col gap-3 pt-1">
-                                <div class="flex items-center gap-3">
-                                    <h1 class="text-2xl font-bold text-slate-900 tracking-tight m-0">{{ Auth::user()->naam }}</h1>
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500 to-teal-500 text-white text-xs font-bold tracking-wide shadow-sm">Lid ID: #{{ $lid->lid_id }}</span>
+
+                            <div class="pt-0.5">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <h1 class="text-xl font-bold text-slate-900 m-0">{{ Auth::user()->naam }}</h1>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">ID: {{ $lid->lid_id }}</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">Actief</span>
                                 </div>
-                                <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-500">
+                                <div class="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-slate-500">
                                     <div class="flex items-center gap-1.5">
                                         <i class="fa-regular fa-calendar text-slate-400 text-xs"></i>
                                         <span>Lid sinds <strong class="text-slate-700 font-semibold">{{ $lid->lid_sinds ? \Carbon\Carbon::parse($lid->lid_sinds)->format('d/m/Y') : 'Onbekend' }}</strong></span>
                                     </div>
-
-                                <div class="flex items-center gap-6">
-                                    <!--Lid type-->
-                                    <div class="flex items-center gap-1.5">
-                                        <h2>Lid type:</h2> 
-                                        <i class="fa-regular fa-user text-slate-400 text-xs"></i>
-                                        <span><strong class="text-slate-700 font-semibold">{{ $lid->lid_type }}</strong></span>
-                                    </div>
-
-                                 </div>
                                     <div class="flex items-center gap-1.5">
                                         <i class="fa-regular fa-user text-slate-400 text-xs"></i>
-                                        <span><strong class="text-slate-700 font-semibold">{{ $lid->geboortedatum ? \Carbon\Carbon::parse($lid->geboortedatum)->translatedFormat('d F Y') : 'Onbekend' }}</strong> ({{ $lid->geboortedatum ? \Carbon\Carbon::parse($lid->geboortedatum)->age : '?' }} jaar)</span>
+                                        <span>{{ $lid->lid_type }}</span>
                                     </div>
-                                </div>
-
-                                <!--Password reset knop-->
-                                <div class="flex items-center gap-3 mt-2">
-                                    <a href="{{ route('recover-password') }}">
-                                    <button class="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer">
-                                        <i class="fa-solid fa-lock text-xs"></i>
-                                        Password reset
-                                    </button>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="hidden lg:block w-px h-32 bg-slate-200 self-center"></div>
-
-
-                        <!-- Openstaand balans met upcomming en latere betalingen-->
-                        <div class="w-full lg:w-auto lg:min-w-[320px]">
-                            <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
-                                <div class="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
-                                <p class="text-xs font-bold tracking-[0.15em] text-slate-400 uppercase mb-3">Outstanding Balance</p>
-                                <p class="text-4xl font-extrabold tracking-tight mb-5">
-                                <span class="text-lg font-bold text-slate-300 mr-1">SRD</span>{{ number_format($openstaandeBalans, 2, ',', '.') }}
-                                </p>
-                                <!-- Deadline-->
-                                 <div class="">
-                                 <div class="flex items-center justify-between text-sm">
-                                    <span class="text-slate-400">Uw contributie deadline is:</span>
-                                    <span class="font-semibold text-red-400">{{ $deadline ? $deadline->format('d M Y') : 'Geen' }}</span>
-                                 </div>
-                                 </div>
-
-                                <div class="space-y-2.5 pt-3 border-t border-slate-700/60">
-                                    <div class="flex items-center justify-between text-sm">
-                                        <span class="text-slate-400">Last Payment</span>
-                                        <span class="font-semibold text-slate-200">{{ $laatsteBetaling ? \Carbon\Carbon::parse($laatsteBetaling->ingediend_op)->translatedFormat('d M Y') : 'Geen' }}</span>
-                                    </div>
-                                    <div class="flex items-center justify-between text-sm">
-                                        <span class="text-slate-400">Upcoming Cost</span>
-                                        <span class="font-semibold text-emerald-400">{{ $UpcomingBetaling ? 'SRD 45.00' : 'SRD 0.00' }}</span>
+                                    <div class="flex items-center gap-1.5">
+                                        <i class="fa-regular fa-cake-candles text-slate-400 text-xs"></i>
+                                        <span>{{ $lid->geboortedatum ? \Carbon\Carbon::parse($lid->geboortedatum)->translatedFormat('d F Y') : 'Onbekend' }}
+                                            @if($lid->geboortedatum)
+                                                ({{ \Carbon\Carbon::parse($lid->geboortedatum)->age }} jaar)
+                                            @endif
+                                        </span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </section>
-    
 
-            <!-- Contact info -->
-            <div class="px-8 py-6">
-                <div class="flex flex-col lg:flex-row gap-6 w-full items-start">
-                    <div class="bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.03)] border border-slate-200/60 w-full lg:w-[320px] flex-shrink-0">
-                        <div class="flex items-center gap-3 p-6 pb-4">
-                            <i class="fa-regular fa-file text-slate-700"></i>
-                            <h2 class="text-base font-bold text-slate-900">Contact Details</h2>
-                        </div>
-                        <div class="px-6 pb-6 space-y-5">
-                            <div>
-                                <p class="text-[11px] font-semibold tracking-[0.08em] uppercase text-slate-400 mb-1">Email Address</p>
-                                <p class="text-sm font-medium text-slate-800">{{ Auth::user()->email }}</p>
-                            </div>
-                            <div>
-                                <p class="text-[11px] font-semibold tracking-[0.08em] uppercase text-slate-400 mb-1">Telefoon Number</p>
-                                <p class="text-sm font-medium text-slate-800">{{ $lid->telefoonnummer ?? 'Onbekend' }}</p>
-                            </div>
-                            <div>
-                                <p class="text-[11px] font-semibold tracking-[0.08em] uppercase text-slate-400 mb-1">Address</p>
-                                <p class="text-sm font-medium text-slate-800">{{ $lid->adres ?? 'Onbekend' }}</p>
-                                <p class="text-sm text-slate-500">{{ $lid->woonplaats ?? '' }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.03)] border border-slate-200/60 flex-1 min-w-0">
-                        <div class="flex items-center justify-between p-6 pb-4">
-                            <div class="flex items-center gap-3">
-                                <i class="fa-regular fa-clock text-slate-700"></i>
-                                <h2 class="text-base font-bold text-slate-900">Payment History</h2>
-                            </div>
-                            <button class="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer" title="Filter">
-                                <i class="fa-solid fa-filter text-slate-500 text-sm"></i>
+                        <!-- Password reset knop rechtsboven -->
+                        <a href="{{ route('recover-password') }}" class="item-center p-6" >
+                            <button class="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl border border-slate-200 transition-all duration-200 shadow-sm cursor-pointer">
+                                <i class="fa-solid fa-lock text-xs text-slate-500"></i>
+                                Password reset
                             </button>
-                        </div>
-
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm" id="paymentHistoryTable">
-                                <thead>
-                                    <tr class="border-t border-b border-slate-100">
-                                        <th class="text-left text-[11px] font-semibold tracking-[0.08em] uppercase text-slate-400 px-6 py-3">ID</th>
-                                        <th class="text-left text-[11px] font-semibold tracking-[0.08em] uppercase text-slate-400 px-6 py-3">Date</th>
-                                        <th class="text-left text-[11px] font-semibold tracking-[0.08em] uppercase text-slate-400 px-6 py-3">Contribution</th>
-                                        <th class="text-left text-[11px] font-semibold tracking-[0.08em] uppercase text-slate-400 px-6 py-3">Status</th>
-                                        <th class="text-left text-[11px] font-semibold tracking-[0.08em] uppercase text-slate-400 px-6 py-3">Bonnummer</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-50">
-                                    @forelse($betalingen as $betaling)
-                                        <tr class="hover:bg-slate-50/50 transition-colors">
-                                            <td class="px-6 py-4 text-slate-600 font-medium">{{ $betaling->betaling_id }}</td>
-                                            <td class="px-6 py-4 text-slate-600">{{ \Carbon\Carbon::parse($betaling->ingediend_op)->translatedFormat('d M Y') }}</td>
-                                            <td class="px-6 py-4 text-slate-700 font-medium">SRD {{ number_format($betaling->bedrag, 2, ',', '.') }}</td>
-                                            <td class="px-6 py-4">
-                                                @if($betaling->status === 'betaald')
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold tracking-wide bg-emerald-50 text-emerald-600">BETAALD</span>
-                                                @elseif($betaling->status === 'niet_betaald')
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold tracking-wide bg-red-50 text-red-600">NIET BETAALD</span>
-                                                @elseif($betaling->status === 'in_behandeling')
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold tracking-wide bg-amber-50 text-amber-600">IN BEHANDELING</span>
-                                                @else
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold tracking-wide bg-slate-100 text-slate-600">AFGEWEZEN</span>
-                                                @endif
-                                            </td>
-                                            <td class="px-6 py-4 text-slate-500">{{ $betaling->bon ? $betaling->bon->bon_nummer : '—' }}</td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="5" class="px-6 py-8 text-center text-slate-400">
-                                                Geen betalingsgeschiedenis gevonden.
-                                            </td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-
-                        @if($betalingen->hasPages())
-                        <div class="flex items-center justify-between px-6 py-4 border-t border-slate-100">
-                            <p class="text-sm text-slate-400">
-                                Weergeven van {{ $betalingen->firstItem() }} tot {{ $betalingen->lastItem() }} van {{ $betalingen->total() }} betalingen
-                            </p>
-                            <div class="flex items-center gap-1.5">
-                                {{ $betalingen->links('pagination::tailwind') }}
-                            </div>
-                        </div>
-                        @endif
+                        </a>
                     </div>
                 </div>
-            </div>
+
+                <!-- Balance + Contact Details rij -->
+                <div class="flex flex-col lg:flex-row gap-6 mb-6">
+
+                    <!-- Outstanding Balance dark card -->
+                    <div class="bg-slate-900 rounded-2xl p-6 text-white lg:w-[380px] flex-shrink-0">
+                        <p class="text-xs font-semibold tracking-widest text-slate-400 uppercase mb-2">Outstanding Balance</p>
+                        <p class="text-4xl font-extrabold tracking-tight text-cyan-400 mb-5">
+                            SRD {{ number_format($openstaandeBalans, 2, ',', '.') }}
+                        </p>
+
+
+                         <!-- Upcoming Deadline -->
+                        <div class="flex flex-row justify-center gap-12 pt-4 border-t border-slate-700/60">
+                            <div>
+                                <p class="text-[10px] font-semibold tracking-widest text-slate-500 uppercase mb-1">Upcoming Deadline</p>
+                                <p class="text-sm font-bold text-red-400">{{ $deadline ? $deadline->format('d M Y') : 'Geen' }}</p>
+                            </div>
+                            <div> 
+                                <p class="text-[10px] font-semibold tracking-widest text-slate-500 uppercase mb-1">Last Payment</p>
+                                <p class="text-sm font-bold text-slate-200">{{ $laatsteBetaling ? \Carbon\Carbon::parse($laatsteBetaling->ingediend_op)->translatedFormat('d M Y') : 'Geen' }}</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-semibold tracking-widest text-slate-500 uppercase mb-1">Upcoming Cost</p>
+                                <p class="text-sm font-bold text-emerald-400">{{ $UpcomingBetaling ? 'SRD 45,00' : 'SRD 0,00' }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Details card -->
+                    <div class="bg-white rounded-2xl border border-slate-200/60 shadow-sm p-6 flex-1 ">
+                        <div class="flex items-center gap-2 mb-5">
+                            <i class="fa-regular fa-address-card text-slate-500"></i>
+                            <h2 class="text-base font-bold text-slate-900 m-0">Contact Details</h2>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="flex items-start gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-regular fa-envelope text-slate-500 text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-semibold tracking-widest uppercase text-slate-400 mb-0.5">Email Address</p>
+                                    <p class="text-sm font-medium text-slate-800">{{ Auth::user()->email }}</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-phone"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-semibold tracking-widest uppercase text-slate-400 mb-0.5">Phone Number</p>
+                                    
+                                    <p class="text-sm font-medium text-slate-800">{{ $lid->telefoonnummer ?? 'Onbekend' }}</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-address-book"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-semibold tracking-widest uppercase text-slate-400 mb-0.5">Home Address</p>
+                                    <p class="text-sm font-medium text-slate-800">{{ $lid->adres ?? 'Onbekend' }}</p>
+                                    @if($lid->woonplaats)
+                                        <p class="text-sm text-slate-500">{{ $lid->woonplaats }}</p>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Geschiedenis Betaling tabel -->
+                <div class="bg-white rounded-2xl border border-slate-200/60 shadow-sm">
+                    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+                        <h2 class="text-base font-bold text-slate-900 m-0">Geschiedenis Betaling</h2>
+                        <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer" title="Filter">
+                            <i class="fa-solid fa-filter text-slate-400 text-sm"></i>
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm" id="paymentHistoryTable">
+                            <thead>
+                                <tr class="border-b border-slate-100">
+                                    <th class="text-left text-[11px] font-semibold tracking-widest uppercase text-slate-400 px-6 py-3">ID</th>
+                                    <th class="text-left text-[11px] font-semibold tracking-widest uppercase text-slate-400 px-6 py-3">Date</th>
+                                    <th class="text-right text-[11px] font-semibold tracking-widest uppercase text-slate-400 px-6 py-3">Amount</th>
+                                    <th class="text-left text-[11px] font-semibold tracking-widest uppercase text-slate-400 px-6 py-3">Status</th>
+                                    <th class="text-left text-[11px] font-semibold tracking-widest uppercase text-slate-400 px-6 py-3">Bon nummer</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-50">
+                                @forelse($betalingen as $betaling)
+                                    <tr class="hover:bg-slate-50/50 transition-colors">
+                                        <td class="px-6 py-4 text-slate-500 font-medium">{{ $betaling->betaling_id }}</td>
+                                        <td class="px-6 py-4 text-slate-600">{{ \Carbon\Carbon::parse($betaling->ingediend_op)->translatedFormat('d M Y') }}</td>
+                                        <td class="px-6 py-4 text-slate-800 font-semibold text-right">SRD {{ number_format($betaling->bedrag, 2, ',', '.') }}</td>
+                                        <td class="px-6 py-4">
+                                            @if($betaling->status === 'betaald')
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-600">Betaald</span>
+                                            @elseif($betaling->status === 'niet_betaald')
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-50 text-red-600">Niet betaald</span>
+                                            @elseif($betaling->status === 'in_behandeling')
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-600">In behandeling</span>
+                                            @else
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-500">Afgewezen</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 text-slate-500">{{ $betaling->bon ? $betaling->bon->bon_nummer : '—' }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="px-6 py-10 text-center text-slate-400">
+                                            Geen betalingsgeschiedenis gevonden.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+
+                    @if($betalingen->hasPages())
+                    <div class="flex items-center justify-between px-6 py-4 border-t border-slate-100">
+                        <p class="text-sm text-slate-400">
+                            Weergeven van {{ $betalingen->firstItem() }} tot {{ $betalingen->lastItem() }} van {{ $betalingen->total() }} betalingen
+                        </p>
+                        <div class="flex items-center gap-1.5">
+                            {{ $betalingen->links('pagination::tailwind') }}
+                        </div>
+                    </div>
+                    @endif
+                </div>
+
+            </section>
         </div>
     </div>
 </body>

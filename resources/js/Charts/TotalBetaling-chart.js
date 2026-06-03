@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function () {
             chart: {
                 type: 'bar',
                 height: 200,
-                stacked: true,
+                stacked: false,
                 toolbar: { show: false },
                 fontFamily: 'Inter, sans-serif',
                 animations: {
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             plotOptions: {
                 bar: {
-                    borderRadius: 4,
+                    borderRadius: 1,
                     columnWidth: '45%',
                 },
             },
@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 show: true,
             },
             legend: {
-                show: false,
+                show: true,
             },
             dataLabels: {
                 enabled: false,

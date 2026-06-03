@@ -105,13 +105,22 @@
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <!-- Left: Monthly Performance Chart (takes 2 cols) -->
                     <div class="lg:col-span-2 bg-white rounded-xl border border-gray-200/80 p-6 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+
                         <div class="flex justify-between items-center mb-6">
                             <h3 class="text-base font-semibold text-slate-800">Maandelijke performance</h3>
-                            <button class="text-slate-400 hover:text-slate-600 bg-slate-50 border border-slate-100 p-2 rounded-lg transition-colors">
-                                <i class="fa-solid fa-gear text-sm"></i>
-                            </button>
+                            <div class="flex items-center gap-3">
+                                {{-- Jaar dropdown --}}
+                                <select id="filterJaar" class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-gray-50 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-all cursor-pointer">
+                                    <option value="">Alle jaren</option>
+                                </select>
+
+                                {{-- Maand dropdown --}}
+                                <select id="filterMaand" class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-gray-50 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-all cursor-pointer">
+                                    <option value="">Alle maanden</option>
+                                </select>
+                            </div>
                         </div>
- 
+
                         <!--hier komt mijn grafiek-->
                         <div id="performanceChart" class="w-full h-[300px]"></div>
 

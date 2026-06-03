@@ -74,7 +74,7 @@
                 <!-- Check Subscriptie knop - checkt of alle leden betaald hebben deze maand -->
                 <button
                     id="checkSubscriptieBtn"
-                    onclick="checkSubscriptie()"
+                    data-url="{{ route('betalingen.checkSubscriptie') }}"
                     class="inline-flex items-center gap-2 bg-gradient-to-br from-amber-500 to-orange-500 text-white font-['Inter',sans-serif] text-[0.8125rem] font-semibold px-5 py-2.5 rounded-[10px] shadow-[0_2px_8px_rgba(245,158,11,0.25)] hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(245,158,11,0.35)] active:translate-y-0 transition-all duration-200 cursor-pointer border-none whitespace-nowrap"
                 >
                     <!-- Refresh icon -->

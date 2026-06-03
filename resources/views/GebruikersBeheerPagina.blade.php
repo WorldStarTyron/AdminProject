@@ -17,19 +17,19 @@
             <div class="w-full h-full p-1">
                 <div class="ml-5">
                     <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-2 mt-5 mb-1">
-                        <i class="fas fa-user-cog mr-1"></i>
+                        <i class="fas fa-user-cog mr-1 text-gray-500"></i>
                         Gebruikerbeheer
                     </h2>
                     <p class="text-sm ml-12 text-gray-600">Hier kunt u alle geregistreerde applicatiegebruikers overzichtelijk bekijken en beheren.</p>
                 </div>
 
                 <!-- Stat cards -->
-                <div class="flex flex-row  justify-center mt-5 gap-4 px-5">
+                <div class="flex flex-row justify-center mt-5 gap-4 px-5">
 
                     <!-- Totaal Gebruikers -->
                     <div class="flex-1 bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition-shadow duration-200">
-                        <div class="w-11 h-11 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 shrink-0">
-                            <i class="fas fa-users text-lg"></i>
+                        <div class="w-11 h-11 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                            <i class="fas fa-users text-lg text-blue-600"></i>
                         </div>
                         <div class="flex flex-col gap-0.5">
                             <span class="text-xs text-gray-500 font-medium">Totaal Gebruikers</span>
@@ -39,8 +39,8 @@
 
                     <!-- Admins -->
                     <div class="flex-1 bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition-shadow duration-200">
-                        <div class="w-11 h-11 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 shrink-0">
-                            <i class="fas fa-user-shield text-lg"></i>
+                        <div class="w-11 h-11 rounded-full bg-purple-100 flex items-center justify-center shrink-0">
+                            <i class="fas fa-user-shield text-lg text-purple-600"></i>
                         </div>
                         <div class="flex flex-col gap-0.5">
                             <span class="text-xs text-gray-500 font-medium">Administratie Medewerker</span>
@@ -50,8 +50,8 @@
 
                     <!-- Voorzitter -->
                     <div class="flex-1 bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition-shadow duration-200">
-                        <div class="w-11 h-11 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 shrink-0">
-                            <i class="fas fa-user-tie text-lg"></i>
+                        <div class="w-11 h-11 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                            <i class="fas fa-user-tie text-lg text-amber-600"></i>
                         </div>
                         <div class="flex flex-col gap-0.5">
                             <span class="text-xs text-gray-500 font-medium">Voorzitter</span>
@@ -59,7 +59,6 @@
                         </div>
                     </div>
                 </div>
-               
 
                 <!-- Search bar + Filter button -->
                 <form method="GET" action="{{ route('GebruikersBeheer') }}" id="filterForm">
@@ -154,115 +153,144 @@
                     });
                 </script>
 
-          <!-- Users Table -->
-            <div class="mt-5 px-5">
-                <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                    <table class="w-full text-sm">
-                        <thead>
-                            <tr class="border-b border-gray-200">
-                                <th class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-4">Gebruiker</th>
-                                <th class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-4">Email</th>
-                                <th class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-4">Rol</th>
-                                <th class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-4">Status</th>
-                                <th class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-4">Acties</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            @foreach($gebruikers as $gebruiker)
-                            <tr class="hover:bg-gray-50 transition-colors duration-150">
+                <!-- Users Table -->
+                <div class="mt-5 px-5">
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b border-gray-200 bg-gray-50">
+                                    <th class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-4">Gebruiker</th>
+                                    <th class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-4">Email</th>
+                                    <th class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-4">Rol</th>
+                                    <th class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-4">Status</th>
+                                    <th class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-4">Acties</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                @php
+                                    $avatarKleuren = [
+                                        'bg-blue-100 text-blue-600',
+                                        'bg-purple-100 text-purple-600',
+                                        'bg-green-100 text-green-600',
+                                        'bg-amber-100 text-amber-600',
+                                        'bg-pink-100 text-pink-600',
+                                        'bg-red-100 text-red-600',
+                                    ];
+                                    $avatarIndex = 0;
+                                @endphp
 
-                    <!-- Gebruiker -->
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center shrink-0">
-                                            <i class="fas fa-user text-gray-400 text-sm"></i>
+                                @foreach($gebruikers as $gebruiker)
+                                @php $avatarKleur = $avatarKleuren[$avatarIndex % count($avatarKleuren)]; $avatarIndex++; @endphp
+                                <tr class="hover:bg-gray-50 transition-colors duration-150">
+
+                                    <!-- Gebruiker -->
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-9 h-9 rounded-full {{ $avatarKleur }} flex items-center justify-center shrink-0 text-sm font-semibold">
+                                                {{ strtoupper(substr($gebruiker->naam, 0, 2)) }}
+                                            </div>
+                                            <div class="flex flex-col">
+                                                <span class="font-semibold text-gray-900">{{ $gebruiker->naam }}</span>
+                                                <span class="text-xs text-gray-400">ID: #{{ $gebruiker->gebruiker_id }}</span>
+                                            </div>
                                         </div>
-                                        <div class="flex flex-col">
-                                            <span class="font-semibold text-gray-900">{{ $gebruiker->naam }}</span>
-                                            <span class="text-xs text-gray-400">ID: #{{ $gebruiker->gebruiker_id }}</span>
-                                        </div>
-                                    </div>
-                                </td>
-
-                                <!-- Email -->
-                                <td class="px-6 py-4 text-gray-600">{{ $gebruiker->email }}</td>
-
-                                <!-- Rol -->
-                               <td>
-                                 @forelse($gebruiker->rollen as $rol)
-                                  <span>{{ $rol->naam }}</span>
-                                   @empty
-                                  <span class="text-red-600">Geen rol</span>
-                                @endforelse
                                     </td>
-                           
-                                <!-- Status -->
-                                <td class="px-6 py-4">
-                                    @if($gebruiker->status === 'Actief')
-                            <span class="flex items-center gap-1.5 text-green-600 font-medium">
-                                <span class="w-2 h-2 rounded-full bg-green-500 inline-block"></span>
-                                Actief
-                            </span>
-                        @else
-                            <span class="flex items-center gap-1.5 text-gray-400 font-medium">
-                                <span class="w-2 h-2 rounded-full bg-gray-400 inline-block"></span>
-                                Inactief
-                            </span>
-                        @endif
-                    </td>
 
-                    <!-- Acties -->
-                    <td class="px-6 py-4">
-                        <div class="flex items-center gap-3">
-                            <button class="text-gray-400 hover:text-blue-500 transition-colors duration-150" title="Bewerken">
-                                <i class="fas fa-pencil-alt"></i>
-                            </button>
-                            <button class="text-gray-400 hover:text-red-500 transition-colors duration-150" title="Verwijderen">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                                    <!-- Email -->
+                                    <td class="px-6 py-4 text-gray-600">{{ $gebruiker->email }}</td>
+
+                                    <!-- Rol -->
+                                    <td class="px-6 py-4">
+                                        @forelse($gebruiker->rollen as $rol)
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium
+                                                {{ $rol->naam == 'Applicatie Beheerder' ? 'bg-red-800 text-white' :
+                                                   ($rol->naam == 'Voorzitter' ? 'bg-amber-100 text-amber-700 border border-amber-200' :
+                                                   ($rol->naam == 'Administratie Medewerker' ? 'bg-purple-100 text-purple-700 border border-purple-200' :
+                                                   'bg-gray-100 text-gray-600 border border-gray-200')) }}">
+                                                @if($rol->naam == 'Applicatie Beheerder')
+                                                    <i class="fa-solid fa-crown text-[10px]"></i>
+                                                @elseif($rol->naam == 'Voorzitter')
+                                                    <i class="fa-solid fa-star text-[10px]"></i>
+                                                @elseif($rol->naam == 'Administratie Medewerker')
+                                                    <i class="fa-solid fa-briefcase text-[10px]"></i>
+                                                @else
+                                                    <i class="fa-solid fa-circle-user text-[10px]"></i>
+                                                @endif
+                                                {{ $rol->naam }}
+                                            </span>
+                                        @empty
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-red-500 border border-red-100">
+                                                <i class="fa-regular fa-circle-xmark text-[10px]"></i>
+                                                Geen rol
+                                            </span>
+                                        @endforelse
+                                    </td>
+
+                                    <!-- Status -->
+                                    <td class="px-6 py-4">
+                                        @if($gebruiker->status === 'Actief')
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-200">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>
+                                                Actief
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500 border border-gray-200">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>
+                                                Inactief
+                                            </span>
+                                        @endif
+                                    </td>
+
+                                    <!-- Acties -->
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <button class="text-gray-400 hover:text-blue-500 transition-colors duration-150" title="Bewerken">
+                                                <i class="fas fa-pencil-alt"></i>
+                                            </button>
+                                            <button class="text-gray-400 hover:text-red-500 transition-colors duration-150" title="Verwijderen">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+
+                        <!-- Pagination -->
+                        <div class="flex items-center justify-between px-6 py-4 border-t border-gray-100">
+                            <span class="text-sm text-gray-500">
+                                Toon {{ $gebruikers->firstItem() }} tot {{ $gebruikers->lastItem() }} van {{ $gebruikers->total() }} gebruikers
+                            </span>
+                            <div class="flex items-center gap-1">
+                                <!-- Vorige -->
+                                <a href="{{ $gebruikers->previousPageUrl() }}"
+                                   class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors duration-150 {{ $gebruikers->onFirstPage() ? 'pointer-events-none opacity-40' : '' }}">
+                                    <i class="fas fa-chevron-left text-xs"></i>
+                                </a>
+
+                                <!-- Paginanummers -->
+                                @foreach($gebruikers->getUrlRange(1, $gebruikers->lastPage()) as $page => $url)
+                                    <a href="{{ $url }}"
+                                       class="w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium transition-colors duration-150
+                                              {{ $page == $gebruikers->currentPage()
+                                                    ? 'bg-gray-900 text-white'
+                                                    : 'border border-gray-200 text-gray-600 hover:bg-gray-50' }}">
+                                        {{ $page }}
+                                    </a>
+                                @endforeach
+
+                                <!-- Volgende -->
+                                <a href="{{ $gebruikers->nextPageUrl() }}"
+                                   class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors duration-150 {{ !$gebruikers->hasMorePages() ? 'pointer-events-none opacity-40' : '' }}">
+                                    <i class="fas fa-chevron-right text-xs"></i>
+                                </a>
+                            </div>
                         </div>
-                    </td>
 
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-
-        <!-- Pagination -->
-        <div class="flex items-center justify-between px-6 py-4 border-t border-gray-100">
-            <span class="text-sm text-gray-500">
-                Toon {{ $gebruikers->firstItem() }} tot {{ $gebruikers->lastItem() }} van {{ $gebruikers->total() }} gebruikers
-            </span>
-            <div class="flex items-center gap-1">
-                <!-- Vorige -->
-                <a href="{{ $gebruikers->previousPageUrl() }}"
-                   class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors duration-150 {{ $gebruikers->onFirstPage() ? 'pointer-events-none opacity-40' : '' }}">
-                    <i class="fas fa-chevron-left text-xs"></i>
-                </a>
-
-                  <!-- Paginanummers -->
-                @foreach($gebruikers->getUrlRange(1, $gebruikers->lastPage()) as $page => $url)
-                    <a href="{{ $url }}"
-                       class="w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium transition-colors duration-150
-                              {{ $page == $gebruikers->currentPage()
-                                    ? 'bg-gray-900 text-white'
-                                    : 'border border-gray-200 text-gray-600 hover:bg-gray-50' }}">
-                        {{ $page }}
-                    </a>
-                @endforeach
-
-                <!-- Volgende -->
-                <a href="{{ $gebruikers->nextPageUrl() }}"
-                   class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors duration-150 {{ !$gebruikers->hasMorePages() ? 'pointer-events-none opacity-40' : '' }}">
-                    <i class="fas fa-chevron-right text-xs"></i>
-                </a>
-            </div>
-        </div>
-
-    </div>
-</div>
-
-
+                    </div>
+                </div>
 
             </div>
         </div>

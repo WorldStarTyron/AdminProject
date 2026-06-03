@@ -43,7 +43,7 @@ function redirectBasedOnRole($user)
 {
     return match($user->rol) {
         Role::Lid => redirect()->route('GegevensPagina'),
-        default   => redirect()->route('dashboard'),
+        default   => redirect()->route('MainDashboardPagina'),
     };
 }
 

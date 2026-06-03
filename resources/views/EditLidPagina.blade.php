@@ -20,7 +20,7 @@
             <div class="px-8 py-6">
                 {{-- Breadcrumb --}}
                 <nav class="text-sm text-gray-400 mb-6 flex items-center gap-1.5">
-                    <a href="{{ route('dashboard') }}" class="hover:text-gray-600 transition-colors">Dashboard</a>
+                    <a href="{{ route('MainDashboardPagina') }}" class="hover:text-gray-600 transition-colors">Dashboard</a>
                     <span>/</span>
                     <a href="{{ route('ledenpagina') }}" class="hover:text-gray-600 transition-colors">Members</a>
                     <span>/</span>

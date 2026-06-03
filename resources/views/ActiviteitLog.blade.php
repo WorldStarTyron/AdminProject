@@ -104,7 +104,7 @@
                 <div>
                     <!-- Breadcrumb navigation navigation links -->
                     <nav class="flex items-center gap-2 text-xs text-slate-400 mb-2 font-medium">
-                        <a href="{{ route('dashboard') }}" class="hover:text-blue-600 transition-colors">Dashboard</a>
+                        <a href="{{ route('MainDashboardPagina') }}" class="hover:text-blue-600 transition-colors">Dashboard</a>
                         <i class="fa-solid fa-chevron-right text-[8px]"></i>
                         <span class="text-slate-600">Activiteitenlog</span>
                     </nav>

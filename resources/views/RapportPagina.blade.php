@@ -36,7 +36,7 @@
                 <div>
                     <!-- Breadcrumbs -->
                     <nav class="flex items-center gap-2 text-xs text-slate-400 mb-2">
-                        <a href="{{ route('dashboard') }}" class="hover:text-blue-600 transition-colors">Dashboard</a>
+                        <a href="{{ route('MainDashboardPagina') }}" class="hover:text-blue-600 transition-colors">Dashboard</a>
                         <i class="fa-solid fa-chevron-right text-[9px]"></i>
                         <span class="text-slate-600 font-medium">Rapportage</span>
                     </nav>
@@ -293,6 +293,6 @@
 </div> 
 
 <!-- Render scripts for the chart -->
-@vite('resources/js/Rapportage-Chart.js')
+@vite('resources/js/Charts/Rapportage-Chart.js')
 </body>
 </html>

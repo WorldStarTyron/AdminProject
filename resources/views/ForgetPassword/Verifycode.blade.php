@@ -29,6 +29,11 @@
         <p class="text-sm text-gray-500 mt-2 text-center max-w-xs leading-relaxed">
             We've sent a 6-digit verification code to your registered email address. Please enter it below.
         </p>
+        @if(session('reset_attempts') && session('reset_attempts') > 0)
+            <p class="text-xs text-amber-600 mt-2 font-medium">
+                ⚠️ {{ 5 - session('reset_attempts') }} poging(en) resterend
+            </p>
+        @endif
     </div>
 
     <!-- Main Card: Verification Code Form -->
@@ -142,18 +147,24 @@
                 Verify
             </button>
 
-            <!-- Resend Code Link -->
-            <div class="text-center">
-                <a href="" class="text-sm text-gray-600 hover:text-gray-900 font-medium transition inline-flex items-center gap-1.5">
-                    <!-- Refresh Icon -->
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.992 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182" />
-                    </svg>
-                    Resend Code
-                </a>
-            </div>
-        </form>
-    </div>
+             <!-- Resend Code Form & Link -->
+             <div class="text-center">
+                 <a href="#" onclick="event.preventDefault(); document.getElementById('resend-form').submit();" class="text-sm text-gray-600 hover:text-gray-900 font-medium transition inline-flex items-center gap-1.5">
+                     <!-- Refresh Icon -->
+                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                         <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.992 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182" />
+                     </svg>
+                     Resend Code
+                 </a>
+             </div>
+         </form>
+
+         <!-- Hidden Form for Resending Code -->
+         <form id="resend-form" method="POST" action="{{ route('recover-password.post') }}" class="hidden">
+             @csrf
+             <input type="hidden" name="email" value="{{ session('reset_email') }}">
+         </form>
+     </div>
 
     <!-- ========================================== -->
     <!-- Back to Login Link                         -->

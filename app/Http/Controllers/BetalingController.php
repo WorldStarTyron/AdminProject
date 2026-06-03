@@ -9,10 +9,14 @@ use App\Models\Activiteit;
 use App\Http\Controllers\BonController;
 use Carbon\Carbon;
 use App\Models\Bon;
+use App\Models\Lid;
 use Illuminate\Support\Facades\Gate;
 
 class BetalingController extends Controller
 {
+
+
+    
     public function index(Request $request)
     {
 
@@ -93,6 +97,9 @@ class BetalingController extends Controller
             ->get()
             ->groupBy(fn($r) => $r->jaar . '-' . $r->maand)  // sleutel: "2025-3"
             ->map(fn($groep) => $groep->keyBy('methode'));    // sleutel: "fysiek" / "overmaking"
+
+
+            
  
         // Zet om naar series die ApexCharts verwacht
         $labels   = [];
@@ -488,5 +495,6 @@ class BetalingController extends Controller
             'chartOvermaking'
         ));
     }
+
 
 }

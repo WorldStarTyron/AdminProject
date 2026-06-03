@@ -13,20 +13,26 @@ use App\Http\Controllers\GebruikerController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\RapportController;
 use App\Http\Controllers\ActiviteitController;
+use App\Http\Controllers\MainDashboardController;
 
 Route::get('/', function () {
     return view('welcome');
 });
 // Dashboard
 Route::middleware(['auth'])->group(function () {
-    Route::get('/MainDashboardPagina', function () {
-        return view('MainDashboardPagina');
-    })->name('dashboard')->middleware('can:dashboard');
+Route::get('/MainDashboardPagina', [MainDashboardController::class, 'Maindashboard'])->name('MainDashboardPagina')->middleware('can:dashboard');
+Route::get('/dashboard/chart-data', [MainDashboardController::class, 'ChartData'])->name('dashboard.chartdata');
 });
-
+ 
 // Leden, Betalingen, Rapport, Log, Rollen & Gebruikers routes
 Route::middleware(['auth'])->group(function () {
     
+
+ 
+  
+
+
+
     // Lid — eigen profiel
     Route::get('/Lidpagina', [LidController::class, 'show'])->name('GegevensPagina')->middleware('can:eigen-profiel');
 
@@ -41,6 +47,9 @@ Route::middleware(['auth'])->group(function () {
 
     // Leden — verwijderen (alleen beheerder)
     Route::delete('/ledenpagina/delete/{lidId}', [PostController::class, 'destroy'])->name('ledenpagina.delete')->middleware('can:leden-verwijderen');
+
+    
+
 
     // Betalingen
     Route::get('/betalingPagina', [BetalingController::class, 'index'])->name('betalingPagina')->middleware('can:betalingen-bekijken');

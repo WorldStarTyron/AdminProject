@@ -28,7 +28,7 @@ public function showLogin()
        if (Auth::attempt($credentials)) {
     $user = Auth::user();
 
-    // ✅ Eerst checken of account actief is
+    // Eerst checken of account actief is
     if ($user->status === 'Inactief') {
         Auth::logout();
         return redirect()->route('login')
@@ -62,7 +62,7 @@ public function showLogin()
         }
 
         // Alle andere rollen (Beheerders, Voorzitter, etc.) gaan naar het dashboard
-        return redirect()->route('dashboard');
+        return redirect()->route('MainDashboardPagina');
     }
 
 // ----------------------Logout----------------------

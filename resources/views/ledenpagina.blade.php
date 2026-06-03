@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/css/ledenpagina-new.css', 'resources/css/Toevoegen.css', 'resources/js/app.js', 'resources/js/FormValidator.js', 'resources/js/AddLidModal.js'])
+    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/css/ledenpagina-new.css', 'resources/css/Toevoegen.css', 'resources/js/app.js', 'resources/js/FormValidator.js', 'resources/js/Modal/AddLidModal.js'])
 </head>
 <body>
     <div class="flex min-h-screen">
@@ -52,6 +52,8 @@
                 </div>
 
                 @include('layouts.Totalleden-Charts')
+
+                
                   <!--- Leden Table with all details -->
                 <div class="lp-table-section">
                     <div class="lp-table-wrapper">
@@ -197,6 +199,6 @@
         <span>Lid succesvol toegevoegd!</span>
     </div>
 
-    @vite(['resources/js/Button&More.js', 'resources/js/TotalLeden-Chart.js'])
+    @vite(['resources/js/Button&More.js', 'resources/js/Charts/TotalLeden-Chart.js'])
 </body>
 </html>

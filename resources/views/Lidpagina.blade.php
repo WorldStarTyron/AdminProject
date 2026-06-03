@@ -79,7 +79,7 @@
                                 <div class="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
                                 <p class="text-xs font-bold tracking-[0.15em] text-slate-400 uppercase mb-3">Outstanding Balance</p>
                                 <p class="text-4xl font-extrabold tracking-tight mb-5">
-                                    <span class="text-lg font-bold text-slate-300 mr-1">SRD</span>{{ number_format($openstaandeBalans, 2, ',', '.') }}
+                                <span class="text-lg font-bold text-slate-300 mr-1">SRD</span>{{ number_format($openstaandeBalans, 2, ',', '.') }}
                                 </p>
                                 <!-- Deadline-->
                                  <div class="">

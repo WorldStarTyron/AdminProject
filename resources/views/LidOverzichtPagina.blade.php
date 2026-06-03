@@ -29,7 +29,7 @@
 
                 <!-- Breadcrumb -->
                 <nav class="flex items-center gap-2 text-sm text-gray-400 mb-6">
-                    <a href="{{ route('dashboard') }}" class="hover:text-gray-600 transition-colors">Dashboard</a>
+                    <a href="{{ route('MainDashboardPagina') }}" class="hover:text-gray-600 transition-colors">Dashboard</a>
                     <i class="fa-solid fa-chevron-right text-xs"></i>
                     <a href="{{ route('ledenpagina') }}" class="hover:text-gray-600 transition-colors">Members</a>
                     <i class="fa-solid fa-chevron-right text-xs"></i>
@@ -103,7 +103,7 @@
                         </div>
                     </div>
 
-                    <!-- Card 3: Action buttons with @can guards -->
+                    <!-- Card 3: Action buttons with can guards -->
                     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                         <h3 class="flex items-center gap-2 text-base font-semibold text-gray-900 mb-5">Action:</h3>
                         <div class="flex flex-col gap-3">
@@ -241,18 +241,11 @@
                                     </a>
                                 @endif
 
-                                @foreach($betalingen->links()->elements as $element)
-                                    @if(is_string($element))
-                                        <span class="w-8 h-8 flex items-center justify-center text-gray-400 text-sm">{{ $element }}</span>
-                                    @endif
-                                    @if(is_array($element))
-                                        @foreach($element as $page => $url)
-                                            @if($page == $betalingen->currentPage())
-                                                <span class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-900 text-white text-sm font-semibold">{{ $page }}</span>
-                                            @else
-                                                <a href="{{ $url }}" class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-600 hover:bg-gray-100 transition-colors text-sm">{{ $page }}</a>
-                                            @endif
-                                        @endforeach
+                                @foreach($betalingen->getUrlRange(1, $betalingen->lastPage()) as $page => $url)
+                                    @if($page == $betalingen->currentPage())
+                                        <span class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-900 text-white text-sm font-semibold">{{ $page }}</span>
+                                    @else
+                                        <a href="{{ $url }}" class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-600 hover:bg-gray-100 transition-colors text-sm">{{ $page }}</a>
                                     @endif
                                 @endforeach
 
@@ -265,7 +258,6 @@
                                         <i class="fa-solid fa-chevron-right text-xs"></i>
                                     </span>
                                 @endif
-
                             </div>
                         @endif
                     </div>
@@ -276,6 +268,6 @@
  
 
     <!-- Editpagina.js -->
-    @vite('resources/js/EditPagina.js')
+   @vite('resources/js/EditPagina.js')
 </body>
 </html>

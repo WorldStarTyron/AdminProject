@@ -21,76 +21,219 @@
             @include('layouts.header')
 
             <main class="p-6 max-w-[1500px] mx-auto space-y-6">
-                <!-- Stats Row -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Header Title Section -->
+                <div class="mb-6">
+                    <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Performance Overview</h1>
+                    <p class="text-sm text-gray-500 mt-1">Welcome back. Here's what's happening today.</p>
+                </div>
 
-                    <!-- Total Income -->
-                    <div class="bg-white rounded-xl p-5 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-slate-100 flex flex-col justify-between h-full">
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="text-sm font-medium text-slate-600">Total Income</h3>
-                            <div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-white">
+                <!-- Stats Row -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+                    <!-- Card 1: TOTAL INCOME -->
+                    <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 text-white rounded-xl p-5 flex flex-col justify-between h-full shadow-lg shadow-indigo-950/15 border-0">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-[10px] font-extrabold tracking-wider text-indigo-200/80 uppercase">TOTAL INCOME</span>
+                            <div class="w-8 h-8 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center text-white">
                                 <i class="fa-solid fa-dollar-sign text-sm"></i>
                             </div>
                         </div>
                         <div>
-                            <p class="text-2xl font-bold text-slate-900">Srd 33,321.50</p>
-                            <p class="text-xs text-slate-400 mt-1">elk maand</p>
+                            <div class="text-[11px] text-indigo-300/80 font-semibold mb-0.5">Srd</div>
+                            <div class="text-3xl font-bold text-white tracking-tight leading-none mb-3">{{number_format($totaleInkomsten, 2)}}</div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold font-mono">+12%</span>
+                                <span class="text-xs text-indigo-200/80">elk maand</span>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Total Leden -->
-                    <div class="bg-white rounded-xl p-5 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-slate-100 flex flex-col justify-between h-full">
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="text-sm font-medium text-slate-600">Total Leden</h3>
-                            <div class="w-8 h-8 flex items-center justify-center text-slate-600">
-                                <i class="fa-solid fa-users text-lg"></i>
+                    <!-- Card 2: TOTAL LEDEN -->
+                    <div class="bg-gradient-to-br from-indigo-600 via-indigo-700 to-blue-700 text-white rounded-xl p-5 flex flex-col justify-between h-full shadow-lg shadow-indigo-900/15 border-0">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-[10px] font-extrabold tracking-wider text-blue-100 uppercase">TOTAL LEDEN</span>
+                            <div class="w-8 h-8 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center text-white">
+                                <i class="fa-solid fa-users text-sm"></i>
                             </div>
                         </div>
                         <div>
-                            <p class="text-2xl font-bold text-slate-900">65</p>
-                            <p class="text-xs text-slate-400 mt-1">+3 392</p>
+                            <div class="text-3xl font-bold text-white tracking-tight leading-none mb-3">{{$totaalLeden}}</div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-xs text-emerald-300 font-bold bg-white/10 px-1.5 py-0.5 rounded font-mono">+2,392</span>
+                                <span class="text-xs text-blue-100/90">since last period</span>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Totaal Betaald -->
-                    <div class="bg-white rounded-xl p-5 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-slate-100 flex flex-col justify-between h-full">
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="text-sm font-medium text-slate-600">Totaal Betaald</h3>
-                            <div class="w-8 h-8 flex items-center justify-center text-slate-600">
-                                <i class="fa-solid fa-user-check text-lg"></i>
+                    <!-- Card 3: TOTAAL BETAALD -->
+                    <div class="bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 text-white rounded-xl p-5 flex flex-col justify-between h-full shadow-lg shadow-emerald-950/15 border-0">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-[10px] font-extrabold tracking-wider text-emerald-100 uppercase">TOTAAL BETAALD</span>
+                            <div class="w-8 h-8 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center text-white">
+                                <i class="fa-regular fa-circle-check text-sm"></i>
                             </div>
                         </div>
                         <div>
-                            <p class="text-2xl font-bold text-slate-900">59</p>
-                            <p class="text-xs text-slate-400 mt-1">-1.22%</p>
+                            <div class="text-3xl font-bold text-white tracking-tight leading-none mb-3">{{$totaalBetaald}}</div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-xs text-emerald-200 font-bold bg-white/10 px-1.5 py-0.5 rounded font-mono">-1.22%</span>
+                                <span class="text-xs text-emerald-100/90">vs monthly avg</span>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Niet Betaald -->
-                    <div class="bg-white rounded-xl p-5 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-slate-100 flex flex-col justify-between h-full">
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="text-sm font-medium text-slate-600">Niet Betaald</h3>
-                            <div class="w-8 h-8 flex items-center justify-center text-slate-600">
-                                <i class="fa-solid fa-user-xmark text-lg"></i>
+                    <!-- Card 4: NIET BETAALD -->
+                    <div class="bg-gradient-to-br from-rose-500 via-rose-600 to-red-700 text-white rounded-xl p-5 flex flex-col justify-between h-full shadow-lg shadow-rose-950/15 border-0">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-[10px] font-extrabold tracking-wider text-rose-100 uppercase">NIET BETAALD</span>
+                            <div class="w-8 h-8 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center text-white">
+                                <i class="fa-regular fa-circle-xmark text-sm"></i>
                             </div>
                         </div>
                         <div>
-                            <p class="text-2xl font-bold text-slate-900">6</p>
-                            <p class="text-xs text-slate-400 mt-1">-1.22%</p>
+                            <div class="text-2xl font-bold text-white tracking-tight leading-none mb-3">{{$totaalNietBetaald}}</div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-xs text-rose-200 font-bold bg-white/10 px-1.5 py-0.5 rounded font-mono">-1.22%</span>
+                                <span class="text-xs text-rose-100/90">unpaid this cycle</span>
+                            </div>
                         </div>
                     </div>
 
                 </div>
 
-                <!-- Chart Section -->
-                <div class="bg-white rounded-xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-slate-100 p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-base font-semibold text-slate-800">Maandelijke preformance</h3>
-                        <button class="text-slate-400 hover:text-slate-600 bg-slate-50 p-1.5 rounded-md">
-                            <i class="fa-solid fa-gear text-base"></i>
-                        </button>
+                <!-- Chart and Upcoming Payments Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Left: Monthly Performance Chart (takes 2 cols) -->
+                    <div class="lg:col-span-2 bg-white rounded-xl border border-gray-200/80 p-6 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-base font-semibold text-slate-800">Maandelijke performance</h3>
+                            <button class="text-slate-400 hover:text-slate-600 bg-slate-50 border border-slate-100 p-2 rounded-lg transition-colors">
+                                <i class="fa-solid fa-gear text-sm"></i>
+                            </button>
+                        </div>
+ 
+                        <!--hier komt mijn grafiek-->
+                        <div id="performanceChart" class="w-full h-[300px]"></div>
+
                     </div>
-                    <div id="performanceChart" class="w-full h-[300px]"></div>
+
+                    <!-- Right: Upcoming Payments (takes 1 col) -->
+                    <div class="bg-white rounded-xl border border-gray-200/80 p-6 shadow-[0_1px_3px_rgba(0,0,0,0.02)] flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-base font-semibold text-slate-800 mb-5">Aankomende Betalingen</h3>
+                            
+                            <div class="space-y-3.5">
+                                @forelse($deadlineLeden as $lid)
+                                    @php
+                                        // Retrieve the first unpaid payment to determine the deadline
+                                        $firstPayment = $lid->betalingen->first();
+                                        if ($firstPayment) {
+                                            // The payment deadline is 1 month after the submission date (ingediend_op)
+                                            $deadline = \Carbon\Carbon::parse($firstPayment->ingediend_op)->addMonth();
+                                            
+                                            // Calculate the signed number of days left until the deadline day
+                                            $daysLeft = now()->startOfDay()->diffInDays($deadline->startOfDay(), false);
+                                            
+                                            // Determine urgency label and color coding based on days remaining
+                                            
+                                            if ($daysLeft < 0) {
+                                                // Overdue: Show how many days overdue in red
+                                                $daysText = 'Verlopen (' . abs($daysLeft) . ' ' . (abs($daysLeft) == 1 ? 'dag' : 'dagen') . ')';
+                                                $colorClass = 'red';
+                                            } elseif ($daysLeft == 0) {
+                                                // Due today: High urgency in red
+                                                $daysText = 'Vandaag';
+                                                $colorClass = 'red';
+                                            } elseif ($daysLeft == 1) {
+                                                // Due tomorrow: High urgency in amber
+                                                $daysText = 'Morgen';
+                                                $colorClass = 'amber';
+                                            } elseif ($daysLeft <= 3) {
+                                                // Due within 3 days: Medium urgency in amber
+                                                $daysText = 'Binnen ' . $daysLeft . ' dagen';
+                                                $colorClass = 'amber';
+                                            } elseif ($daysLeft <= 5) {
+                                                // Due within 5 days: Moderate urgency in sky blue
+                                                $daysText = 'Binnen ' . $daysLeft . ' dagen';
+                                                $colorClass = 'sky';
+                                            } else {
+                                                // Due in 6 or 7 days: Low urgency in violet
+                                                $daysText = 'Binnen ' . $daysLeft . ' dagen';
+                                                $colorClass = 'violet';
+                                            }
+                                            
+                                            $formattedDeadline = $deadline->format('d-m-Y');
+                                        } else {
+                                            // Fallback if no unpaid payments are found for the member
+                                            $daysText = 'Geen openstaande betaling';
+                                            $colorClass = 'gray';
+                                            $formattedDeadline = '';
+                                        }
+
+                                        // Default fallback Tailwind styling classes (gray styling)
+                                        $stripeColor = 'bg-gray-500';
+                                        $iconBg = 'bg-gray-50';
+                                        $iconBorder = 'border-gray-100';
+                                        $iconText = 'text-gray-600';
+                                        $daysTextColor = 'text-gray-600';
+
+                                        // Map the selected urgency color class to specific Tailwind classes
+                                        if ($colorClass === 'red') {
+                                            $stripeColor = 'bg-red-500';
+                                            $iconBg = 'bg-red-50';
+                                            $iconBorder = 'border-red-100';
+                                            $iconText = 'text-red-600';
+                                            $daysTextColor = 'text-red-600';
+                                        } elseif ($colorClass === 'amber') {
+                                            $stripeColor = 'bg-amber-500';
+                                            $iconBg = 'bg-amber-50';
+                                            $iconBorder = 'border-amber-100';
+                                            $iconText = 'text-amber-600';
+                                            $daysTextColor = 'text-amber-600';
+                                        } elseif ($colorClass === 'sky') {
+                                            $stripeColor = 'bg-sky-500';
+                                            $iconBg = 'bg-sky-50';
+                                            $iconBorder = 'border-sky-100';
+                                            $iconText = 'text-sky-600';
+                                            $daysTextColor = 'text-sky-600';
+                                        } elseif ($colorClass === 'violet') {
+                                            $stripeColor = 'bg-violet-500';
+                                            $iconBg = 'bg-violet-50';
+                                            $iconBorder = 'border-violet-100';
+                                            $iconText = 'text-violet-600';
+                                            $daysTextColor = 'text-violet-600';
+                                        }
+                                    @endphp
+
+                                    <div class="flex items-center justify-between p-3.5 bg-gray-50/50 border border-gray-100 rounded-xl relative overflow-hidden pl-5 hover:shadow-sm transition-all duration-200">
+                                        <div class="absolute left-0 top-0 bottom-0 w-1 {{ $stripeColor }}"></div>
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-9 h-9 rounded-full {{ $iconBg }} {{ $iconBorder }} flex items-center justify-center {{ $iconText }} shadow-sm">
+                                                <i class="fa-regular fa-clock text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <div class="text-sm font-semibold text-gray-800">{{ $lid->gebruiker->naam }}</div>
+                                                <div class="text-xs {{ $daysTextColor }} font-semibold mt-0.5" title="Deadline: {{ $formattedDeadline }}">
+                                                    {{ $daysText }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="text-sm font-bold text-gray-900">
+                                            € {{ number_format($lid->betalingen->sum('bedrag'), 2, ',', '.') }}
+                                        </div>
+                                    </div>
+                                @empty
+                                    <div class="flex flex-col items-center justify-center p-6 border border-dashed border-gray-200 rounded-xl bg-gray-50/30 text-center">
+                                        <div class="w-10 h-10 rounded-full bg-green-50 border border-green-100 flex items-center justify-center text-green-600 mb-3 shadow-sm">
+                                            <i class="fa-regular fa-circle-check text-base"></i>
+                                        </div>
+                                        <div class="text-sm font-medium text-gray-700">Geen aankomende deadlines</div>
+                                        <div class="text-xs text-gray-500 mt-1">Alle openstaande betalingen zijn up-to-date.</div>
+                                    </div>
+                                @endforelse
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 @include('layouts.Main_Dashboard Layouts.Main_Table')
@@ -99,7 +242,7 @@
     </div>
 
     <!-- Script -->
-    @vite('resources/js/MainDashboard-chart.js')
+    @vite('resources/js/Charts/MainDashboard-chart.js')
 
 </body>
 </html>

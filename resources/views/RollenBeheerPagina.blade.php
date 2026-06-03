@@ -34,7 +34,7 @@
                 <div class="flex items-start justify-between mb-6">
                     <div>
                         <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                            <i class="fa-solid fa-user-shield text-gray-700"></i>
+                            <i class="fa-solid fa-user-shield text-gray-500"></i>
                             Rollen Toewijzen
                         </h1>
                         <p class="mt-1 text-sm text-gray-500 max-w-md">
@@ -43,10 +43,10 @@
                     </div>
                 </div>
 
-                 <!-- Snel Rol Toewijzen -->
+                <!-- Snel Rol Toewijzen -->
                 <div class="bg-white border border-gray-200 rounded-xl p-5 mb-5">
                     <h2 class="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-bolt text-yellow-500"></i>
+                        <i class="fa-solid fa-bolt text-yellow-400"></i>
                         Snel Rol Toewijzen
                     </h2>
                     <form action="{{ route('rollen-beheer.assign') }}" method="POST" id="quickAssignForm">
@@ -179,11 +179,24 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-50">
+                                @php
+                                    $avatarKleuren = [
+                                        'bg-blue-100 text-blue-600',
+                                        'bg-purple-100 text-purple-600',
+                                        'bg-green-100 text-green-600',
+                                        'bg-red-100 text-red-600',
+                                        'bg-amber-100 text-amber-600',
+                                        'bg-pink-100 text-pink-600',
+                                    ];
+                                    $avatarIndex = 0;
+                                @endphp
+
                                 @forelse($gebruikers as $gebruiker)
+                                @php $avatarKleur = $avatarKleuren[$avatarIndex % count($avatarKleuren)]; $avatarIndex++; @endphp
                                 <tr class="hover:bg-gray-50 transition-colors">
                                     <td class="px-5 py-3.5">
                                         <div class="flex items-center gap-3">
-                                            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-semibold text-blue-600 shrink-0">
+                                            <div class="w-8 h-8 rounded-full {{ $avatarKleur }} flex items-center justify-center text-xs font-semibold shrink-0">
                                                 {{ strtoupper(substr($gebruiker->naam, 0, 2)) }}
                                             </div>
                                             <div>
@@ -195,15 +208,15 @@
                                             </div>
                                         </div>
                                     </td>
-                                     
+
                                     <!-- Huidige rol -->
                                     <td class="px-5 py-3.5">
                                         <div class="flex flex-wrap gap-1">
                                             @forelse($gebruiker->rollen as $rol)
-                                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium 
-                                                    {{ $rol->naam == 'Applicatie Beheerder' ? 'bg-red-800 text-white' : 
-                                                       ($rol->naam == 'Voorzitter' ? 'bg-gray-100 text-gray-700 border border-gray-200' : 
-                                                       ($rol->naam == 'Administratie Medewerker' ? 'bg-blue-100 text-blue-700 border border-blue-200' : 
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium
+                                                    {{ $rol->naam == 'Applicatie Beheerder' ? 'bg-red-800 text-white' :
+                                                       ($rol->naam == 'Voorzitter' ? 'bg-purple-100 text-purple-700 border border-purple-200' :
+                                                       ($rol->naam == 'Administratie Medewerker' ? 'bg-blue-100 text-blue-700 border border-blue-200' :
                                                        'bg-gray-100 text-gray-700 border border-gray-200')) }}">
                                                     @if($rol->naam == 'Applicatie Beheerder')
                                                         <i class="fa-solid fa-crown text-[10px]"></i>
@@ -231,7 +244,7 @@
                                         </span>
                                     </td>
                                     <td class="px-5 py-3.5">
-                                        <button type="button" onclick="openRoleModal({{ $gebruiker->gebruiker_id }})" class="text-sm text-gray-600 hover:text-gray-900 font-medium transition-colors flex items-center gap-1.5">
+                                        <button type="button" onclick="openRoleModal({{ $gebruiker->gebruiker_id }})" class="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors flex items-center gap-1.5">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                             Bewerk Rol
                                         </button>
@@ -263,16 +276,16 @@
                     {{-- Beveiligingstips --}}
                     <div class="w-56 bg-white border border-gray-200 rounded-xl p-4 shrink-0">
                         <div class="flex items-center gap-2 mb-3">
-                            <i class="fa-solid fa-shield text-gray-700"></i>
+                            <i class="fa-solid fa-shield text-gray-500"></i>
                             <h3 class="text-xs font-semibold text-gray-700">Beveiligingstips</h3>
                         </div>
                         <ul class="flex flex-col gap-3">
                             <li class="flex items-start gap-2">
-                                <i class="fa-solid fa-circle-check text-green-600 shrink-0 mt-0.5 text-sm"></i>
+                                <i class="fa-solid fa-circle-check text-green-500 shrink-0 mt-0.5 text-sm"></i>
                                 <p class="text-xs text-gray-500 leading-relaxed">Gebruik het principe van 'least privilege': geef gebruikers alleen de machtigingen die ze echt nodig hebben.</p>
                             </li>
                             <li class="flex items-start gap-2">
-                                <i class="fa-solid fa-circle-check text-green-600 shrink-0 mt-0.5 text-sm"></i>
+                                <i class="fa-solid fa-circle-check text-green-500 shrink-0 mt-0.5 text-sm"></i>
                                 <p class="text-xs text-gray-500 leading-relaxed">Review maandelijks de lijst met actieve beheerders.</p>
                             </li>
                         </ul>
@@ -314,7 +327,6 @@
             </form>
         </div>
     </div>
-
 
     <!-- Rollen scripts -->
     <script>

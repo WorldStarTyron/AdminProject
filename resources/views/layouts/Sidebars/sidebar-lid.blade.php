@@ -18,8 +18,8 @@
         <ul class="space-y-1">
 
             <!-- Dashboard -->
-            <li class="rounded-lg {{ request()->routeIs('dashboard') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors" data-tooltip="Dashboard">
+            <li class="rounded-lg {{ request()->routeIs('MainDashboardPagina') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                <a href="{{ route('MainDashboardPagina') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors" data-tooltip="Dashboard">
                     <span class="shrink-0 w-5 text-center">
                         <i class="fa-solid fa-user text-base"></i>
                     </span>

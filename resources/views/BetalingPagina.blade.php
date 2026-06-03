@@ -9,8 +9,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/css/Toevoegen.css', 'resources/js/app.js', 'resources/js/AddBetalingModal.js'])
+    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/css/BetalingPagina.css', 'resources/js/app.js', 'resources/js/Modal/AddBetalingModal.js'])
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="m-0 bg-[#f0f4f8] text-slate-700 font-['Inter',sans-serif] antialiased">
     <div class="flex min-h-screen">
@@ -19,34 +20,33 @@
         <div class="flex-1 ml-0 md:ml-64 transition-all duration-300 min-w-0 overflow-x-hidden">
             @include('layouts.header')
 
-            {{-- Stats & Chart Row --}}
-            <div class="flex flex-col lg:flex-row items-stretch gap-6 p-6 px-8 animate-[fadeSlideUp_0.4s_ease-out]">
+            <div class="bp-page-content">
+                {{-- Stats & Chart Row --}}
+                <div class="bp-stats-row">
 
-                {{-- Total Income Card --}}
-                <div class="relative bg-gradient-to-br from-[#1e3a8a] via-[#1d4ed8] to-[#2563eb] rounded-2xl p-6 flex flex-col justify-between min-h-[160px] w-full lg:max-w-[340px] lg:min-w-[260px] shrink-0 overflow-hidden shadow-[0_4px_16px_rgba(30,58,138,0.2),0_1px_3px_rgba(30,58,138,0.1)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(30,58,138,0.3),0_4px_12px_rgba(30,58,138,0.15)]">
-                    <div class="absolute -bottom-[50px] -right-[30px] w-[150px] h-[150px] rounded-full bg-white/[0.06] pointer-events-none"></div>
-                    <div class="absolute -top-[30px] right-[50px] w-[90px] h-[90px] rounded-full bg-white/[0.04] pointer-events-none"></div>
-
-                    <div class="flex justify-between items-center">
-                        <div class="mt-5">
-                            <p class="text-sm font-semibold text-white/90 mb-1">Total Income</p>
-                            <p class="text-[2.5rem] font-extrabold text-white leading-none tracking-tight">Srd {{number_format($maandTotaal, 2)}}</p>
-                            <p class="text-xs text-white/50 mt-1">
-                                {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
-                            </p>
+                    {{-- Total Income Card --}}
+                    <div class="bp-stat-card">
+                        <div class="bp-stat-card-header">
+                            <span class="bp-stat-label">Total Income</span>
+                            <div class="bp-stat-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 1V23M17 5H9.5C8.57174 5 7.6815 5.36875 7.02513 6.02513C6.36875 6.6815 6 7.57174 6 8.5C6 9.42826 6.36875 10.3185 7.02513 10.9749C7.6815 11.6313 8.57174 12 9.5 12H14.5C15.4283 12 16.3185 12.3687 16.9749 13.0251C17.6313 13.6815 18 14.5717 18 15.5C18 16.4283 17.6313 17.3185 16.9749 17.9749C16.3185 18.6313 15.4283 19 14.5 19H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
                         </div>
-                        <div class="w-10 h-10 bg-white/[0.12] rounded-xl flex items-center justify-center backdrop-blur-sm">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 1V23M17 5H9.5C8.57174 5 7.6815 5.36875 7.02513 6.02513C6.36875 6.6815 6 7.57174 6 8.5C6 9.42826 6.36875 10.3185 7.02513 10.9749C7.6815 11.6313 8.57174 12 9.5 12H14.5C15.4283 12 16.3185 12.3687 16.9749 13.0251C17.6313 13.6815 18 14.5717 18 15.5C18 16.4283 17.6313 17.3185 16.9749 17.9749C16.3185 18.6313 15.4283 19 14.5 19H6" stroke="rgba(255,255,255,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
+                        <div>
+                            <div class="bp-stat-value">Srd {{number_format($maandTotaal, 2)}}</div>
+                            <div class="bp-stat-meta">
+                                {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
+                            </div>
                         </div>
                     </div>
+
+                    @include('layouts.BetalingLayout.BetalingChart')
                 </div>
 
-                @include('layouts.BetalingLayout.BetalingChart')
+                @include('layouts.BetalingLayout.Table-Betaling')
             </div>
-
-            @include('layouts.BetalingLayout.Table-Betaling')
         </div>
     </div>
 
@@ -69,64 +69,12 @@
         <span id="subscriptieToastText">Check klaar!</span>
     </div>
 
-    @vite('resources/js/TotalBetaling-chart.js')
+    @vite('resources/js/Charts/TotalBetaling-chart.js')
     @vite('resources/js/OptieDisable.js')
     @vite('resources/js/Button&More.js')
+    @vite('resources/js/CheckSubscriptie.js')
 
-    <!-- Script voor de subscriptie check knop -->
-    <script>
-        // Deze functie stuurt een request om te checken of leden betaald hebben
-        function checkSubscriptie() {
-            // Pak de knop en het icon
-            const btn = document.getElementById('checkSubscriptieBtn');
-            const icon = document.getElementById('subscriptieIcon');
-
-            // Zet de knop uit zodat je niet dubbel kan klikken
-            btn.disabled = true;
-            btn.style.opacity = '0.7';
-
-            // Laat het icon draaien (loading animatie)
-            icon.style.animation = 'spin 1s linear infinite';
-
-            // Stuur het request naar de server
-            fetch('{{ route("betalingen.checkSubscriptie") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json',
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Zet de knop weer aan
-                btn.disabled = false;
-                btn.style.opacity = '1';
-                icon.style.animation = '';
-
-                // Laat het resultaat zien in een toast
-                const toast = document.getElementById('subscriptieToast');
-                const text = document.getElementById('subscriptieToastText');
-                text.textContent = data.message;
-                toast.classList.add('show');
-
-                // Toast verdwijnt na 4 seconden
-                setTimeout(() => toast.classList.remove('show'), 4000);
-
-                // Pagina herladen zodat je de nieuwe status ziet in de tabel
-                setTimeout(() => location.reload(), 1500);
-            })
-            .catch(error => {
-                // Bij een fout: zet de knop weer aan
-                btn.disabled = false;
-                btn.style.opacity = '1';
-                icon.style.animation = '';
-
-                alert('Er ging iets mis bij de subscriptie check.');
-                console.error('Fout:', error);
-            });
-        }
-    </script>
+    
 
     <!-- Animatie voor het draaiende icon -->
     <style>

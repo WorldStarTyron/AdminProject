@@ -43,6 +43,19 @@
         </p>
 
         <!-- Recovery Form  -->
+        @if(auth()->check())
+            <div class="mb-5 p-3.5 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-800 text-xs flex flex-col gap-2">
+                <div class="font-medium">
+                    U bent momenteel ingelogd als <strong>{{ auth()->user()->email }}</strong>. Het e-mailveld is daarom vergrendeld.
+                </div>
+                <div>
+                    <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form-recover').submit();" class="font-bold underline text-amber-900 hover:text-amber-950">
+                        Klik hier om uit te loggen
+                    </a> en een ander e-mailadres te gebruiken.
+                </div>
+            </div>
+        @endif
+
         <form method="POST" action="{{route('recover-password.post')}}" class="space-y-5">
             @csrf 
 
@@ -59,10 +72,11 @@
                         type="email"
                         id="email"
                         name="email"
-                        value="{{ old('email') }}"
+                        value="{{ auth()->check() ? auth()->user()->email : old('email') }}"
                         placeholder="name@company.com"
                         required
-                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-300 transition pr-10 @error('email') border-red-400 @enderror"
+                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-300 transition pr-10 @error('email') border-red-400 @enderror {{ auth()->check() ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                        @if(auth()->check()) readonly @endif
                     >
 
                     <!-- Mail Icon (right side of input) -->
@@ -136,7 +150,10 @@
             <a href="#" class="text-xs text-gray-500 hover:text-gray-700 font-medium transition">Help Center</a>
             <a href="#" class="text-xs text-gray-500 hover:text-gray-700 font-medium transition">Privacy Policy</a>
         </div>
-    </footer>
-
-</body>
-</html>
+     @if(auth()->check())
+         <form id="logout-form-recover" method="POST" action="{{ route('logout') }}" class="hidden">
+             @csrf
+         </form>
+     @endif
+ </body>
+ </html>

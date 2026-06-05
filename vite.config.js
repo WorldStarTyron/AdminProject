@@ -23,6 +23,7 @@ export default defineConfig({
                 'resources/js/Charts/TotalLeden-Chart.js',
                 'resources/js/verifycode.js',
                 'resources/js/Modal/AddBetalingModal.js',
+                'resources/js/Modal/EditBetalingModal.js',
                 'resources/js/Charts/TotalBetaling-chart.js',
                 'resources/js/OptieDisable.js',
                 'resources/js/CheckSubscriptie.js'

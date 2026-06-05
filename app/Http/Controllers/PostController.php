@@ -97,7 +97,19 @@ class PostController extends Controller
             }
             $gebruiker->rollen()->attach($lidRol->rol_id);
 
-            // 4. Log the activity under the authenticated admin or system
+            // 4. Maak automatisch een betaling aan met status "Openstaand"
+            $datum = \Carbon\Carbon::now();
+            $nieuwLid = \App\Models\Lid::where('gebruiker_id', $gebruiker->gebruiker_id)->first();
+            \App\Models\Betaling::create([
+                'lid_id'  => $nieuwLid->lid_id,
+                'bedrag'  => 45,
+                'methode' => 'fysiek',
+                'status'  => 'Openstaand',
+                'maand'   => $datum->month,
+                'jaar'    => $datum->year,
+            ]);
+
+            // 5. Log the activity under the authenticated admin or system
             if (auth()->check()) {
                 Activiteit::log(auth()->id(), 'lid_aangemaakt', [
                     'lid_naam'  => $request->name,

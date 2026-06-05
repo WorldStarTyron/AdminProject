@@ -62,6 +62,14 @@ class CheckSubscription extends Command
                 continue;
             }
 
+            // Als de status "Openstaand" is -> deadline is voorbij, wijzig naar niet_betaald
+            if ($betaling && $betaling->status === 'Openstaand') {
+                $betaling->update(['status' => 'niet_betaald']);
+                $this->warn("  ❌ {$naam} - openstaand → niet_betaald (deadline voorbij)");
+                $nietBetaald++;
+                continue;
+            }
+
             // Als er een betaling is met andere status (bv. in_behandeling)
             // Dan updaten we die naar "niet_betaald"
             if ($betaling) {

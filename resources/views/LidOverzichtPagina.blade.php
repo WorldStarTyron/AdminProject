@@ -31,7 +31,7 @@
                 <nav class="flex items-center gap-2 text-sm text-gray-400 mb-6">
                     <a href="{{ route('MainDashboardPagina') }}" class="hover:text-gray-600 transition-colors">Dashboard</a>
                     <i class="fa-solid fa-chevron-right text-xs"></i>
-                    <a href="{{ route('ledenpagina') }}" class="hover:text-gray-600 transition-colors">Members</a>
+                    <a href="{{ route('ledenpagina') }}" class="hover:text-gray-600 transition-colors">Leden</a>
                     <i class="fa-solid fa-chevron-right text-xs"></i>
                     <span class="text-gray-700 font-medium">Lid Profiel</span>
                 </nav>
@@ -105,7 +105,7 @@
 
                     <!-- Card 3: Action buttons with can guards -->
                     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                        <h3 class="flex items-center gap-2 text-base font-semibold text-gray-900 mb-5">Action:</h3>
+                        <h3 class="flex items-center gap-2 text-base font-semibold text-gray-900 mb-5">Actions:</h3>
                         <div class="flex flex-col gap-3">
 
                             @can('leden-beheren')
@@ -128,6 +128,37 @@
                                     </button>
                                 </form>
                             @endcan
+
+                            <!--Heractiveer knop: Alleen zichtbaar als account Inactief is -->
+                        
+@if($lid->gebruiker->status === 'Inactief')
+    @can('leden-heractiveren')
+        <form action="{{ route('ledenpagina.heractiveer', $lid->lid_id) }}" method="POST">
+            @csrf
+            <button type="submit"
+                    onclick="return confirm('Weet u zeker dat u dit lid wilt heractiveren?')"
+                    class="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl border border-green-200 bg-white text-green-600 text-sm font-medium hover:bg-green-50 hover:border-green-300 transition-all shadow-sm">
+                <i class="fa-solid fa-user-check"></i>
+                Heractiveer Account
+            </button>
+        </form>
+    @endcan
+@endif
+
+                 <!-- Deactiveer knop -->
+@if($lid->gebruiker->status === 'Actief')
+    @can('leden-Deactiveren')
+        <form action="{{ route('ledenpagina.deactiveer', $lid->lid_id) }}" method="POST">
+            @csrf
+            <button type="submit"
+                    onclick="return confirm('Weet u zeker dat u dit lid wilt deactiveren?')"
+                    class="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl border border-orange-200 bg-white text-orange-500 text-sm font-medium hover:bg-orange-50 hover:border-orange-300 transition-all shadow-sm">
+                <i class="fa-solid fa-user-slash"></i>
+                Deactiveer Account
+            </button>
+        </form>
+    @endcan
+@endif
 
                         </div>
                     </div>

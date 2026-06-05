@@ -48,14 +48,16 @@ Route::middleware(['auth'])->group(function () {
     // Leden — verwijderen (alleen beheerder)
     Route::delete('/ledenpagina/delete/{lidId}', [PostController::class, 'destroy'])->name('ledenpagina.delete')->middleware('can:leden-verwijderen');
 
-    
+    // leden - Heractiveer
+    Route::post('/leden/{lid_id}/heractiveer', [LidController::class, 'heractiveer'])->name('ledenpagina.heractiveer')->middleware('can:leden-heractiveren');
+    // Leden - Deactiveer
+Route::post('/leden/{lid_id}/deactiveer', [LidController::class, 'deactiveer'])->name('ledenpagina.deactiveer')->middleware('can:leden-Deactiveren');
 
 
     // Betalingen
     Route::get('/betalingPagina', [BetalingController::class, 'index'])->name('betalingPagina')->middleware('can:betalingen-bekijken');
     Route::post('/betalingPagina/addBetaling', [BetalingController::class, 'store'])->name('betalingPagina.addBetaling.store')->middleware('can:betalingen-beheren');
     Route::patch('/betalingen/{betaling_id}', [BetalingController::class, 'update'])->name('betalingen.update')->middleware('can:betalingen-beheren');
-    Route::delete('/betalingPagina/delete/{betaling_id}', [BetalingController::class, 'destroy'])->name('betalingPagina.delete')->middleware('can:betalingen-beheren');
     Route::post('/betalingen/check-subscriptie', [BetalingController::class, 'checkSubscriptie'])->name('betalingen.checkSubscriptie')->middleware('can:betalingen-beheren');
     Route::get('/betalingen/chart-data', [ChartController::class, 'chartData'])->name('betalingen.chartData')->middleware('can:betalingen-bekijken');
 

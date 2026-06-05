@@ -31,6 +31,10 @@ Gate::define('leden-beheren', fn ($user) =>
 $user->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder'])
 );
 
+Gate::define('leden-heractiveren', fn ($user) =>
+$user->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder'])
+);
+
 Gate::define('leden-verwijderen', fn ($user) =>
 $user->isApplicatieBeheerder()  // alleen volledige beheerder mag hard delete
 );
@@ -56,5 +60,23 @@ $user->hasAnyRole(['Applicatie Beheerder'])
 // BEHEER
 Gate::define('rollenbeheer', fn ($user) => $user->isApplicatieBeheerder());
 Gate::define('gebruikersbeheer', fn ($user) => $user->isApplicatieBeheerder());
+
+
+//Her-activeren
+// VERWIJDER deze dubbele definitie bovenaan:
+Gate::define('leden-heractiveren', fn ($user) =>
+    $user->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder'])
+);
+
+// HOUD alleen deze onderaan:
+Gate::define('leden-heractiveren', fn ($user) => 
+    $user->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder'])
+);
+
+// Leden deactiveren
+Gate::define('leden-Deactiveren', fn($user) => 
+    $user->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder'])
+);
+
     }
 }

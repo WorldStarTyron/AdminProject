@@ -17,7 +17,7 @@ return new class extends Migration
             $table->increments('log_id');
             $table->unsignedInteger('gebruiker_id')->index();
             $table->foreign('gebruiker_id')->references('gebruiker_id')->on('gebruikers');
-            $table->enum('actie', ["lid_aangemaakt","lid_bijgewerkt","lid_verwijderd","betaling_geregistreerd","betaling_goedgekeurd","betaling_afgewezen","bon_aangemaakt","bon_gedownload","wachtwoord_gewijzigd","ingelogd","uitgelogd"]);
+            $table->enum('actie', ["lid_aangemaakt","lid_bijgewerkt","lid_gewijzigd","lid_verwijderd","betaling_geregistreerd","betaling_goedgekeurd","betaling_afgewezen","bon_aangemaakt","bon_gedownload","wachtwoord_gewijzigd","ingelogd","uitgelogd"]);
             $table->json('details')->nullable();
             $table->timestamp('aangemaakt_op')->useCurrent();
         });

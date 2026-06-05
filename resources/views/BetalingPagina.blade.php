@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/css/BetalingPagina.css', 'resources/js/app.js', 'resources/js/Modal/AddBetalingModal.js'])
+    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/css/BetalingPagina.css', 'resources/js/app.js', 'resources/js/Modal/AddBetalingModal.js', 'resources/js/Modal/EditBetalingModal.js'])
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
@@ -52,6 +52,7 @@
 
     @can('betalingen-beheren')
         @include('layouts.Add-Modal.add-Betaling-modal')
+        @include('layouts.Edit-Modal.edit-Betaling-modal')
     @endcan
 
     <div class="toast-notification" id="betalingSuccessToast">

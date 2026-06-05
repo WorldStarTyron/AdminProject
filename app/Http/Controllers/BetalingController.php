@@ -8,7 +8,6 @@ use App\Models\Gebruiker;
 use App\Models\Activiteit;
 use App\Http\Controllers\BonController;
 use Carbon\Carbon;
-use App\Models\Bon;
 use App\Models\Lid;
 use Illuminate\Support\Facades\Gate;
 
@@ -134,7 +133,7 @@ class BetalingController extends Controller
             'naam'            => 'required|string',
             'datum'           => 'required|date',
             'methode'         => 'required|in:fysiek,overmaking',
-            'status'          => 'required|in:in_behandeling,betaald,niet_betaald,afgewezen',
+            'status'          => 'required|in:Openstaand,in_behandeling,betaald,niet_betaald,afgewezen',
             'bedrag'          => 'required|numeric|min:0',
             'betaling_bewijs' => 'nullable|file|max:5120',
         ]);
@@ -205,11 +204,26 @@ class BetalingController extends Controller
 
     // Update Betalingen
    public function update(Request $request, $id){
+    Gate::authorize('betalingen-beheren');
+
+    $request->validate([
+        'status'          => 'required|in:Openstaand,in_behandeling,betaald,niet_betaald,afgewezen',
+        'methode'         => 'required|in:fysiek,overmaking',
+        'bedrag'          => 'required|numeric|min:0',
+        'betaling_bewijs' => 'nullable|file|max:5120',
+    ]);
+
     //Update Bonnen
     $betaling = Betaling::findOrFail($id);
     $oudStatus = $betaling->status;
 
-    $betaling->update($request->only(['status', 'methode', 'bedrag']));
+    $data = $request->only(['status', 'methode', 'bedrag']);
+
+    if ($request->hasFile('betaling_bewijs')) {
+        $data['betaling_bewijs'] = $request->file('betaling_bewijs')->store('bewijzen', 'public');
+    }
+
+    $betaling->update($data);
 
     // Als status verandert naar 'betaald' en er nog geen bon is
     if ($oudStatus !== 'betaald' && $betaling->status === 'betaald' && !$betaling->bon) {
@@ -253,31 +267,6 @@ class BetalingController extends Controller
    }
  
 
-   // Delete Betalingen
-   public function destroy($betaling_id)
-   {
-     Gate::authorize('betalingen-beheren');
-       $betaling = Betaling::where('betaling_id', $betaling_id)->first();
-
-       if ($betaling) {
-           // Check if bon exists and delete it
-           $bon = Bon::where('betaling_id', $betaling_id)->first();
-           if ($bon) {
-               $bon->delete();
-           }
-           $betaling->delete();
-
-           // Log the deletion activity
-           if (auth()->check()) {
-               Activiteit::log(auth()->id(), 'betaling_afgewezen', [
-                   'betaling_id' => $betaling_id,
-                   'details'     => 'Betalingsrecord #' . $betaling_id . ' en bijbehorende bon zijn verwijderd.'
-               ]);
-           }
-       }
-
-       return response()->json(['success' => true, 'message' => 'Betaling succesvol verwijderd']);
-   }
 
 
    // Handmatige subscriptie check - dit kan je vanuit de browser starten
@@ -311,6 +300,13 @@ class BetalingController extends Controller
 
            // Als er al een "niet_betaald" record is -> skip
            if ($betaling && $betaling->status === 'niet_betaald') {
+               continue;
+           }
+
+           // Als de status "Openstaand" is -> deadline voorbij, wijzig naar niet_betaald
+           if ($betaling && $betaling->status === 'Openstaand') {
+               $betaling->update(['status' => 'niet_betaald']);
+               $nietBetaald++;
                continue;
            }
 
@@ -382,9 +378,9 @@ class BetalingController extends Controller
         // Card 1: Totale inkomsten (som van alle betaalde betalingen)
         $totaleInkomsten = (clone $query)->where('status', 'betaald')->sum('bedrag');
 
-        // Card 2: Openstaand bedrag (som van niet-betaalde betalingen)
-        $openstaandBedrag = (clone $query)->where('status', 'niet_betaald')->sum('bedrag');
-        $openstaandAantal = (clone $query)->where('status', 'niet_betaald')->distinct('lid_id')->count('lid_id');
+        // Card 2: Openstaand bedrag (som van niet-betaalde + openstaande betalingen)
+        $openstaandBedrag = (clone $query)->whereIn('status', ['niet_betaald', 'Openstaand'])->sum('bedrag');
+        $openstaandAantal = (clone $query)->whereIn('status', ['niet_betaald', 'Openstaand'])->distinct('lid_id')->count('lid_id');
 
         // Als er wel openstaande betalingen zijn maar het geregistreerde bedrag is 0,
         // schatten we 150 SRD per lid
@@ -427,6 +423,7 @@ class BetalingController extends Controller
                 $b->status_label = match($b->status) {
                     'betaald'        => 'Betaald',
                     'niet_betaald'   => 'Niet betaald',
+                    'Openstaand'     => 'Openstaand',
                     'in_behandeling' => 'In behandeling',
                     default          => ucfirst($b->status),
                 };

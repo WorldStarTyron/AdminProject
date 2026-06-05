@@ -79,9 +79,9 @@ class LidController extends Controller
             ->orderBy('ingediend_op', 'desc')
             ->paginate(5);
 
-        // Bereken openstaande balans (betaald)
+        // Bereken openstaande balans (niet betaald + openstaand)
         $openstaandeBalans = \App\Models\Betaling::where('lid_id', $lid->lid_id)
-            ->where('status', 'betaald')
+            ->whereIn('status', ['niet_betaald', 'Openstaand'])
             ->sum('bedrag');
 
         // Haal de laatste succesvolle betaling op
@@ -90,28 +90,61 @@ class LidController extends Controller
             ->orderBy('ingediend_op', 'desc')
             ->first();
 
-        //Subcription betaling berekenen wanneer het lid weer moet betalen per maand.
+        // Bepaal de eerstvolgende betaling die gedaan moet worden
         $UpcomingBetaling = \App\Models\Betaling::where('lid_id', $lid->lid_id)
-        ->where('status', 'niet_betaald')
-        ->orderBy('ingediend_op', 'asc')
-        ->first();
-  
-        //  Subcription Betaling berekenen wanneer het lid weer moet betalen per maand
-         $UpcomingBetaling = \App\Models\Betaling::where('lid_id', $lid->lid_id)
-        ->where('status', 'betaald')
-        ->orderBy('ingediend_op', 'asc')
-        ->first();
+            ->whereIn('status', ['Openstaand', 'niet_betaald'])
+            ->orderBy('jaar', 'asc')
+            ->orderBy('maand', 'asc')
+            ->first();
 
-        //wanneer lid lid wordt dan moet hij over 1 maand zijn contributie betalen.
-       $deadline = $UpcomingBetaling
-    ? \Carbon\Carbon::parse($UpcomingBetaling->ingediend_op)->addMonth()
-    : null;
-        // $Datum = Subscriptie::where('lid_id', $lid->lid_id)->first();
+        if ($UpcomingBetaling) {
+            // De deadline voor een openstaande/niet betaalde betaling is het einde van die betreffende maand
+            $deadline = \Carbon\Carbon::createFromDate($UpcomingBetaling->jaar, $UpcomingBetaling->maand, 1)->endOfMonth();
+        } else {
+            // Als er geen openstaande/niet betaalde betalingen zijn, pakken we de meest recente betaalde betaling
+            $UpcomingBetaling = \App\Models\Betaling::where('lid_id', $lid->lid_id)
+                ->where('status', 'betaald')
+                ->orderBy('jaar', 'desc')
+                ->orderBy('maand', 'desc')
+                ->first();
+
+            $deadline = $UpcomingBetaling
+                ? \Carbon\Carbon::createFromDate($UpcomingBetaling->jaar, $UpcomingBetaling->maand, 1)->addMonth()->endOfMonth()
+                : null;
+        }
         
 
         return view('lidpagina', compact('lid', 'betalingen', 'openstaandeBalans', 'laatsteBetaling', 'UpcomingBetaling', 'deadline'));
     }
 
+    public function heractiveer($lid_id)
+    {
+        $lid = Lid::findOrFail($lid_id);
+        $lid->gebruiker->status = 'Actief';
+        $lid->gebruiker->save();
+
+        if (auth()->check()) {
+            \App\Models\Activiteit::log(auth()->id(), 'lid_gewijzigd', [
+                'lid_id'  => $lid->lid_id,
+                'details' => 'Lid ' . $lid->gebruiker->naam . ' is succesvol hergeactiveerd.'
+            ]);
+        }
+
+         return redirect()->back()->with('success', 'Account is succesvol geheractiveerd.');
+
+
+
+
+}
+    public function deactiveer($lid_id)
+{
+    $lid = Lid::findOrFail($lid_id);
+    $lid->gebruiker->status = 'Inactief';
+    $lid->gebruiker->save();
+
+    return redirect()->back()->with('success', 'Account is succesvol gedeactiveerd.');
+}
+    
 }
 
  

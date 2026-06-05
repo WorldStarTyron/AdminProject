@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreign('lid_id')->references('lid_id')->on('leden');
             $table->decimal('bedrag', 10, 2);
             $table->enum('methode', ["fysiek","overmaking"]);
-            $table->enum('status', ["in_behandeling","betaald","niet_betaald","afgewezen"]);
+            $table->enum('status', ["Openstaand","betaald","niet_betaald"]);
             $table->tinyInteger('maand');
             $table->year('jaar');
             $table->string('betaling_bewijs', 255)->nullable();

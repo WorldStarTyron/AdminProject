@@ -158,7 +158,6 @@
                         <table class="w-full text-sm" id="paymentHistoryTable">
                             <thead>
                                 <tr class="border-b border-slate-100">
-                                    <th class="text-left text-[11px] font-semibold tracking-widest uppercase text-slate-400 px-6 py-3">ID</th>
                                     <th class="text-left text-[11px] font-semibold tracking-widest uppercase text-slate-400 px-6 py-3">Date</th>
                                     <th class="text-right text-[11px] font-semibold tracking-widest uppercase text-slate-400 px-6 py-3">Amount</th>
                                     <th class="text-left text-[11px] font-semibold tracking-widest uppercase text-slate-400 px-6 py-3">Status</th>
@@ -168,7 +167,7 @@
                             <tbody class="divide-y divide-slate-50">
                                 @forelse($betalingen as $betaling)
                                     <tr class="hover:bg-slate-50/50 transition-colors">
-                                        <td class="px-6 py-4 text-slate-500 font-medium">{{ $betaling->betaling_id }}</td>
+                                        
                                         <td class="px-6 py-4 text-slate-600">{{ \Carbon\Carbon::parse($betaling->ingediend_op)->translatedFormat('d M Y') }}</td>
                                         <td class="px-6 py-4 text-slate-800 font-semibold text-right">SRD {{ number_format($betaling->bedrag, 2, ',', '.') }}</td>
                                         <td class="px-6 py-4">

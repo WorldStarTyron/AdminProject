@@ -46,5 +46,17 @@ class Lid extends Model
     {
         return $this->belongsTo(Gebruiker::class, 'gebruiker_id', 'gebruiker_id');
     }
+
+
+    public function MaandelijkseBijdrage(): float
+{
+    return match ($this->lid_type) {
+        'Actief'    => 45.50,
+        'Passief'   => 120.00,
+        'Bijzonder' => 0.00,
+        default     => 0.00,
+    };
+}
+
 }
 

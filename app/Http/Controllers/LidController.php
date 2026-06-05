@@ -98,20 +98,40 @@ class LidController extends Controller
             ->first();
 
         if ($UpcomingBetaling) {
-            // De deadline voor een openstaande/niet betaalde betaling is het einde van die betreffende maand
-            $deadline = \Carbon\Carbon::createFromDate($UpcomingBetaling->jaar, $UpcomingBetaling->maand, 1)->endOfMonth();
-        } else {
-            // Als er geen openstaande/niet betaalde betalingen zijn, pakken we de meest recente betaalde betaling
-            $UpcomingBetaling = \App\Models\Betaling::where('lid_id', $lid->lid_id)
-                ->where('status', 'betaald')
-                ->orderBy('jaar', 'desc')
-                ->orderBy('maand', 'desc')
-                ->first();
+    // Openstaande betaling: deadline is einde van die maand
+    $deadline = \Carbon\Carbon::createFromDate(
+        $UpcomingBetaling->jaar, 
+        $UpcomingBetaling->maand, 1
+    )->endOfMonth();
+} else {
+    // Laatste betaalde betaling ophalen
+    $UpcomingBetaling = \App\Models\Betaling::where('lid_id', $lid->lid_id)
+        ->where('status', 'betaald')
+        ->orderBy('jaar', 'desc')
+        ->orderBy('maand', 'desc')
+        ->first();
 
-            $deadline = $UpcomingBetaling
-                ? \Carbon\Carbon::createFromDate($UpcomingBetaling->jaar, $UpcomingBetaling->maand, 1)->addMonth()->endOfMonth()
-                : null;
-        }
+    if ($UpcomingBetaling) {
+    $deadline = \Carbon\Carbon::createFromDate(
+        $UpcomingBetaling->jaar, 
+        $UpcomingBetaling->maand, 1
+    )->endOfMonth();
+} else {
+    $UpcomingBetaling = \App\Models\Betaling::where('lid_id', $lid->lid_id)
+        ->where('status', 'betaald')
+        ->orderBy('jaar', 'desc')
+        ->orderBy('maand', 'desc')
+        ->first();
+
+    // ✅ addMonth() BEFORE endOfMonth() — deadline is end of NEXT month
+    $deadline = $UpcomingBetaling
+        ? \Carbon\Carbon::createFromDate(
+            $UpcomingBetaling->jaar, 
+            $UpcomingBetaling->maand, 1
+          )->addMonth()->endOfMonth()
+        : null;
+}
+}
         
 
         return view('lidpagina', compact('lid', 'betalingen', 'openstaandeBalans', 'laatsteBetaling', 'UpcomingBetaling', 'deadline'));

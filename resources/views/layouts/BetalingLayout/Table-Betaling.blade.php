@@ -2,11 +2,27 @@
 <main class="px-8 pb-8 flex-1">
     <div class="bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.03)] border border-slate-200/60 p-7 animate-[fadeSlideUp_0.5s_ease-out]">
 
-        <!-- Table header with title and action buttons -->
+        <!-- Table header with title, month/year filter and action buttons -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-7 gap-4">
             <div>
                 <h2 class="text-xl font-extrabold text-slate-800 tracking-tight">Betaling Table</h2>
             </div>
+            {{-- Month/year filter (merged from Leden Betalingsstatus) --}}
+            <form method="GET" action="{{ route('betalingPagina') }}" class="flex items-center gap-2">
+                <select name="maand" class="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]/20">
+                    @for($m = 1; $m <= 12; $m++)
+                        <option value="{{ $m }}" {{ ($maand ?? now()->month) == $m ? 'selected' : '' }}>
+                            {{ \Carbon\Carbon::create()->month($m)->translatedFormat('F') }}
+                        </option>
+                    @endfor
+                </select>
+                <select name="jaar" class="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]/20">
+                    @for($y = now()->year - 1; $y <= now()->year + 1; $y++)
+                        <option value="{{ $y }}" {{ ($jaar ?? now()->year) == $y ? 'selected' : '' }}>{{ $y }}</option>
+                    @endfor
+                </select>
+                <button type="submit" class="bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-lg text-sm font-medium transition-colors">Filter</button>
+            </form>
             <div class="flex items-center gap-3">
 
                 <!-- Filter dropdown (Alpine.js) -->
@@ -15,8 +31,7 @@
                         @click="open = !open"
                         @keydown.escape="open = false"
                         type="button"
-                        class="inline-flex items-center gap-2 bg-white border-[1.5px] {{ request('methode') ? 'border-[#1e3a8a] text-[#1e3a8a]' : 'border-slate-200 text-slate-600' }} font-['Inter',sans-serif] text-[0.8125rem] font-semibold px-4 py-2.5 rounded-[10px] hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 cursor-pointer whitespace-nowrap"
-                    >
+                        class="inline-flex items-center gap-2 bg-white border-[1.5px] {{ request('methode') ? 'border-[#1e3a8a] text-[#1e3a8a]' : 'border-slate-200 text-slate-600' }} font-['Inter',sans-serif] text-[0.8125rem] font-semibold px-4 py-2.5 rounded-[10px] hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 cursor-pointer whitespace-nowrap">
                         <!-- Filter icon -->
                         <i class="fa-solid fa-filter text-xs"></i>
                         @if(request('methode') == 'fysiek')
@@ -78,8 +93,10 @@
                 <button
                     id="checkSubscriptieBtn"
                     data-url="{{ route('betalingen.checkSubscriptie') }}"
-                    class="inline-flex items-center gap-2 bg-gradient-to-br from-amber-500 to-orange-500 text-white font-['Inter',sans-serif] text-[0.8125rem] font-semibold px-5 py-2.5 rounded-[10px] shadow-[0_2px_8px_rgba(245,158,11,0.25)] hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(245,158,11,0.35)] active:translate-y-0 transition-all duration-200 cursor-pointer border-none whitespace-nowrap"
-                >
+                    data-maand="{{ $maand }}"
+                    data-jaar="{{ $jaar }}"
+                    class="inline-flex items-center gap-2 bg-gradient-to-br from-amber-500 to-orange-500 text-white font-['Inter',sans-serif] 
+                    text-[0.8125rem] font-semibold px-5 py-2.5 rounded-[10px] shadow-[0_2px_8px_rgba(245,158,11,0.25)] hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(245,158,11,0.35)] active:translate-y-0 transition-all duration-200 cursor-pointer border-none whitespace-nowrap">
                     <!-- Refresh icon -->
                     <i id="subscriptieIcon" class="fa-solid fa-rotate text-xs"></i>
                     Check Subscriptie
@@ -97,18 +114,65 @@
 
 
 
+        <!-- Leden Betalingsstatus block -->
+        <div class="bg-slate-50/60 rounded-xl border border-slate-100 p-5 mb-7">
+            <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Leden Betalingsstatus</h3>
+            <div class="overflow-x-auto rounded-[10px] border border-slate-100">
+                <table class="w-full border-collapse text-left">
+                    <thead>
+                        <tr class="bg-slate-50/80">
+                            <th class="px-2 py-3.5 text-[0.6875rem] font-bold text-slate-400 uppercase tracking-wider">Naam</th>
+                            <th class="px-2 py-3.5 text-[0.6875rem] font-bold text-slate-400 uppercase tracking-wider">Status</th>
+                            <th class="px-2 py-3.5 text-[0.6875rem] font-bold text-slate-400 uppercase tracking-wider">Lid Type</th>
+                            <th class="px-2 py-3.5 text-[0.6875rem] font-bold text-slate-400 uppercase tracking-wider">Bedrag</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($ledenStatus as $item)
+                            @php
+                                $ledenStatusStyles = match($item->status) {
+                                    'betaald'        => 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-200',
+                                    'niet_betaald'   => 'bg-red-50 text-red-500 ring-1 ring-red-200',
+                                    'Openstaand'     => 'bg-amber-50 text-amber-600 ring-1 ring-amber-200',
+                                    default          => 'bg-slate-100 text-slate-500 ring-1 ring-slate-200',
+                                };
+                                $ledenStatusLabel = match($item->status) {
+                                    'betaald'        => 'BETAALD',
+                                    'niet_betaald'   => 'NIET BETAALD',
+                                    'Openstaand'     => 'OPENSTAAND',
+                                    default          => strtoupper($item->status),
+                                };
+                            @endphp
+                            <tr class="border-b border-slate-100/80 hover:bg-slate-50/60">
+                                <td class="px-2 py-2 font-semibold text-slate-800 text-sm">{{ $item->naam }}</td>
+                                <td class="px-2 py-2">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-[0.625rem] font-bold tracking-widest {{ $ledenStatusStyles }}">
+                                        {{ $ledenStatusLabel }}
+                                    </span>
+                                </td>
+                                <td class="px-5 py-4 text-slate-600 text-sm">{{ $item->lid_type }}</td>
+                                <td class="px-5 py-4 font-bold text-slate-800 text-sm">SRD {{ number_format($item->bedrag, 2) }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="4" class="px-5 py-8 text-center text-slate-400 text-sm">Geen leden gevonden</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- Payments table -->
         <div class="overflow-x-auto rounded-[10px] border border-slate-100">
             <table class="w-full border-collapse text-left" id="betalingTable">
                 <thead>
                     <tr class="bg-slate-50/80">
-                        <th class="px-5 py-3.5 text-[0.6875rem] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">ID</th>
-                        <th class="px-5 py-3.5 text-[0.6875rem] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Naam</th>
-                        <th class="px-5 py-3.5 text-[0.6875rem] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Datum</th>
-                        <th class="px-5 py-3.5 text-[0.6875rem] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Bedrag</th>
-                        <th class="px-5 py-3.5 text-[0.6875rem] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Status</th>
-                        <th class="px-5 py-3.5 text-[0.6875rem] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-200">Betaling <br> Method</th>
-                        <th class="px-5 py-3.5 text-[0.6875rem] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Bonnummer</th>
+                        
+                        <th class="px-5 py-1 text-[0.6875rem] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Naam</th>
+                        <th class="px-5 py-1 text-[0.6875rem] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Datum</th>
+                        <th class="px-5 py-1 text-[0.6875rem] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Bedrag</th>
+                        <th class="px-5 py-1 text-[0.6875rem] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Status</th>
+                        <th class="px-5 py-1 text-[0.6875rem] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-200">Betaling <br> Method</th>
+                        <th class="px-5 py-2 text-[0.6875rem] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Bonnummer</th>
                         @can('betalingen-beheren')
                         <th class="px-5 py-3.5 text-[0.6875rem] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Acties</th>
                         @endcan

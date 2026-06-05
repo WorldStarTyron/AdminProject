@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     columnWidth: '45%',
                 },
             },
-            colors: ['#1e293b', '#64748b', '#cbd5e1'],
+            colors: ['#1e293b', '#0963e1ff', '#cbd5e1'],
             xaxis: {
                 categories: labels,
                 labels: {

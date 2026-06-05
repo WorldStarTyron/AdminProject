@@ -5,6 +5,8 @@ document.addEventListener('DOMContentLoaded', function () {
     btn.addEventListener('click', function () {
         const icon = document.getElementById('subscriptieIcon');
         const url = btn.getAttribute('data-url');
+        const maand = btn.getAttribute('data-maand');
+        const jaar = btn.getAttribute('data-jaar');
 
         // Zet de knop uit zodat je niet dubbel kan klikken
         btn.disabled = true;
@@ -23,6 +25,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                 'Accept': 'application/json',
             },
+            body: JSON.stringify({
+                maand: maand,
+                jaar: jaar
+            })
         })
         .then(response => response.json())
         .then(data => {

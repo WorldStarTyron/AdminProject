@@ -6,12 +6,10 @@
         </div>
         <div class="header-right flex items-center gap-4">
 
-            {{-- Notificatie bel --}}
-            <button class="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-gray-700 transition">
-                <i class="fa-regular fa-bell text-lg"></i>
-            </button>
+           
+           
 
-            {{-- Naam + Rollen --}}
+            <!-- Naam + Rollen -->
             <div class="flex flex-col text-right">
                 <span class="text-sm font-semibold text-gray-900">{{ Auth::user()->naam }}</span>
                 <div class="flex items-center justify-end gap-1 flex-wrap mt-0.5">

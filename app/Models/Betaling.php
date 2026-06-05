@@ -24,8 +24,6 @@ class Betaling extends Model
         'ingediend_op',
     ];
 
-    
-
     public function lid()
     {
         return $this->belongsTo(Lid::class, 'lid_id');

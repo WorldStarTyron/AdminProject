@@ -23,7 +23,7 @@ return new class extends Migration
             $table->tinyInteger('maand');
             $table->year('jaar');
             $table->string('betaling_bewijs', 255)->nullable();
-            $table->timestamp('ingediend_op')->useCurrent();
+            $table->date('ingediend_op')->nullable();
             $table->timestamp('bijgewerkt_op')->useCurrent();
         });
 

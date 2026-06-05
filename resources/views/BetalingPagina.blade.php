@@ -45,7 +45,10 @@
                     @include('layouts.BetalingLayout.BetalingChart')
                 </div>
 
-                @include('layouts.BetalingLayout.Table-Betaling')
+                    @include('layouts.BetalingLayout.recente-transacties-tabel')
+                    @include('layouts.BetalingLayout.leden-betalingsstatus-tabel')
+                   
+              
             </div>
         </div>
     </div>

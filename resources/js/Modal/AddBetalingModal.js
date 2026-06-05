@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         if (form) form.reset();
         if (errorsDiv) {
-            errorsDiv.style.display = 'none';
+            errorsDiv.classList.add('hidden');
             errorList.innerHTML = '';
         }
         if (fileText) fileText.textContent = 'Bestand uploaden';
@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', function () {
             submitBtn.innerHTML = '<span class="spinner"></span> Bezig...';
 
             // Hide previous errors
-            errorsDiv.style.display = 'none';
+            errorsDiv.classList.add('hidden');
             errorList.innerHTML = '';
 
             // Collect form data (including file)
@@ -142,7 +142,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         return response.json().then(function (data) {
                             // Show validation errors
                             if (data.errors) {
-                                errorsDiv.style.display = 'block';
                                 errorsDiv.classList.remove('hidden');
                                 for (var field in data.errors) {
                                     data.errors[field].forEach(function (msg) {
@@ -156,7 +155,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 })
                 .catch(function () {
-                    errorsDiv.style.display = 'block';
                     errorsDiv.classList.remove('hidden');
                     var li = document.createElement('li');
                     li.textContent = 'Er is een fout opgetreden. Probeer het opnieuw.';
@@ -164,7 +162,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 })
                 .finally(function () {
                     submitBtn.disabled = false;
-                    submitBtn.innerHTML = 'Betaling toevoegen';
+                    submitBtn.innerHTML = '<i class="fa-solid fa-plus"></i> Betaling toevoegen';
                 });
         });
     }

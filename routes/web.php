@@ -28,12 +28,7 @@ Route::get('/dashboard/chart-data', [MainDashboardController::class, 'ChartData'
 Route::middleware(['auth'])->group(function () {
     
 
- 
-  
-
-
-
-    // Lid — eigen profiel
+ // Lid — eigen profiel
     Route::get('/Lidpagina', [LidController::class, 'show'])->name('GegevensPagina')->middleware('can:eigen-profiel');
 
     // Leden — lezen
@@ -62,7 +57,7 @@ Route::post('/leden/{lid_id}/deactiveer', [LidController::class, 'deactiveer'])-
     Route::get('/betalingen/chart-data', [ChartController::class, 'chartData'])->name('betalingen.chartData')->middleware('can:betalingen-bekijken');
 
     // Rapport & log
-    Route::get('/RapportPagina', [BetalingController::class, 'rapportageData'])->name('Rapport')->middleware('can:rapport-bekijken');
+    Route::get('/RapportPagina', [RapportController::class, 'RapportageData'])->name('Rapport')->middleware('can:rapport-bekijken');
     Route::get('/ActiviteitLogPagina', [ActiviteitController::class, 'activiteitLogData'])->name('ActiviteitLog')->middleware('can:activiteitlog-bekijken');
 
     // Rollen & gebruikers

@@ -45,7 +45,7 @@
                         <label for="edit_betaling_datum" class="text-[0.8125rem] font-semibold text-slate-700 mb-1.5">
                             Datum van betaling
                         </label>
-                        <input type="date" id="edit_betaling_datum" name="datum" disabled
+                        <input type="date" id="edit_betaling_datum" name="datum" readonly
                             class="px-3 py-2.5 border-[1.5px] border-slate-200 rounded-[10px] text-[0.8125rem] text-slate-400 bg-slate-100 w-full box-border font-[inherit] cursor-not-allowed">
                     </div>
 
@@ -89,10 +89,8 @@
                         <select id="edit_betaling_status" name="status" required
                             class="px-3 py-2.5 border-[1.5px] border-slate-200 rounded-[10px] text-[0.8125rem] text-slate-700 bg-slate-50 w-full box-border transition-all duration-200 font-[inherit] focus:outline-none focus:border-blue-600 focus:bg-white focus:shadow-[0_0_0_3px_rgba(37,99,235,0.08)]">
                             <option value="Openstaand">Openstaand</option>
-                            <option value="in_behandeling">Afwachting</option>
                             <option value="niet_betaald">Niet Betaald</option>
                             <option value="betaald">Betaald</option>
-                            <option value="afgewezen">Afgewezen</option>
                         </select>
                     </div>
 

@@ -8,27 +8,20 @@ use App\Models\Gebruiker;
 use Illuminate\Support\Facades\Gate;
 
 class ActiviteitController extends Controller
-
 {
-    /**
-     * Retrieve and filter activity log data for the admin view.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\View\View
-     */
     public function activiteitLogData(Request $request)
     {
+        // Alleen admins mogen de activiteitenlog bekijken
+        Gate::authorize('activiteitlog-bekijken');
 
-        Gate::authorize('activiteitlog-bekijken'); 
-        
-        // Get active filters from request
+        // Haal filters op uit de request
         $search = $request->input('search');
         $tab = $request->input('tab', 'Alle');
 
-        // Build the base query eager-loading the related gebruiker model
+        // Basisquery met de bijbehorende gebruiker
         $query = Activiteit::with('gebruiker');
 
-        // Apply Tab Filter
+        // Filter op tab
         if ($tab === 'Inloggen') {
             $query->whereIn('actie', ['ingelogd', 'uitgelogd']);
         } elseif ($tab === 'Leden') {
@@ -40,7 +33,7 @@ class ActiviteitController extends Controller
             ]);
         }
 
-        // Apply Search Filter across actions, details (JSON/text), and user name
+        // Filter op zoekterm (actie, details of gebruikersnaam)
         if (!empty($search)) {
             $query->where(function($q) use ($search) {
                 $q->where('actie', 'like', "%{$search}%")
@@ -51,17 +44,17 @@ class ActiviteitController extends Controller
             });
         }
 
-        // Order by latest activity first
+        // Nieuwste activiteiten eerst
         $query->orderBy('aangemaakt_op', 'desc')->orderBy('log_id', 'desc');
 
-        // Paginate results (5 per page like the design mockup)
+        // Pagineer resultaten (5 per pagina)
         $activiteiten = $query->paginate(5)->appends($request->query());
 
-        // Count overall total activities for KPI card
+        // Totaal aantal activiteiten voor de KPI-kaart
         $totalCount = Activiteit::count();
 
-        // Calculate dynamic weekly trend
-        $oneWeekAgo = now()->subDays(7);
+        // Bereken de weektrend (deze week vs vorige week)
+        $oneWeekAgo  = now()->subDays(7);
         $twoWeeksAgo = now()->subDays(14);
 
         $thisWeekCount = Activiteit::where('aangemaakt_op', '>=', $oneWeekAgo)->count();
@@ -70,15 +63,15 @@ class ActiviteitController extends Controller
                                     ->count();
 
         if ($lastWeekCount > 0) {
-            $diff = $thisWeekCount - $lastWeekCount;
+            $diff         = $thisWeekCount - $lastWeekCount;
             $trendPercent = round(($diff / $lastWeekCount) * 100);
-            $weeklyTrend = ($trendPercent >= 0 ? '+' : '') . $trendPercent . '% deze week';
+            $weeklyTrend  = ($trendPercent >= 0 ? '+' : '') . $trendPercent . '% deze week';
         } else {
-            // Default premium mock trend when there isn't enough historical data
+            // Standaard waarde als er niet genoeg data is
             $weeklyTrend = '+12% deze week';
         }
 
-        // Render the view with correct variables
+        // Stuur data naar de view
         return view('ActiviteitLog', compact('activiteiten', 'search', 'tab', 'totalCount', 'weeklyTrend'));
     }
 }

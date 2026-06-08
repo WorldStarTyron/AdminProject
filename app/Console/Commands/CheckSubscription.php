@@ -82,11 +82,13 @@ class CheckSubscription extends Command
             // Als er helemaal geen betaling is -> maak een nieuwe "niet_betaald" aan
             Betaling::create([
                 'lid_id'  => $lid->lid_id,
-                'bedrag'  => 0,
-                'methode' => 'fysiek',
+                'bedrag'  => $lid->MaandelijkseBijdrage(),
+                'methode' => null,
                 'status'  => 'niet_betaald',
                 'maand'   => $maand,
                 'jaar'    => $jaar,
+                'ingediend_op' => null,
+                'betaling_bewijs' => null,
             ]);
 
             $this->warn("  ❌ {$naam} - niet betaald (nieuw record aangemaakt)");

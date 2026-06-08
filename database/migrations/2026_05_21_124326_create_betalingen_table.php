@@ -18,7 +18,7 @@ return new class extends Migration
             $table->unsignedInteger('lid_id')->index();
             $table->foreign('lid_id')->references('lid_id')->on('leden');
             $table->decimal('bedrag', 10, 2);
-            $table->enum('methode', ["fysiek","overmaking"]);
+            $table->enum('methode', ['fysiek', 'overmaking'])->nullable();
             $table->enum('status', ["Openstaand","betaald","niet_betaald"]);
             $table->tinyInteger('maand');
             $table->year('jaar');

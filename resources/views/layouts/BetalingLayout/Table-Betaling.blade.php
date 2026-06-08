@@ -208,17 +208,13 @@
                                 $statusStyles = match($betaling->status) {
                                     'betaald'        => 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-200',
                                     'niet_betaald'   => 'bg-red-50 text-red-500 ring-1 ring-red-200',
-                                    'in_behandeling' => 'bg-amber-50 text-amber-600 ring-1 ring-amber-200',
                                     'Openstaand'     => 'bg-cyan-50 text-cyan-600 ring-1 ring-cyan-200',
-                                    'afgewezen'      => 'bg-slate-100 text-slate-500 ring-1 ring-slate-200',
                                     default          => 'bg-slate-100 text-slate-500 ring-1 ring-slate-200',
                                 };
                                 $statusLabel = match($betaling->status) {
                                     'betaald'        => 'BETAALD',
                                     'niet_betaald'   => 'NIET BETAALD',
-                                    'in_behandeling' => 'IN BEHANDELING',
                                     'Openstaand'     => 'OPENSTAAND',
-                                    'afgewezen'      => 'AFGEWEZEN',
                                     default          => strtoupper($betaling->status),
                                 };
                             @endphp

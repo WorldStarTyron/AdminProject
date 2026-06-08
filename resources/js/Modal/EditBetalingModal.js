@@ -94,6 +94,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+
+
     // STEP 4: Form submission
     if (form) {
         form.addEventListener('submit', function (e) {
@@ -113,6 +115,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Collect form data
             var formData = new FormData(form);
+            formData.append('_method', 'PUT'); // Laravel method spoofing
 
             // Fetch request (using POST with _method PATCH for Laravel compatibility with multipart/form-data if ever needed)
             var updateUrl = '/betalingen/' + id;
@@ -184,5 +187,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
         });
     }
+
+    
 
 });

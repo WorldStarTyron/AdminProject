@@ -48,15 +48,12 @@ class Lid extends Model
     }
 
 
+    //elk lid type betaalt SRD 100 per maand (behalve bijzonder lidmaatschap)
     public function MaandelijkseBijdrage(): float
 {
-    return match ($this->lid_type) {
-        'Actief'    => 45.50,
-        'Passief'   => 120.00,
-        'Bijzonder' => 0.00,
-        default     => 0.00,
-    };
+    return 150.00; 
 }
 
 }
 
+ 

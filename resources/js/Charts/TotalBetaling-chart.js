@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     columnWidth: '45%',
                 },
             },
-            colors: ['#1e293b', '#0963e1ff', '#cbd5e1'],
+            colors: ['#0867ffff', '#0963e1ff', '#6aa6f4ff'],
             xaxis: {
                 categories: labels,
                 labels: {
@@ -64,6 +64,16 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             yaxis: {
                 show: true,
+                labels: {
+                    formatter: function (val) {
+                        return 'SRD ' + val.toLocaleString('nl-NL', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+                    },
+                    style: {
+                        colors: '#94a3b8',
+                        fontSize: '10px',
+                        fontWeight: 500,
+                    }
+                }
             },
             grid: {
                 show: true,
@@ -77,9 +87,14 @@ document.addEventListener('DOMContentLoaded', function () {
             tooltip: {
                 theme: 'dark',
                 y: {
-                    // Toon aantal leden (geen valutasymbool)
+                    // Toon totale bedrag in srd
                     formatter: function (val) {
-                        return val + (val === 1 ? ' lid' : ' leden');
+                        return new Intl.NumberFormat('nl-SR', {
+                            style: 'currency',
+                            currency: 'SRD',
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2 
+                        }).format(val);
                     },
                 },
             },

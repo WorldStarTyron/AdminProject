@@ -14,6 +14,7 @@ class AuthServiceProvider extends ServiceProvider
     {
        // app/Providers/AuthServiceProvider.php
 
+       // 
 Gate::define('dashboard', fn ($user) =>
 $user->hasAnyRole(['Administratie Medewerker', 'Voorzitter', 'Applicatie Beheerder'])
 );

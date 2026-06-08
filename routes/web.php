@@ -54,8 +54,9 @@ Route::post('/leden/{lid_id}/deactiveer', [LidController::class, 'deactiveer'])-
     Route::post('/betalingPagina/addBetaling', [BetalingController::class, 'store'])->name('betalingPagina.addBetaling.store')->middleware('can:betalingen-beheren');
     Route::patch('/betalingen/{betaling_id}', [BetalingController::class, 'update'])->name('betalingen.update')->middleware('can:betalingen-beheren');
     Route::post('/betalingen/check-subscriptie', [BetalingController::class, 'checkSubscriptie'])->name('betalingen.checkSubscriptie')->middleware('can:betalingen-beheren');
-    Route::get('/betalingen/chart-data', [ChartController::class, 'chartData'])->name('betalingen.chartData')->middleware('can:betalingen-bekijken');
+    Route::get('/betalingen/chart-data', [BetalingController::class, 'chartData'])->name('betalingen.chartData')->middleware('can:betalingen-bekijken');
     Route::put('/betalingen/{betaling}', [BetalingController::class, 'update'])->name('betalingen.update')->middleware('can:betalingen-beheren');
+    Route::delete('/betalingen/{betaling}', [BetalingController::class, 'destroy'])->name('betalingen.destroy')->middleware('can:betalingen-beheren');
 
     // Rapport & log
     Route::get('/RapportPagina', [RapportController::class, 'RapportageData'])->name('Rapport')->middleware('can:rapport-bekijken');

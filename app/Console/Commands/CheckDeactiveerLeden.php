@@ -38,7 +38,7 @@ class CheckDeactiveerLeden extends Command
             $nietBetaaldAantal = 0;
              
          
-            for ($i = 1; $i <= 2; $i++){ // Juni, mei, april
+            for ($i = 1; $i <= 2; $i++){ // Bijv: Juni, mei, april
                 $HeeftBetaald = Betaling::where('lid_id', $lid->lid_id)
                 ->where('maand', now()->subMonths($i)->month)
                 ->where('jaar', now()->subMonths($i)->year)

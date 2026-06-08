@@ -34,6 +34,18 @@
 
             <p class="px-3 pt-4 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">Menu</p>
 
+            <!-- Mijn Gegevens — zichtbaar voor elke gebruiker met de Lid rol (ook als ze andere rollen hebben) -->
+            @can('eigen-profiel')
+            <li class="rounded-lg {{ request()->routeIs('GegevensPagina') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                <a href="{{ route('GegevensPagina') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors" data-tooltip="Mijn Gegevens">
+                    <span class="shrink-0 w-5 text-center">
+                        <i class="fa-solid fa-id-card text-base"></i>
+                    </span>
+                    <span class="nav-text text-sm font-medium">Mijn Gegevens</span>
+                </a>
+            </li>
+            @endcan
+
             <!-- Leden — alleen admin medewerker en applicatiebeheerder -->
             @can('leden-bekijken')
             <li class="rounded-lg {{ request()->routeIs('ledenpagina') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">

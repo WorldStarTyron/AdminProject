@@ -95,7 +95,7 @@
                             </div>
                             <div>
                                 <p class="text-[10px] font-semibold tracking-widest text-slate-500 uppercase mb-1">Upcoming Cost</p>
-                                <p class="text-sm font-bold text-emerald-400">{{ $UpcomingBetaling ? 'SRD 45,00' : 'SRD 0,00' }}</p>
+                                <p class="text-sm font-bold text-emerald-400">SRD {{ number_format($UpcomingKost, 2, ',', '.') }}</p>
                             </div>
                         </div>
                     </div>

@@ -57,6 +57,7 @@ class BetalingController extends Controller
                 'status'              => $betaling->status,
                 'lid_type'            => $lid->lid_type,
                 'maandelijks_bijdrage'=> $lid->MaandelijkseBijdrage(),
+                'bedrag'              => $lid->MaandelijkseBijdrage(),
                 'betaling_id'         => $betaling->betaling_id,
             ];
         }
@@ -92,12 +93,16 @@ class BetalingController extends Controller
         ));
     }
 
+
+
+
+
     // Grafiekdata voor de laatste 7 maanden (ApexCharts)
     public function chartData()
     {
-        // Bouw lijst van laatste 7 maanden (oudste eerst)
+        // Bouw een lijst van de laatste 7 maanden (oudste eerst)
         $maanden = collect(range(6, 0))->map(function ($maandenTerug) {
-            $datum = now()->subMonths($maandenTerug);
+            $datum = Carbon::now()->subMonths($maandenTerug);
             return [
                 'jaar'  => (int) $datum->format('Y'),
                 'maand' => (int) $datum->format('n'),
@@ -105,13 +110,14 @@ class BetalingController extends Controller
             ];
         });
 
-        // Haal betaalde betalingen op per maand en methode
-        $rijen = Betaling::selectRaw('jaar, maand, methode, COUNT(DISTINCT lid_id) as aantal')
+        // Haal alle relevante betalingen op in één query en bereken de som (totaal) van het bedrag
+        $rijen = Betaling::selectRaw('jaar, maand, methode, SUM(bedrag) as totaal')
             ->where('status', 'betaald')
             ->where(function ($q) use ($maanden) {
                 foreach ($maanden as $m) {
                     $q->orWhere(function ($sub) use ($m) {
-                        $sub->where('jaar', $m['jaar'])->where('maand', $m['maand']);
+                        $sub->where('jaar', $m['jaar'])
+                            ->where('maand', $m['maand']);
                     });
                 }
             })
@@ -120,7 +126,7 @@ class BetalingController extends Controller
             ->groupBy(fn($r) => $r->jaar . '-' . $r->maand)
             ->map(fn($groep) => $groep->keyBy('methode'));
 
-        // Zet om naar ApexCharts series
+        // Zet om naar series die ApexCharts verwacht
         $labels     = [];
         $fysiek     = [];
         $overmaking = [];
@@ -128,8 +134,8 @@ class BetalingController extends Controller
         foreach ($maanden as $m) {
             $sleutel      = $m['jaar'] . '-' . $m['maand'];
             $labels[]     = $m['label'];
-            $fysiek[]     = (int) ($rijen[$sleutel]['fysiek']->aantal     ?? 0);
-            $overmaking[] = (int) ($rijen[$sleutel]['overmaking']->aantal ?? 0);
+            $fysiek[]     = (float) ($rijen[$sleutel]['fysiek']->totaal     ?? 0);
+            $overmaking[] = (float) ($rijen[$sleutel]['overmaking']->totaal ?? 0);
         }
 
         return response()->json([
@@ -141,6 +147,8 @@ class BetalingController extends Controller
         ]);
     }
 
+
+
     // Nieuwe betaling opslaan
     public function store(Request $request)
     {
@@ -151,9 +159,12 @@ class BetalingController extends Controller
             'datum'           => 'required|date',
             'methode'         => 'required|in:fysiek,overmaking',
             'status'          => 'required|in:Openstaand,betaald,niet_betaald',
-            'bedrag'          => 'required|numeric|min:0',
-            'betaling_bewijs' => 'nullable|file|max:5120',
+            'bedrag'          => 'required|numeric|min:100', //alleen betaling van 100
+            'betaling_bewijs' => 'nullable|file|max:5120', 
+        ],[
+            'bedrag.min' => 'Het bedrag moet minimaal SRD100 zijn', 
         ]);
+
 
         // Zoek gebruiker op naam
         $gebruiker = Gebruiker::where('naam', $request->naam)->first();
@@ -223,6 +234,10 @@ class BetalingController extends Controller
             ]);
         }
 
+
+
+
+
         return response()->json(['success' => true, 'message' => 'Betaling succesvol toegevoegd'], 201);
     }
 
@@ -232,7 +247,7 @@ class BetalingController extends Controller
         Gate::authorize('betalingen-beheren');
 
         $request->validate([
-            'bedrag'          => 'required|numeric|min:0',
+            'bedrag'          => 'required|numeric|min:100', //alleen betaling van 100
             'methode'         => 'required|in:fysiek,overmaking',
             'status'          => 'required|in:Openstaand,betaald,niet_betaald',
             'datum'           => 'required|date',
@@ -276,12 +291,34 @@ class BetalingController extends Controller
 
 
 
+    // Soft delete 
+    public function destroy($betaling_id)
+    {
+        Gate::authorize('betalingen-beheren');
+
+        $betaling = Betaling::find($betaling_id);
+
+        if (!$betaling) {
+            return response()->json(['success' => false, 'message' => 'Betaling niet gevonden']);
+        }
+
+        $betaling->delete();
+
+        // Activiteit loggen
+        if (auth()->check()) {
+            Activiteit::log(auth()->id(), 'betaling_verwijderd', [
+                'betaling_id' => $betaling->betaling_id,
+                'details'     => 'Betaling #' . $betaling->betaling_id . ' verwijderd.',
+            ]);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Betaling succesvol verwijderd']);
+    }
 
 
 
 
 
-    
     // Controleer of alle leden betaald hebben voor een bepaalde maand
     public function checkSubscriptie(Request $request)
     {
@@ -316,7 +353,7 @@ class BetalingController extends Controller
                 } else {
                     Betaling::create([
                         'lid_id'       => $lid->lid_id,
-                        'bedrag'       => $lid->getRequiredMaandelijkseBijdrage(),
+                        'bedrag'       => $lid->MaandelijkseBijdrage(),
                         'status'       => 'niet_betaald',
                         'maand'        => $maand,
                         'jaar'         => $jaar,
@@ -330,7 +367,7 @@ class BetalingController extends Controller
                 if (!$betaling) {
                     Betaling::create([
                         'lid_id'       => $lid->lid_id,
-                        'bedrag'       => $lid->getRequiredMaandelijkseBijdrage(),
+                        'bedrag'       => $lid->MaandelijkseBijdrage(),
                         'status'       => 'Openstaand',
                         'maand'        => $maand,
                         'jaar'         => $jaar,

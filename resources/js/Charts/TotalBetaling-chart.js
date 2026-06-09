@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error('Chart data kon niet worden opgehaald:', err);
             // Toon een vriendelijke foutmelding in de chart-container
             container.innerHTML =
-                '<p class="text-slate-400 text-sm text-center pt-8">Grafiek kon niet worden geladen.</p>';
+                '<p class="text-slate-400 color-red text-sm text-center pt-8">Grafiek kon niet worden geladen.</p>';
         });
 
     // ── Chart renderen ───────────────────────────────────────────────────────
@@ -45,11 +45,11 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             plotOptions: {
                 bar: {
-                    borderRadius: 1,
+                    borderRadius: 2,
                     columnWidth: '45%',
                 },
             },
-            colors: ['#0867ffff', '#0963e1ff', '#6aa6f4ff'],
+            colors: ['#0867ffff'],
             xaxis: {
                 categories: labels,
                 labels: {

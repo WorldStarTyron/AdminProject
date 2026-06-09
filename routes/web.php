@@ -58,6 +58,14 @@ Route::post('/leden/{lid_id}/deactiveer', [LidController::class, 'deactiveer'])-
     Route::put('/betalingen/{betaling}', [BetalingController::class, 'update'])->name('betalingen.update')->middleware('can:betalingen-beheren');
     Route::delete('/betalingen/{betaling}', [BetalingController::class, 'destroy'])->name('betalingen.destroy')->middleware('can:betalingen-beheren');
 
+    Route::get('/betalingen/trashed', [BetalingController::class, 'trashed'])->name('betalingen.trashed')->middleware('can:betalingen-beheren');
+    Route::patch('/betalingen/{betaling_id}/restore', [BetalingController::class, 'restore'])->name('betalingen.restore')->middleware('can:betalingen-beheren');
+
+
+    //VerwijderdeBetaling Record
+    Route::get('/DeletedBetaling', [BetalingController::class, 'trashed'])->name('DeletedBetaling')->middleware('can:betalingen-beheren');
+    
+
     // Rapport & log
     Route::get('/RapportPagina', [RapportController::class, 'RapportageData'])->name('Rapport')->middleware('can:rapport-bekijken');
     Route::get('/ActiviteitLogPagina', [ActiviteitController::class, 'activiteitLogData'])->name('ActiviteitLog')->middleware('can:activiteitlog-bekijken');

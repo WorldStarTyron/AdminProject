@@ -145,66 +145,98 @@
                     </div>
                 </div>
 
-                <!-- Geschiedenis Betaling tabel -->
-                <div class="bg-white rounded-2xl border border-slate-200/60 shadow-sm">
-                    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-                        <h2 class="text-base font-bold text-slate-900 m-0">Geschiedenis Betaling</h2>
-                        <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer" title="Filter">
-                            <i class="fa-solid fa-filter text-slate-400 text-sm"></i>
-                        </button>
-                    </div>
+               <!-- Geschiedenis Betaling tabel -->
+<div class="bg-white rounded-2xl border border-slate-200/60 shadow-sm">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+        <h2 class="text-base font-bold text-slate-900 m-0">Geschiedenis Betaling</h2>
 
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm" id="paymentHistoryTable">
-                            <thead>
-                                <tr class="border-b border-slate-100">
-                                    <th class="text-left text-[11px] font-semibold tracking-widest uppercase text-slate-400 px-6 py-3">Date</th>
-                                    <th class="text-right text-[11px] font-semibold tracking-widest uppercase text-slate-400 px-6 py-3">Amount</th>
-                                    <th class="text-left text-[11px] font-semibold tracking-widest uppercase text-slate-400 px-6 py-3">Status</th>
-                                    <th class="text-left text-[11px] font-semibold tracking-widest uppercase text-slate-400 px-6 py-3">Bon nummer</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-50">
-                                @forelse($betalingen as $betaling)
-                                    <tr class="hover:bg-slate-50/50 transition-colors">
-                                        
-                                        <td class="px-6 py-4 text-slate-600">{{ \Carbon\Carbon::parse($betaling->ingediend_op)->translatedFormat('d M Y') }}</td>
-                                        <td class="px-6 py-4 text-slate-800 font-semibold text-right">SRD {{ number_format($betaling->bedrag, 2, ',', '.') }}</td>
-                                        <td class="px-6 py-4">
-                                            @if($betaling->status === 'betaald')
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-600">Betaald</span>
-                                            @elseif($betaling->status === 'niet_betaald')
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-50 text-red-600">Niet betaald</span>
-                                            @elseif($betaling->status === 'in_behandeling')
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-600">In behandeling</span>
-                                            @else
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-500">Afgewezen</span>
-                                            @endif
-                                        </td>
-                                        <td class="px-6 py-4 text-slate-500">{{ $betaling->bon ? $betaling->bon->bon_nummer : '—' }}</td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="5" class="px-6 py-10 text-center text-slate-400">
-                                            Geen betalingsgeschiedenis gevonden.
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
+        <form method="GET" action="{{ route('GegevensPagina') }}" class="flex items-center gap-2">
+            <!-- Maand dropdown -->
+            <select name="maand" onchange="this.form.submit()"
+                class="text-sm px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-700 cursor-pointer focus:outline-none">
+                <option value="">Alle maanden</option>
+                @foreach(['01'=>'Januari','02'=>'Februari','03'=>'Maart','04'=>'April','05'=>'Mei','06'=>'Juni','07'=>'Juli','08'=>'Augustus','09'=>'September','10'=>'Oktober','11'=>'November','12'=>'December'] as $num => $naam)
+                    <option value="{{ $num }}" {{ request('maand') == $num ? 'selected' : '' }}>
+                        {{ $naam }}
+                    </option>
+                @endforeach
+            </select>
 
-                    @if($betalingen->hasPages())
-                    <div class="flex items-center justify-between px-6 py-4 border-t border-slate-100">
-                        <p class="text-sm text-slate-400">
-                            Weergeven van {{ $betalingen->firstItem() }} tot {{ $betalingen->lastItem() }} van {{ $betalingen->total() }} betalingen
-                        </p>
-                        <div class="flex items-center gap-1.5">
-                            {{ $betalingen->links('pagination::tailwind') }}
-                        </div>
-                    </div>
-                    @endif
+            <!-- Jaar dropdown -->
+            <select name="jaar" onchange="this.form.submit()"
+                class="text-sm px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-700 cursor-pointer focus:outline-none">
+                <option value="">Alle jaren</option>
+                @foreach($beschikbareJaren as $jaar)
+                    <option value="{{ $jaar }}" {{ request('jaar') == $jaar ? 'selected' : '' }}>
+                        {{ $jaar }}
+                    </option>
+                @endforeach
+            </select>
+
+            <!-- Wis filter knop -->
+            @if(request('maand') || request('jaar'))
+                <a href="{{ route('GegevensPagina') }}"
+                   class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer" title="Wis filter">
+                    <i class="fa-solid fa-xmark text-slate-400 text-sm"></i>
+                </a>
+            @else
+                <div class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200">
+                    <i class="fa-solid fa-filter text-slate-400 text-sm"></i>
                 </div>
+            @endif
+        </form>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm" id="paymentHistoryTable">
+            <thead>
+                <tr class="border-b border-slate-100">
+                    <th class="text-left text-[11px] font-semibold tracking-widest uppercase text-slate-400 px-6 py-3">Date</th>
+                    <th class="text-right text-[11px] font-semibold tracking-widest uppercase text-slate-400 px-6 py-3">Amount</th>
+                    <th class="text-left text-[11px] font-semibold tracking-widest uppercase text-slate-400 px-6 py-3">Status</th>
+                    <th class="text-left text-[11px] font-semibold tracking-widest uppercase text-slate-400 px-6 py-3">Bon nummer</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-50">
+                @forelse($betalingen as $betaling)
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="px-6 py-4 text-slate-600">{{ \Carbon\Carbon::parse($betaling->ingediend_op)->translatedFormat('d M Y') }}</td>
+                        <td class="px-6 py-4 text-slate-800 font-semibold text-right">SRD {{ number_format($betaling->bedrag, 2, ',', '.') }}</td>
+                        <td class="px-6 py-4">
+                            @if($betaling->status === 'betaald')
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-600">Betaald</span>
+                            @elseif($betaling->status === 'niet_betaald')
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-50 text-red-600">Niet betaald</span>
+                            @elseif($betaling->status === 'in_behandeling')
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-600">In behandeling</span>
+                            @else
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-500">Afgewezen</span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 text-slate-500">{{ $betaling->bon ? $betaling->bon->bon_nummer : '—' }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="4" class="px-6 py-10 text-center text-slate-400">
+                            Geen betalingsgeschiedenis gevonden.
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    @if($betalingen->hasPages())
+    <div class="flex items-center justify-between px-6 py-4 border-t border-slate-100">
+        <p class="text-sm text-slate-400">
+            Weergeven van {{ $betalingen->firstItem() }} tot {{ $betalingen->lastItem() }} van {{ $betalingen->total() }} betalingen
+        </p>
+        <div class="flex items-center gap-1.5">
+            {{ $betalingen->links('pagination::tailwind') }}
+        </div>
+    </div>
+    @endif
+</div>
 
             </section>
         </div>

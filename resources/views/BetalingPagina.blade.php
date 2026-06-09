@@ -44,7 +44,9 @@
 
                     @include('layouts.BetalingLayout.BetalingChart')
                 </div>
+                 
 
+                   <!--Tables-->
                     @include('layouts.BetalingLayout.recente-transacties-tabel')
                     @include('layouts.BetalingLayout.leden-betalingsstatus-tabel')
                    
@@ -77,6 +79,7 @@
     @vite('resources/js/OptieDisable.js')
     @vite('resources/js/Button&More.js')
     @vite('resources/js/CheckSubscriptie.js')
+    @vite('resources/js/Herstel.js')
 
     
 

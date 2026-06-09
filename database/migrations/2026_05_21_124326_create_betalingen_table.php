@@ -25,6 +25,7 @@ return new class extends Migration
             $table->string('betaling_bewijs', 255)->nullable();
             $table->date('ingediend_op')->nullable();
             $table->timestamp('bijgewerkt_op')->useCurrent();
+            $table->softDeletes();
         });
 
         Schema::enableForeignKeyConstraints();

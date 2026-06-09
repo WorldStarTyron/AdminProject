@@ -49,6 +49,11 @@ Gate::define('betalingen-beheren', fn ($user) =>
 $user->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder'])
 );
 
+// SOFT DELETE    betalingen-verwijderen
+Gate::define('leden-verwijderen', fn ($user) =>
+$user->hasAnyRole(['Applicatie Beheerder'])
+);   
+
 // RAPPORT & LOG
 Gate::define('rapport-bekijken', fn ($user) =>
 $user->hasAnyRole(['Applicatie Beheerder', "Voorzitter"])

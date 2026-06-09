@@ -66,70 +66,89 @@ class LidController extends Controller
 
     // Lid detailpagina
     public function show(Request $request, $id = null)
-    {
-        $lid = \App\Models\Lid::where('gebruiker_id', Auth::id())->firstOrFail();
+{
+    $lid = \App\Models\Lid::where('gebruiker_id', Auth::id())->firstOrFail();
 
-        // Betalingsgeschiedenis van dit lid
-        $betalingen = \App\Models\Betaling::where('lid_id', $lid->lid_id)
-            ->with('bon')
-            ->orderBy('ingediend_op', 'desc')
-            ->paginate(5);
+    // Openstaande balans (niet_betaald + Openstaand)
+    $openstaandeBalans = \App\Models\Betaling::where('lid_id', $lid->lid_id)
+        ->whereIn('status', ['niet_betaald', 'Openstaand'])
+        ->sum('bedrag');
 
-        // Openstaande balans (niet_betaald + Openstaand)
-        $openstaandeBalans = \App\Models\Betaling::where('lid_id', $lid->lid_id)
-            ->whereIn('status', ['niet_betaald', 'Openstaand'])
-            ->sum('bedrag');
+    // Laatste betaalde betaling
+    $laatsteBetaling = \App\Models\Betaling::where('lid_id', $lid->lid_id)
+        ->where('status', 'betaald')
+        ->orderBy('ingediend_op', 'desc')
+        ->first();
 
-        // Laatste betaalde betaling
-        $laatsteBetaling = \App\Models\Betaling::where('lid_id', $lid->lid_id)
-            ->where('status', 'betaald')
-            ->orderBy('ingediend_op', 'desc')
-            ->first();
+    // Zoek alleen een OPENSTAANDE betaling
+    $UpcomingBetaling = \App\Models\Betaling::where('lid_id', $lid->lid_id)
+        ->where('status', 'Openstaand')
+        ->orderBy('jaar', 'desc')
+        ->orderBy('maand', 'desc')
+        ->first();
 
-        // Zoek alleen een OPENSTAANDE betaling (niet niet_betaald)
+    if ($UpcomingBetaling) {
+        $deadline = \Carbon\Carbon::createFromDate(
+            $UpcomingBetaling->jaar,
+            $UpcomingBetaling->maand, 1
+        )->endOfMonth();
+
+        $UpcomingKost = $UpcomingBetaling->bedrag;
+    } else {
         $UpcomingBetaling = \App\Models\Betaling::where('lid_id', $lid->lid_id)
-            ->where('status', 'Openstaand')
+            ->where('status', 'betaald')
             ->orderBy('jaar', 'desc')
             ->orderBy('maand', 'desc')
             ->first();
 
-        if ($UpcomingBetaling) {
-            // Openstaande betaling gevonden → deadline is einde van die maand
-            $deadline = \Carbon\Carbon::createFromDate(
+        $deadline = $UpcomingBetaling
+            ? \Carbon\Carbon::createFromDate(
                 $UpcomingBetaling->jaar,
                 $UpcomingBetaling->maand, 1
-            )->endOfMonth();
+              )->addMonth()->endOfMonth()
+            : null;
 
-            $UpcomingKost = $UpcomingBetaling->bedrag;
-        } else {
-            // Geen openstaande betaling → pak de laatste betaalde betaling
-            $UpcomingBetaling = \App\Models\Betaling::where('lid_id', $lid->lid_id)
-                ->where('status', 'betaald')
-                ->orderBy('jaar', 'desc')
-                ->orderBy('maand', 'desc')
-                ->first();
-
-            // Deadline is einde van de VOLGENDE maand na de laatste betaling
-            $deadline = $UpcomingBetaling
-                ? \Carbon\Carbon::createFromDate(
-                    $UpcomingBetaling->jaar,
-                    $UpcomingBetaling->maand, 1
-                  )->addMonth()->endOfMonth()
-                : null;
-
-            $UpcomingKost = $UpcomingBetaling ? $UpcomingBetaling->bedrag : $lid->MaandelijkseBijdrage();
-        }
-
-        return view('lidpagina', compact(
-            'lid',
-            'betalingen',
-            'openstaandeBalans',
-            'laatsteBetaling',
-            'UpcomingBetaling',
-            'deadline',
-            'UpcomingKost'
-        ));
+        $UpcomingKost = $UpcomingBetaling
+            ? $UpcomingBetaling->bedrag
+            : $lid->MaandelijkseBijdrage();
     }
+
+    // Filter op maand en jaar
+    $maandFilter = $request->input('maand'); // bijv. "03"
+    $jaarFilter  = $request->input('jaar');  // bijv. "2025"
+
+    $betalingenQuery = \App\Models\Betaling::where('lid_id', $lid->lid_id)
+        ->with('bon')
+        ->orderBy('ingediend_op', 'desc');
+
+    if ($maandFilter) {
+        $betalingenQuery->whereMonth('ingediend_op', $maandFilter);
+    }
+
+    if ($jaarFilter) {
+        $betalingenQuery->whereYear('ingediend_op', $jaarFilter);
+    }
+
+    $betalingen = $betalingenQuery->paginate(5)->withQueryString();
+
+   // Beschikbare jaren voor de dropdown
+$beschikbareJaren = \App\Models\Betaling::where('lid_id', $lid->lid_id)
+    ->selectRaw('YEAR(ingediend_op) as jaar')
+    ->groupByRaw('YEAR(ingediend_op)')
+    ->orderByDesc('jaar')
+    ->pluck('jaar');
+
+    return view('lidpagina', compact(
+        'lid',
+        'betalingen',
+        'openstaandeBalans',
+        'laatsteBetaling',
+        'UpcomingBetaling',
+        'deadline',
+        'UpcomingKost',
+        'beschikbareJaren'
+    ));
+}
 
     // Lid heractiveren
     public function heractiveer($lid_id)

@@ -133,7 +133,10 @@
                                 title="Bewerken">
                                 <i class="fa-solid fa-pen-to-square text-xs"></i>
                             </button>
+                            @endcan
 
+
+                            @can('leden-verwijderen')
                             <!-- Verwijderknop -->
                             <form action="{{ route('betalingen.destroy', $betaling->betaling_id) }}" method="POST" class="inline-block">
                                 @csrf
@@ -146,9 +149,11 @@
                                     <i class="fa-solid fa-trash text-xs"></i>
                                 </button>
                             </form>
+                        @endcan
+
+                        
                         </div>
                     </td>
-                    @endcan
                 </tr>
 
                 <!-- Lege staat als er geen betalingen zijn -->

@@ -10,7 +10,8 @@ use App\Models\Lid;
 use App\Http\Controllers\BonController;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Storage; // ← was missing, needed for deleting old files
+use Illuminate\Support\Facades\Storage; 
+use Illuminate\Support\Facades\DB;
 
 class BetalingController extends Controller
 {
@@ -93,57 +94,50 @@ class BetalingController extends Controller
         ));
     }
 
+ 
 
 
 
 
-    // Grafiekdata voor de laatste 7 maanden (ApexCharts)
+
+    // Bedrag in dagen grafiek
     public function chartData()
     {
-        // Bouw een lijst van de laatste 7 maanden (oudste eerst)
-        $maanden = collect(range(6, 0))->map(function ($maandenTerug) {
-            $datum = Carbon::now()->subMonths($maandenTerug);
-            return [
-                'jaar'  => (int) $datum->format('Y'),
-                'maand' => (int) $datum->format('n'),
-                'label' => $datum->translatedFormat('M'),
-            ];
-        });
+        // Haal de afgelopen 7 dagen op
+        $dagen =Betaling::select(
+            DB::raw('DATE(ingediend_op) as dag'),
+            DB::raw('SUM(bedrag) as totaal'),
+        )
+        ->where('status', 'betaald')
+        ->where('ingediend_op', '>=', now()->subDays(7))
+        ->groupBy('dag')
+        ->orderBy('dag', 'desc')
+        ->get()
+        ->keyBy('dag');
 
-        // Haal alle relevante betalingen op in één query en bereken de som (totaal) van het bedrag
-        $rijen = Betaling::selectRaw('jaar, maand, methode, SUM(bedrag) as totaal')
-            ->where('status', 'betaald')
-            ->where(function ($q) use ($maanden) {
-                foreach ($maanden as $m) {
-                    $q->orWhere(function ($sub) use ($m) {
-                        $sub->where('jaar', $m['jaar'])
-                            ->where('maand', $m['maand']);
-                    });
-                }
-            })
-            ->groupBy('jaar', 'maand', 'methode')
-            ->get()
-            ->groupBy(fn($r) => $r->jaar . '-' . $r->maand)
-            ->map(fn($groep) => $groep->keyBy('methode'));
+        $labels=[];
+        $series=[];
 
-        // Zet om naar series die ApexCharts verwacht
-        $labels     = [];
-        $fysiek     = [];
-        $overmaking = [];
+// labels en series opmaken voor ApexCharts
+        for($i = 6; $i>= 0; $i--){
+            $datum = now()->subDays($i);
+            $dagNaam = $datum->locale('nl')->isoFormat('ddd'); // Ma. Di, Wo, Do, etc...      
 
-        foreach ($maanden as $m) {
-            $sleutel      = $m['jaar'] . '-' . $m['maand'];
-            $labels[]     = $m['label'];
-            $fysiek[]     = (float) ($rijen[$sleutel]['fysiek']->totaal     ?? 0);
-            $overmaking[] = (float) ($rijen[$sleutel]['overmaking']->totaal ?? 0);
+            $labels[] = $dagNaam;
+            $bedragen[] = (float) ($dagen->get($datum->toDateString())->totaal ?? 0);
+            
         }
+        
+      $series = [
+        [
+            'name' => 'Totaal Bedrag',
+            'data' => $bedragen,
+        ]
+      ];
 
         return response()->json([
-            'labels' => $labels,
-            'series' => [
-                ['name' => 'Fysiek',     'data' => $fysiek],
-                ['name' => 'Overmaking', 'data' => $overmaking],
-            ],
+            'labels'=> $labels,
+            'series'=> $series,
         ]);
     }
 
@@ -241,6 +235,9 @@ class BetalingController extends Controller
         return response()->json(['success' => true, 'message' => 'Betaling succesvol toegevoegd'], 201);
     }
 
+
+
+
     // Bestaande betaling bijwerken
     public function update(Request $request, Betaling $betaling)
     {
@@ -291,6 +288,9 @@ class BetalingController extends Controller
 
 
 
+
+
+
     // Soft delete 
     public function destroy($betaling_id)
     {
@@ -308,11 +308,56 @@ class BetalingController extends Controller
         if (auth()->check()) {
             Activiteit::log(auth()->id(), 'betaling_verwijderd', [
                 'betaling_id' => $betaling->betaling_id,
-                'details'     => 'Betaling #' . $betaling->betaling_id . ' verwijderd.',
+                'details'     => 'Betaling #' . $betaling->betaling_id . ' verwijderd door '. auth()->user()->naam,
             ]);
         }
 
-        return response()->json(['success' => true, 'message' => 'Betaling succesvol verwijderd']);
+        return redirect()->back()->with('success','Betaling verwijderd');
+    }
+
+
+    public function trashed()
+    {
+        Gate::authorize('betalingen-beheren');
+          
+        $verwijderdeBetalingen = Betaling::onlyTrashed()
+        ->Select('betalingen.*','gebruikers.naam')
+        ->join('leden','leden.lid_id', '=','betalingen.lid_id')
+        ->join('gebruikers','gebruikers.gebruiker_id', '=','leden.gebruiker_id')
+        ->orderBy('betalingen.deleted_at', 'desc')
+        ->get();
+
+      
+
+        return view('DeletedBetaling', compact('verwijderdeBetalingen'));
+    }
+
+
+    public function restore($betaling_id)
+    {
+        Gate::authorize('betalingen-beheren');
+
+        //WithTrashed() zoekt ook in verwijderde rijen
+        //zonder dit vindt laravel de betaling niet want die is weg
+
+        $betaling = Betaling::withTrashed()->find($betaling_id);
+
+        if(!$betaling){
+            return response()->json(['success' => false, 'message' => 'Betaling niet gevonden']);
+        }
+         
+        //restore() haalt de betaling terug uit de trash
+        $betaling->restore();
+
+        // Activiteit loggen
+        if (auth()->check()) {
+            Activiteit::log(auth()->id(), 'betaling_hersteld', [
+                'betaling_id' => $betaling->betaling_id,
+                'details'     => 'Betaling #' . $betaling->betaling_id . ' hersteld door '. auth()->user()->naam ,
+            ]);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Betaling succesvol hersteld']);
     }
 
 

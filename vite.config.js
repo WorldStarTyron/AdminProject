@@ -11,7 +11,7 @@ export default defineConfig({
                 'resources/css/login.css',
                 'resources/css/ledenpagina-new.css',
                 'resources/css/BetalingPagina.css',
-                'resources/js/app.js',
+                'resources/js/Sidebar.js',
                 'resources/js/Rolbeheer.js',
                 'resources/js/Charts/Rapportage-Chart.js',
                 'resources/js/Charts/MainDashboard-chart.js',

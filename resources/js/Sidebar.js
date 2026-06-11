@@ -47,4 +47,45 @@ document.addEventListener('DOMContentLoaded', function() {
             localStorage.setItem('sidebar-collapsed', isCollapsed);
         });
     }
+
+    // Betaling dropdown toggle and persistence (Vanilla JavaScript fallback/override)
+    const betalingDropdownToggle = document.getElementById('betalingDropdownToggle');
+    const betalingDropdownMenu = document.getElementById('betalingDropdownMenu');
+    const betalingDropdownChevron = document.getElementById('betalingDropdownChevron');
+    const betalingDropdownContainer = document.getElementById('betalingDropdownContainer');
+
+    if (betalingDropdownToggle && betalingDropdownMenu && betalingDropdownChevron) {
+        // Read persisted state or fall back to active route check from server
+        const isRouteActive = betalingDropdownContainer.getAttribute('data-active') === 'true';
+        const savedDropdownState = localStorage.getItem('sidebar_betaling_open');
+        
+        let isOpen = isRouteActive;
+        if (savedDropdownState !== null) {
+            isOpen = savedDropdownState === 'true';
+        }
+
+        // Apply initial state
+        if (isOpen) {
+            betalingDropdownMenu.classList.remove('hidden');
+            betalingDropdownChevron.classList.add('rotate-180');
+        } else {
+            betalingDropdownMenu.classList.add('hidden');
+            betalingDropdownChevron.classList.remove('rotate-180');
+        }
+
+        // Toggle on click
+        betalingDropdownToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            const currentlyOpen = !betalingDropdownMenu.classList.contains('hidden');
+            if (currentlyOpen) {
+                betalingDropdownMenu.classList.add('hidden');
+                betalingDropdownChevron.classList.remove('rotate-180');
+                localStorage.setItem('sidebar_betaling_open', 'false');
+            } else {
+                betalingDropdownMenu.classList.remove('hidden');
+                betalingDropdownChevron.classList.add('rotate-180');
+                localStorage.setItem('sidebar_betaling_open', 'true');
+            }
+        });
+    }
 });

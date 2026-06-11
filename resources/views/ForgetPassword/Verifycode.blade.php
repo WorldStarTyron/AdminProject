@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verify Code - Security Portal</title>
     <meta name="description" content="Enter the 6-digit verification code sent to your email to reset your password.">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/Sidebar.js'])
 </head>
 
 <!-- Page Body: Light gray background -->

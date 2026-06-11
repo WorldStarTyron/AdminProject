@@ -17,9 +17,6 @@
     <nav class="flex-1 overflow-y-auto px-3 pb-2">
         <ul class="space-y-1">
 
-
-        
-
             <!-- Dashboard — zichtbaar voor iedereen behalve Lid -->
             @can('dashboard')
             <li class="rounded-lg {{ request()->routeIs('MainDashboardPagina') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
@@ -59,49 +56,49 @@
             @endcan
 
             <!-- Betaling — alleen admin medewerker en applicatiebeheerder -->
-           <!-- Betaling dropdown — alleen admin medewerker en applicatiebeheerder -->
-@can('betalingen-bekijken')
-<li x-data="{ open: {{ request()->routeIs('betalingPagina', 'deletedBetalingPagina') ? 'true' : 'false' }} }" class="rounded-lg">
+            @can('betalingen-bekijken')
+            <li class="rounded-lg" id="betalingDropdownContainer" data-active="{{ request()->routeIs('betalingPagina', 'DeletedRecords') ? 'true' : 'false' }}">
 
-    {{-- Dropdown toggle knop --}}
-    <button
-        @click="open = !open"
-        class="flex items-center gap-3 px-3 py-2 rounded-lg w-full transition-colors
-               {{ request()->routeIs('betalingPagina', 'deletedBetalingPagina') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
-        data-tooltip="Betaling">
-        <span class="shrink-0 w-5 text-center">
-            <i class="fa-solid fa-credit-card text-base"></i>
-        </span>
-        <span class="nav-text text-sm font-medium flex-1 text-left">Betaling</span>
-        <span class="nav-text shrink-0">
-            <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200" :class="open ? 'rotate-180' : ''"></i>
-        </span>
-    </button>
+                {{-- Dropdown toggle knop --}}
+                <button
+                    id="betalingDropdownToggle"
+                    class="flex items-center gap-3 px-3 py-2 rounded-lg w-full transition-colors
+                           {{ request()->routeIs('betalingPagina', 'DeletedRecords') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                    data-tooltip="Betaling">
+                    <span class="shrink-0 w-5 text-center">
+                        <i class="fa-solid fa-credit-card text-base"></i>
+                    </span>
+                    <span class="nav-text text-sm font-medium flex-1 text-left">Betaling</span>
+                    <span class="nav-text shrink-0">
+                        <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200" id="betalingDropdownChevron"></i>
+                    </span>
+                </button>
 
-    {{-- Dropdown items --}}
-    <ul x-show="open" x-transition class="mt-1 ml-5 space-y-1 border-l border-gray-200 pl-3">
+                {{-- Dropdown items --}}
+                <ul class="mt-1 ml-5 space-y-1 border-l border-gray-200 pl-3 hidden" id="betalingDropdownMenu">
 
-        <li class="rounded-lg {{ request()->routeIs('betalingPagina') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-            <a href="{{ route('betalingPagina') }}"
-               class="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm"
-               data-tooltip="Betalingen">
-                <i class="fa-solid fa-list text-xs shrink-0"></i>
-                <span class="nav-text font-medium">Betalingen</span>
-            </a>
-        </li> 
-        @endcan
-        @can('leden-verwijderen') 
-        <li class="rounded-lg {{ request()->routeIs('DeletedBetaling') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-            <a href="{{ route('DeletedBetaling') }}"
-               class="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm"
-               data-tooltip="Verwijderde Betalingen">
-                <i class="fa-solid fa-trash-can text-xs shrink-0"></i>
-                <span class="nav-text font-medium">Verwijderde Betalingen</span>
-            </a>
-        </li>
-       @endcan
-    </ul>
-</li>
+                    <li class="rounded-lg {{ request()->routeIs('betalingPagina') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <a href="{{ route('betalingPagina') }}"
+                           class="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm"
+                           data-tooltip="Betalingen">
+                            <i class="fa-solid fa-list text-xs shrink-0"></i>
+                            <span class="nav-text font-medium">Betalingen</span>
+                        </a>
+                    </li>
+
+                    @can('betalingen-verwijderen')
+                    <li class="rounded-lg {{ request()->routeIs('DeletedRecords') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <a href="{{ route('DeletedRecords') }}"
+                           class="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm"
+                           data-tooltip="Verwijderde Betalingen">
+                            <i class="fa-solid fa-trash-can text-xs shrink-0"></i>
+                            <span class="nav-text font-medium">Verwijderde Betalingen</span>
+                        </a>
+                    </li>
+                    @endcan
+                </ul>
+            </li>
+            @endcan
 
             <!-- Rollen beheren — alleen applicatiebeheerder -->
             @can('rollenbeheer')

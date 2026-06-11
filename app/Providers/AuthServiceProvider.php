@@ -54,6 +54,10 @@ Gate::define('leden-verwijderen', fn ($user) =>
 $user->hasAnyRole(['Applicatie Beheerder'])
 );   
 
+Gate::define('betalingen-verwijderen', fn ($user) =>
+$user->isApplicatieBeheerder()
+);
+
 // RAPPORT & LOG
 Gate::define('rapport-bekijken', fn ($user) =>
 $user->hasAnyRole(['Applicatie Beheerder', "Voorzitter"])

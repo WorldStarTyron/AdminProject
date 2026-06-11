@@ -102,7 +102,7 @@ class PostController extends Controller
             $nieuwLid = \App\Models\Lid::where('gebruiker_id', $gebruiker->gebruiker_id)->first();
             \App\Models\Betaling::create([
                 'lid_id'  => $nieuwLid->lid_id,
-                'bedrag'  => 45,
+                'bedrag'  => $nieuwLid->MaandelijkseBijdrage(),
                 'methode' => 'fysiek',
                 'status'  => 'Openstaand',
                 'maand'   => $datum->month,

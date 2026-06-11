@@ -95,11 +95,6 @@ class BetalingController extends Controller
     }
 
  
-
-
-
-
-
     // Bedrag in dagen grafiek
     public function chartData()
     {
@@ -153,10 +148,10 @@ class BetalingController extends Controller
             'datum'           => 'required|date',
             'methode'         => 'required|in:fysiek,overmaking',
             'status'          => 'required|in:Openstaand,betaald,niet_betaald',
-            'bedrag'          => 'required|numeric|min:100', //alleen betaling van 100
+            'bedrag'          => 'required|numeric|min:150', //alleen betaling van 150
             'betaling_bewijs' => 'nullable|file|max:5120', 
         ],[
-            'bedrag.min' => 'Het bedrag moet minimaal SRD100 zijn', 
+            'bedrag.min' => 'Het bedrag moet minimaal SRD150 zijn', 
         ]);
 
 
@@ -244,7 +239,7 @@ class BetalingController extends Controller
         Gate::authorize('betalingen-beheren');
 
         $request->validate([
-            'bedrag'          => 'required|numeric|min:100', //alleen betaling van 100
+            'bedrag'          => 'required|numeric|min:150', //alleen betaling van 100
             'methode'         => 'required|in:fysiek,overmaking',
             'status'          => 'required|in:Openstaand,betaald,niet_betaald',
             'datum'           => 'required|date',
@@ -308,9 +303,14 @@ class BetalingController extends Controller
         if (auth()->check()) {
             Activiteit::log(auth()->id(), 'betaling_verwijderd', [
                 'betaling_id' => $betaling->betaling_id,
-                'details'     => 'Betaling #' . $betaling->betaling_id . ' verwijderd door '. auth()->user()->naam,
+                'details'     => 'Betaling #'. $betaling->betaling_id . ' ('. $betaling->ingediend_op .') van lid: ' . $betaling->lid->gebruiker->naam . ' verwijderd door '. auth()->user()->naam,
             ]);
-        }
+        } 
+           
+
+
+
+
 
         return redirect()->back()->with('success','Betaling verwijderd');
     }
@@ -318,7 +318,7 @@ class BetalingController extends Controller
 
     public function trashed()
     {
-        Gate::authorize('betalingen-beheren');
+        Gate::authorize('betalingen-verwijderen');
           
         $verwijderdeBetalingen = Betaling::onlyTrashed()
         ->Select('betalingen.*','gebruikers.naam')
@@ -327,15 +327,16 @@ class BetalingController extends Controller
         ->orderBy('betalingen.deleted_at', 'desc')
         ->get();
 
+     
       
 
-        return view('DeletedBetaling', compact('verwijderdeBetalingen'));
+        return view('DeletedRecords', compact('verwijderdeBetalingen'));
     }
 
 
     public function restore($betaling_id)
     {
-        Gate::authorize('betalingen-beheren');
+        Gate::authorize('betalingen-verwijderen');
 
         //WithTrashed() zoekt ook in verwijderde rijen
         //zonder dit vindt laravel de betaling niet want die is weg
@@ -353,7 +354,7 @@ class BetalingController extends Controller
         if (auth()->check()) {
             Activiteit::log(auth()->id(), 'betaling_hersteld', [
                 'betaling_id' => $betaling->betaling_id,
-                'details'     => 'Betaling #' . $betaling->betaling_id . ' hersteld door '. auth()->user()->naam ,
+                'details'     => 'Betaling #' . $betaling->betaling_id . '('. $betaling->ingediend_op .') van lid: ' . $betaling->lid->gebruiker->naam . ' hersteld door '. auth()->user()->naam ,
             ]);
         }
 

@@ -12,7 +12,7 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/js/Sidebar.js'])
 </head>
 
 <body class="font-sans bg-gray-50 text-gray-800">
@@ -229,13 +229,20 @@
                                             <td class="py-3 pr-4">
                                                 @php
                                                     $statusStyles = match($betaling->status) {
-                                                        'Betaald'      => 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-200',
-                                                        'Niet Betaald' => 'bg-red-50 text-red-500 ring-1 ring-red-200',
+                                                        'betaald'      => 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-200',
+                                                        'niet_betaald' => 'bg-red-50 text-red-500 ring-1 ring-red-200',
+                                                        'Openstaand'   => 'bg-cyan-50 text-cyan-600 ring-1 ring-cyan-200',
                                                         default        => 'bg-amber-50 text-amber-600 ring-1 ring-amber-200',
+                                                    };
+                                                    $statusLabel = match($betaling->status) {
+                                                        'betaald'      => 'Betaald',
+                                                        'niet_betaald' => 'Niet betaald',
+                                                        'Openstaand'   => 'Openstaand',
+                                                        default        => ucfirst($betaling->status),
                                                     };
                                                 @endphp
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold {{ $statusStyles }}">
-                                                    {{ $betaling->status }}
+                                                    {{ $statusLabel }}
                                                 </span>
                                             </td>
                                             <td class="py-3 text-gray-500 text-xs font-mono">

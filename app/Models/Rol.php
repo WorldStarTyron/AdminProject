@@ -21,6 +21,4 @@ class Rol extends Model
         return $this->belongsToMany(Gebruiker::class, 'gebruikers_rollen', 'rol_id', 'gebruiker_id');
     } 
 
-
-    
 }

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>New Password - Security Portal</title>
     <meta name="description" content="Create a new secure password for your account.">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/Sidebar.js'])
 </head>
 
 <!-- Page Body: Light gray background matching the design -->

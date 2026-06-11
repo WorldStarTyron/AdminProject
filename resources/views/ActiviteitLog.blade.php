@@ -4,15 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Activiteit Log | Administratie Panel</title>
-    <!-- Preconnect to Google Fonts for optimal loading speed -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Import Inter Font for a modern, clean typography scale -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- FontAwesome CDN for modern micro-interaction icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <!-- Load custom Vite styles and sidebar layouts -->
-    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/js/Sidebar.js'])
 </head>
 <body class="m-0 bg-[#f0f4f8] text-slate-700 font-['Inter',sans-serif] antialiased">
 
@@ -165,7 +161,7 @@
 
                 <!-- TABS CONTAINER SYSTEM: Dynamic active design indicator -->
                 <div class="flex items-center gap-1 bg-slate-200/50 p-1 rounded-2xl border border-slate-200/20 self-start lg:self-auto">
-                    @foreach(['Alle', 'Inloggen', 'Leden', 'Systeem'] as $t)
+                    @foreach(['Alle', 'Inloggen', 'Leden', 'Betaling', 'Systeem'] as $t)
                         @php
                             $isActive = ($tab === $t);
                         @endphp
@@ -244,60 +240,102 @@
                                                     {{ $act->gebruiker ? $act->gebruiker->naam : 'Onbekende Gebruiker' }}
                                                 </span>
                                                 <span class="text-[10px] text-slate-400 font-bold tracking-wider uppercase mt-0.5">
-                                                    ID: {{ $act->gebruiker ? $act->gebruiker->gebruiker_id : '0' }}
-                                                </span>
+                                                    {{ $act->gebruiker ? $act->gebruiker->rollen->pluck('naam')->join(', ') : 'Geen rol' }}
+                                                </span> 
                                             </div>
                                         </div>
                                     </td>
                                     
                                     <!-- ACTIE Column: Categorized Dynamic Colored Badge Pills -->
                                     <td class="px-6 py-4">
-                                        @php
-                                            $actStr = strtolower($act->actie);
-                                            
-                                            // Conditional mappings corresponding to requested display actions
-                                            if ($actStr === 'ingelogd') {
-                                                $badgeLabel = 'Login';
-                                                $badgeStyle = 'bg-blue-50 text-blue-700 ring-1 ring-blue-600/15'; 
-                                            } elseif ($actStr === 'uitgelogd') {
-                                                $badgeLabel = 'Logout';
-                                                $badgeStyle = 'bg-slate-100 text-slate-700 ring-1 ring-slate-600/15'; 
-                                            } elseif ($actStr === 'lid_aangemaakt') {
-                                                // If details mention adding a new user, display "Gebruiker aangemaakt"
-                                                $isUser = false;
-                                                if (is_array($act->details)) {
-                                                    $text = $act->details['details'] ?? '';
-                                                    if (str_contains(strtolower($text), 'nieuwe gebruiker')) {
-                                                        $isUser = true;
-                                                    }
+                                       @php
+                                        $actStr = strtolower($act->actie);
+
+                                        // login actie
+                                        if ($actStr === 'ingelogd') {
+                                            $badgeLabel = 'Login';
+                                            $badgeStyle = 'bg-blue-50 text-blue-700 ring-1 ring-blue-600/15';
+
+                                        // logout actie
+                                        } elseif ($actStr === 'uitgelogd') {
+                                            $badgeLabel = 'Logout';
+                                            $badgeStyle = 'bg-slate-100 text-slate-700 ring-1 ring-slate-600/15';
+
+                                        // lid aangemaakt
+                                        } elseif ($actStr === 'lid_aangemaakt') {
+
+                                        // check of het een gebruiker is
+                                        $isUser = false;
+
+                                            if (is_array($act->details)) {
+                                                $text = $act->details['details'] ?? '';
+
+                                            // check tekst bevat "nieuwe gebruiker"
+                                                if (str_contains(strtolower($text), 'nieuwe gebruiker')) {
+                                                    $isUser = true;
                                                 }
-                                                $badgeLabel = $isUser ? 'Gebruiker aangemaakt' : 'Lid toegevoegd';
-                                                $badgeStyle = 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/15'; 
-                                            } elseif ($actStr === 'lid_bijgewerkt') {
-                                                $badgeLabel = 'Lid gewijzigd';
-                                                $badgeStyle = 'bg-teal-50 text-teal-700 ring-1 ring-teal-600/15'; 
-                                            } elseif ($actStr === 'lid_verwijderd') {
-                                                $badgeLabel = 'Lid verwijderd';
-                                                $badgeStyle = 'bg-rose-50 text-rose-700 ring-1 ring-rose-600/15'; 
-                                            } elseif ($actStr === 'betaling_geregistreerd') {
-                                                $badgeLabel = 'Betaling toegevoegd';
-                                                $badgeStyle = 'bg-purple-50 text-purple-700 ring-1 ring-purple-600/15'; 
-                                            } elseif ($actStr === 'betaling_goedgekeurd') {
-                                                $badgeLabel = 'Betaling goedgekeurd';
-                                                $badgeStyle = 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-600/15'; 
-                                            } elseif ($actStr === 'betaling_afgewezen') {
-                                                $badgeLabel = 'Betaling afgewezen';
-                                                $badgeStyle = 'bg-amber-50 text-amber-700 ring-1 ring-amber-600/15'; 
-                                            } elseif ($actStr === 'wachtwoord_gewijzigd') {
-                                                $badgeLabel = 'Wachtwoord gewijzigd';
-                                                $badgeStyle = 'bg-orange-50 text-orange-700 ring-1 ring-orange-600/15'; 
-                                            } elseif (in_array($actStr, ['bon_gedownload', 'bon_aangemaakt'])) {
-                                                $badgeLabel = 'Rapport gegenereerd';
-                                                $badgeStyle = 'bg-sky-50 text-sky-700 ring-1 ring-sky-600/15'; 
-                                            } else {
-                                                $badgeLabel = 'Systeem';
-                                                $badgeStyle = 'bg-slate-50 text-slate-600 ring-1 ring-slate-500/10'; 
                                             }
+
+                                            // label kiezen
+                                            $badgeLabel = $isUser ? 'Gebruiker aangemaakt' : 'Lid toegevoegd';
+                                            $badgeStyle = 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/15';
+
+                                        // lid aangepast
+                                        } elseif ($actStr === 'lid_bijgewerkt') {
+                                            $badgeLabel = 'Lid gewijzigd';
+                                            $badgeStyle = 'bg-teal-50 text-teal-700 ring-1 ring-teal-600/15';
+
+                                        // lid verwijderd
+                                        } elseif ($actStr === 'lid_verwijderd') {
+                                            $badgeLabel = 'Lid verwijderd';
+                                            $badgeStyle = 'bg-rose-50 text-rose-700 ring-1 ring-rose-600/15';
+
+                                        // betaling gemaakt
+                                        } elseif ($actStr === 'betaling_geregistreerd') {
+                                            $badgeLabel = 'Betaling geregistreerd';
+                                            $badgeStyle = 'bg-purple-50 text-purple-700 ring-1 ring-purple-600/15';
+
+                                        // betaling goedgekeurd
+                                        } elseif ($actStr === 'betaling_goedgekeurd') {
+                                            $badgeLabel = 'Betaling goedgekeurd';
+                                            $badgeStyle = 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-600/15';
+
+                                        // betaling afgekeurd
+                                        } elseif ($actStr === 'betaling_afgewezen') {
+                                            $badgeLabel = 'Betaling afgewezen';
+                                            $badgeStyle = 'bg-amber-50 text-amber-700 ring-1 ring-amber-600/15';
+
+                                        // wachtwoord veranderd
+                                        } elseif ($actStr === 'wachtwoord_gewijzigd') {
+                                            $badgeLabel = 'Wachtwoord gewijzigd';
+                                            $badgeStyle = 'bg-orange-50 text-orange-700 ring-1 ring-orange-600/15';
+
+                                        // bon gemaakt of gedownload
+                                        } elseif (in_array($actStr, ['bon_gedownload', 'bon_aangemaakt'])) {
+                                            $badgeLabel = 'Rapport gegenereerd';
+                                            $badgeStyle = 'bg-sky-50 text-sky-700 ring-1 ring-sky-600/15';
+
+                                        // betaling verwijderd
+                                        } elseif ($actStr === 'betaling_verwijderd') {
+                                            $badgeLabel = 'Betaling verwijderd';
+                                            $badgeStyle = 'bg-amber-50 text-amber-700 ring-1 ring-amber-600/15';
+                                        
+
+                                            //Betaling hersteld
+                                        }elseif (in_array($actStr, ['betaling_hersteld'])) {
+                                            $badgeLabel = 'Betaling hersteld';
+                                            $badgeStyle = 'bg-green-50 text-green-700 ring-1 ring-green-600/15';
+                                        
+                                        // gebruiker acties
+                                        }elseif (in_array($actStr, ['gebruiker_toegevoegd', 'gebruiker_verwijderd', 'gebruiker_gewijzigd'])) {
+                                            $badgeLabel = 'Gebruiker gewijzigd';
+                                            $badgeStyle = 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/15';
+                                        
+                                        // fallback (alles wat niet past)
+                                        } else {
+                                            $badgeLabel = 'Systeem';
+                                            $badgeStyle = 'bg-slate-50 text-slate-600 ring-1 ring-slate-500/10';
+                                        }
                                         @endphp
                                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider {{ $badgeStyle }}">
                                             {{ $badgeLabel }}
@@ -344,7 +382,7 @@
                                     <!-- TIJDSTIP Column: Clock Icon prefix + formatted timestamp -->
                                     <td class="px-6 py-4 text-slate-400 text-xs font-medium">
                                         <i class="fa-regular fa-clock mr-1 text-slate-300 text-sm"></i>
-                                        {{ $act->aangemaakt_op ? $act->aangemaakt_op->format('Y-m-d H:i:s') : 'Nvt' }}
+                                        {{ $act->aangemaakt_op ? $act->aangemaakt_op->format('Y-m-d') : 'Nvt' }}
                                     </td>
                                 </tr>
                             @empty

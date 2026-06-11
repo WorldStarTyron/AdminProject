@@ -336,6 +336,6 @@
         window.csrfToken      = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     </script>
 
-    @vite(['resources/js/app.js', 'resources/js/Rolbeheer.js'])
+    @vite(['resources/js/Sidebar.js', 'resources/js/Rolbeheer.js'])
 </body>
 </html>

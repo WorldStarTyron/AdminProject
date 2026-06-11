@@ -13,18 +13,6 @@
         @can('betalingen-beheren')
         <div class="flex gap-2">
 
-            <!-- Knop om subscripties te controleren voor deze maand -->
-            <button
-                id="checkSubscriptieBtn"
-                data-url="{{ route('betalingen.checkSubscriptie') }}"
-                data-maand="{{ $maand }}"
-                data-jaar="{{ $jaar }}"
-                class="inline-flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200/80 text-xs font-semibold px-3.5 py-1.5 rounded-lg transition-all duration-150 cursor-pointer whitespace-nowrap"
-            >
-                <i id="subscriptieIcon" class="fa-solid fa-rotate text-[0.625rem]"></i>
-                Check Subscriptie
-            </button>
-
             <!-- Knop om een nieuwe betaling toe te voegen -->
             <button id="openBetalingModal" class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold px-3.5 py-1.5 rounded-lg transition-all duration-150 cursor-pointer whitespace-nowrap">
                 <i class="fa-solid fa-plus text-[0.625rem]"></i>

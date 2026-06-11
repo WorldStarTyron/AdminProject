@@ -89,19 +89,6 @@
                 </div>
 
                 @can('betalingen-beheren')
-                <!-- Check subscription button - checks if all members paid this month -->
-                <button
-                    id="checkSubscriptieBtn"
-                    data-url="{{ route('betalingen.checkSubscriptie') }}"
-                    data-maand="{{ $maand }}"
-                    data-jaar="{{ $jaar }}"
-                    class="inline-flex items-center gap-2 bg-gradient-to-br from-amber-500 to-orange-500 text-white font-['Inter',sans-serif] 
-                    text-[0.8125rem] font-semibold px-5 py-2.5 rounded-[10px] shadow-[0_2px_8px_rgba(245,158,11,0.25)] hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(245,158,11,0.35)] active:translate-y-0 transition-all duration-200 cursor-pointer border-none whitespace-nowrap">
-                    <!-- Refresh icon -->
-                    <i id="subscriptieIcon" class="fa-solid fa-rotate text-xs"></i>
-                    Check Subscriptie
-                </button>
-
                 <!-- Add payment button -->
                 <button id="openBetalingModal" class="inline-flex items-center gap-2 bg-gradient-to-br from-[#1e3a8a] to-[#2563eb] text-white font-['Inter',sans-serif] text-[0.8125rem] font-semibold px-5 py-2.5 rounded-[10px] shadow-[0_2px_8px_rgba(30,58,138,0.2)] hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(30,58,138,0.3)] active:translate-y-0 transition-all duration-200 cursor-pointer border-none whitespace-nowrap">
                     <!-- Plus icon -->

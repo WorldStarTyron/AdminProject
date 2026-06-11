@@ -1,106 +1,84 @@
-// ApexCharts - Stacked Bar Chart (live data via /betalingen/chart-data)
-
 document.addEventListener('DOMContentLoaded', function () {
 
-    // ── Skeleton / laadstatus tonen
     const container = document.querySelector('#contributieChart');
     if (!container) return;
 
-    // ── Data ophalen van de backend 
-    fetch('/betalingen/chart-data', {
-        headers: {
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-        },
-    })
-        .then(function (response) {
-            if (!response.ok) throw new Error('Netwerkfout: ' + response.status);
-            return response.json();
-        })
-        .then(function (data) {
-            renderChart(data.labels, data.series);
-        })
-        .catch(function (err) {
-            console.error('Chart data kon niet worden opgehaald:', err);
-            // Toon een vriendelijke foutmelding in de chart-container
-            container.innerHTML =
-                '<p class="text-slate-400 color-red text-sm text-center pt-8">Grafiek kon niet worden geladen.</p>';
-        });
+    const maandSelect = document.querySelector('#maand');
+    const jaarSelect  = document.querySelector('#jaar');
 
-    // ── Chart renderen ───────────────────────────────────────────────────────
+    function loadChart() {
+        const maand = maandSelect ? maandSelect.value : '';
+        const jaar  = jaarSelect ? jaarSelect.value : '';
+
+        fetch(`/betalingen/chart-data?maand=${maand}&jaar=${jaar}`, {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('Netwerkfout: ' + res.status);
+            return res.json();
+        })
+        .then(data => renderChart(data.labels, data.series))
+        .catch(err => {
+            console.error(err);
+            container.innerHTML =
+                '<p class="text-slate-400 text-sm text-center pt-8">Grafiek kon niet worden geladen.</p>';
+        });
+    }
+
     function renderChart(labels, series) {
+        container.innerHTML = ''; // belangrijk: oude chart verwijderen
+
         var options = {
             series: series,
             chart: {
                 type: 'bar',
-                height: 200,
-                stacked: false,
+                height: 250,
                 toolbar: { show: false },
-                fontFamily: 'Inter, sans-serif',
-                animations: {
-                    enabled: true,
-                    easing: 'easeinout',
-                    speed: 600,
-                },
             },
             plotOptions: {
                 bar: {
-                    borderRadius: 2,
-                    columnWidth: '45%',
+                    borderRadius: 3,
+                    columnWidth: '60%',
                 },
             },
-            colors: ['#0867ffff'],
             xaxis: {
                 categories: labels,
                 labels: {
-                    style: {
-                        colors: '#94a3b8',
-                        fontSize: '11px',
-                        fontWeight: 500,
-                    },
+                    rotate: -45,
+                    style: { fontSize: '10px' },
                 },
-                axisBorder: { show: false },
-                axisTicks: { show: false },
+                tickPlacement: 'on',
             },
             yaxis: {
-                show: true,
                 labels: {
                     formatter: function (val) {
-                        return 'SRD ' + val.toLocaleString('nl-NL', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-                    },
-                    style: {
-                        colors: '#94a3b8',
-                        fontSize: '10px',
-                        fontWeight: 500,
-                    }
-                }
-            },
-            grid: {
-                show: true,
-            },
-            legend: {
-                show: true,
-            },
-            dataLabels: {
-                enabled: false,
-            },
-            tooltip: {
-                theme: 'dark',
-                y: {
-                    // Toon totale bedrag in srd
-                    formatter: function (val) {
-                        return new Intl.NumberFormat('nl-SR', {
-                            style: 'currency',
-                            currency: 'SRD',
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2 
-                        }).format(val);
+                        return 'SRD ' + val.toLocaleString('nl-NL');
                     },
                 },
             },
+            tooltip: {
+                y: {
+                    formatter: function (val) {
+                        return 'SRD ' + val.toLocaleString('nl-NL', { minimumFractionDigits: 2 });
+                    },
+                },
+            },
+            colors: ['#14b8a6'],
+            dataLabels: { enabled: false },
         };
 
         var chart = new ApexCharts(container, options);
         chart.render();
     }
+
+    // init load
+    loadChart();
+
+    // refresh bij wijziging filter
+    if (maandSelect) maandSelect.addEventListener('change', loadChart);
+    if (jaarSelect) jaarSelect.addEventListener('change', loadChart);
+
 });

@@ -25,8 +25,7 @@ export default defineConfig({
                 'resources/js/Modal/AddBetalingModal.js',
                 'resources/js/Modal/EditBetalingModal.js',
                 'resources/js/Charts/TotalBetaling-chart.js',
-                'resources/js/OptieDisable.js',
-                'resources/js/CheckSubscriptie.js'
+                'resources/js/OptieDisable.js'
             ],
             refresh: true,
         }),

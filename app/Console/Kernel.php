@@ -15,6 +15,8 @@ class Kernel extends ConsoleKernel
         // Elke 1e van de maand om 00:00 -> check of leden betaald hebben
         $schedule->command('subscriptie:check')->monthlyOn(1, '00:00');
         $schedule->command('check:deactiveer-leden')->daily();
+        $schedule->command('betalingen:check-openstaand')->daily();
+        
     }
 
     /**

@@ -95,44 +95,49 @@ class BetalingController extends Controller
     }
 
  
-    // Bedrag in dagen grafiek
-    public function chartData()
+    // Bedrag per weekdag grafiek
+    public function chartData(Request $request)
     {
-        // Haal de afgelopen 7 dagen op
-        $dagen =Betaling::select(
-            DB::raw('DATE(ingediend_op) as dag'),
-            DB::raw('SUM(bedrag) as totaal'),
+        // filters van de frontend
+        $maand = (int) $request->input('maand', now()->month);
+        $jaar  = (int) $request->input('jaar',  now()->year);
+
+        // Start- en einddatum van de geselecteerde maand
+        $startDatum = Carbon::createFromDate($jaar, $maand, 1)->startOfMonth();
+        $eindDatum  = $startDatum->copy()->endOfMonth();
+
+        // Haal betaalde betalingen op binnen de geselecteerde maand
+        $betalingen = Betaling::select(
+            DB::raw('DAYOFWEEK(ingediend_op) as weekdag'),
+            DB::raw('SUM(bedrag) as totaal')
         )
         ->where('status', 'betaald')
-        ->where('ingediend_op', '>=', now()->subDays(7))
-        ->groupBy('dag')
-        ->orderBy('dag', 'desc')
+        ->whereBetween('ingediend_op', [$startDatum->toDateString(), $eindDatum->toDateString()])
+        ->groupBy('weekdag')
         ->get()
-        ->keyBy('dag');
+        ->keyBy('weekdag');
 
-        $labels=[];
-        $series=[];
+        // DAYOFWEEK: 1=Zondag, 2=Maandag, ... 7=Zaterdag
+        // Wij willen Ma(2) t/m Zo(1)
+        $dagNamen = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'];
+        $dagKeys  = [2, 3, 4, 5, 6, 7, 1]; // MySQL DAYOFWEEK volgorde
 
-// labels en series opmaken voor ApexCharts
-        for($i = 6; $i>= 0; $i--){
-            $datum = now()->subDays($i);
-            $dagNaam = $datum->locale('nl')->isoFormat('ddd'); // Ma. Di, Wo, Do, etc...      
+        $labels   = [];
+        $bedragen = [];
 
-            $labels[] = $dagNaam;
-            $bedragen[] = (float) ($dagen->get($datum->toDateString())->totaal ?? 0);
-            
+        for ($i = 0; $i < 7; $i++) {
+            $labels[]   = $dagNamen[$i];
+            $bedragen[] = (float) ($betalingen->get($dagKeys[$i])->totaal ?? 0);
         }
-        
-      $series = [
-        [
-            'name' => 'Totaal Bedrag',
-            'data' => $bedragen,
-        ]
-      ];
 
         return response()->json([
-            'labels'=> $labels,
-            'series'=> $series,
+            'labels' => $labels,
+            'series' => [
+                [
+                    'name' => 'Totaal Bedrag',
+                    'data' => $bedragen,
+                ]
+            ]
         ]);
     }
 
@@ -306,14 +311,11 @@ class BetalingController extends Controller
                 'details'     => 'Betaling #'. $betaling->betaling_id . ' ('. $betaling->ingediend_op .') van lid: ' . $betaling->lid->gebruiker->naam . ' verwijderd door '. auth()->user()->naam,
             ]);
         } 
-           
-
-
-
-
-
+        
         return redirect()->back()->with('success','Betaling verwijderd');
     }
+
+
 
 
     public function trashed()
@@ -362,77 +364,8 @@ class BetalingController extends Controller
     }
 
 
+    
 
 
 
-    // Controleer of alle leden betaald hebben voor een bepaalde maand
-    public function checkSubscriptie(Request $request)
-    {
-        $maand      = $request->input('maand', now()->month);
-        $jaar       = $request->input('jaar', now()->year);
-        $eindeMaand = Carbon::createFromDate($jaar, $maand, 1)->endOfMonth();
-        $isVerlopen = now()->gt($eindeMaand);
-
-        $leden       = Lid::with('gebruiker')->get();
-        $nietBetaald = 0;
-        $alBetaald   = 0;
-
-        foreach ($leden as $lid) {
-            $betaling = Betaling::where('lid_id', $lid->lid_id)
-                ->where('maand', $maand)
-                ->where('jaar', $jaar)
-                ->first();
-
-            // Lid heeft al betaald, sla over
-            if ($betaling && $betaling->status === 'betaald') {
-                $alBetaald++;
-                continue;
-            }
-
-            if ($isVerlopen) {
-                // Deadline verstreken → zet op niet_betaald
-                if ($betaling) {
-                    if ($betaling->status !== 'niet_betaald') {
-                        $betaling->update(['status' => 'niet_betaald']);
-                        $nietBetaald++;
-                    }
-                } else {
-                    Betaling::create([
-                        'lid_id'       => $lid->lid_id,
-                        'bedrag'       => $lid->MaandelijkseBijdrage(),
-                        'status'       => 'niet_betaald',
-                        'maand'        => $maand,
-                        'jaar'         => $jaar,
-                        'ingediend_op' => $eindeMaand->format('Y-m-d'),
-                        'methode'      => null,
-                    ]);
-                    $nietBetaald++;
-                }
-            } else {
-                // Deadline nog niet verstreken → zet op Openstaand
-                if (!$betaling) {
-                    Betaling::create([
-                        'lid_id'       => $lid->lid_id,
-                        'bedrag'       => $lid->MaandelijkseBijdrage(),
-                        'status'       => 'Openstaand',
-                        'maand'        => $maand,
-                        'jaar'         => $jaar,
-                        'ingediend_op' => $eindeMaand->startOfMonth()->format('Y-m-d'),
-                        'methode'      => null,
-                    ]);
-                    $nietBetaald++;
-                } elseif ($betaling->status === 'niet_betaald') {
-                    $nietBetaald++;
-                } elseif ($betaling->status !== 'betaald') {
-                    $betaling->update(['status' => 'Openstaand']);
-                    $nietBetaald++;
-                }
-            }
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => "Check voltooid. $nietBetaald leden niet betaald / openstaand, $alBetaald leden betaald.",
-        ]);
-    }
 }

@@ -1,5 +1,38 @@
-{{-- Chart Card --}}
-<div class="flex-1 min-w-0 bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.03)] border border-slate-200/60 p-6">
-    <h3 class="text-base font-bold text-slate-800 mb-4">Maandelijke contributie</h3>
-    <div id="contributieChart" class="w-full" style="min-height: 200px;"></div>
+<div class="w-full bg-white border border-slate-100 rounded-2xl p-5">
+
+    {{-- Header --}}
+    <div class="flex items-center justify-between flex-wrap gap-3 mb-5">
+        <div>
+            <p class="text-xs text-slate-400 mb-0.5">Overzicht</p>
+            <p class="text-base font-medium text-slate-800">Betalingen per dag</p>
+        </div>
+        <div class="flex items-center gap-2">
+            {{-- Maand --}}
+            <select id="maand" class="text-sm px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-teal-500">
+                @for ($m = 1; $m <= 12; $m++)
+                    <option value="{{ $m }}" {{ $m == now()->month ? 'selected' : '' }}>
+                        {{ \Carbon\Carbon::create()->month($m)->locale('nl')->monthName }}
+                    </option>
+                @endfor
+            </select>
+
+            {{-- Jaar --}}
+            <select id="jaar" class="text-sm px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-teal-500">
+                @for ($y = now()->year; $y >= now()->year - 5; $y--)
+                    <option value="{{ $y }}" {{ $y == now()->year ? 'selected' : '' }}>
+                        {{ $y }}
+                    </option>
+                @endfor
+            </select>
+        </div>
+    </div>
+
+    {{-- Legend --}}
+    <div class="flex items-center gap-2 mb-3">
+        <span class="w-2.5 h-2.5 rounded-sm bg-teal-500 inline-block"></span>
+        <span class="text-xs text-slate-400">Betalingen</span>
+    </div>
+
+    {{-- ApexCharts render target --}}
+    <div id="contributieChart" class="w-full min-h-[220px]"></div>
 </div>

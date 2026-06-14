@@ -20,129 +20,206 @@
 
             <section class="px-8 py-6">
 
-                <!-- Profile header card -->
-                <div class="bg-white rounded-2xl border border-slate-200/60 shadow-sm p-6 mb-6">
-                    <div class="flex items-start justify-between">
-
-                        <!-- Avatar + naam + info -->
-                        <div class="flex items-start gap-5">
-                            <div class="relative flex-shrink-0">
-                                <div class="w-[72px] h-[72px] rounded-xl overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center">
-                                    <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->naam) }}&size=72&background=e2e8f0&color=475569&bold=true&font-size=0.4" alt="Profiel foto" class="w-full h-full object-cover" id="profilePhoto">
-                                </div>
-                                <button class="absolute -bottom-1.5 -right-1.5 w-7 h-7 bg-slate-800 hover:bg-slate-700 rounded-full flex items-center justify-center shadow transition-colors cursor-pointer" title="Foto wijzigen">
-                                    <i class="fa-solid fa-camera text-white" style="font-size:10px;"></i>
-                                </button>
-                            </div>
-
-                            <div class="pt-0.5">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <h1 class="text-xl font-bold text-slate-900 m-0">{{ Auth::user()->naam }}</h1>
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">ID: {{ $lid->lid_id }}</span>
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">Actief</span>
-                                </div>
-                                <div class="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-slate-500">
-                                    <div class="flex items-center gap-1.5">
-                                        <i class="fa-regular fa-calendar text-slate-400 text-xs"></i>
-                                        <span>Lid sinds <strong class="text-slate-700 font-semibold">{{ $lid->lid_sinds ? \Carbon\Carbon::parse($lid->lid_sinds)->format('d/m/Y') : 'Onbekend' }}</strong></span>
-                                    </div>
-                                    <div class="flex items-center gap-1.5">
-                                        <i class="fa-regular fa-user text-slate-400 text-xs"></i>
-                                        <span>{{ $lid->lid_type }}</span>
-                                    </div>
-                                    <div class="flex items-center gap-1.5">
-                                        <i class="fa-regular fa-cake-candles text-slate-400 text-xs"></i>
-                                        <span>{{ $lid->geboortedatum ? \Carbon\Carbon::parse($lid->geboortedatum)->translatedFormat('d F Y') : 'Onbekend' }}
-                                            @if($lid->geboortedatum)
-                                                ({{ \Carbon\Carbon::parse($lid->geboortedatum)->age }} jaar)
-                                            @endif
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
+                {{-- Succes / Fout melding --}}
+                @if(session('success'))
+                    <div id="successToast"
+                         class="mb-6 bg-emerald-50 border border-emerald-200 text-emerald-800 px-5 py-4 rounded-2xl flex items-center gap-3 text-sm font-medium shadow-sm"
+                         style="animation: slideDown 0.4s ease-out;">
+                        <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-circle-check text-emerald-600"></i>
                         </div>
-
-                        <!-- Password reset knop rechtsboven -->
-                        <a href="{{ route('recover-password') }}" class="item-center p-6" >
-                            <button class="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl border border-slate-200 transition-all duration-200 shadow-sm cursor-pointer">
-                                <i class="fa-solid fa-lock text-xs text-slate-500"></i>
-                                Password reset
-                            </button>
-                        </a>
+                        <div class="flex-1">
+                            <p class="font-bold text-emerald-900 text-sm">Gelukt!</p>
+                            <p class="text-emerald-700 text-xs mt-0.5">{{ session('success') }}</p>
+                        </div>
+                        <button onclick="document.getElementById('successToast').remove()" class="text-emerald-400 hover:text-emerald-600 transition-colors">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
                     </div>
+                @endif
+
+                @if(session('error'))
+                    <div id="errorToast"
+                         class="mb-6 bg-rose-50 border border-rose-200 text-rose-800 px-5 py-4 rounded-2xl flex items-center gap-3 text-sm font-medium shadow-sm"
+                         style="animation: slideDown 0.4s ease-out;">
+                        <div class="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-triangle-exclamation text-rose-600"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-bold text-rose-900 text-sm">Fout</p>
+                            <p class="text-rose-700 text-xs mt-0.5">{{ session('error') }}</p>
+                        </div>
+                        <button onclick="document.getElementById('errorToast').remove()" class="text-rose-400 hover:text-rose-600 transition-colors">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                @endif
+
+                <style>
+                    @keyframes slideDown {
+                        from { opacity: 0; transform: translateY(-12px); }
+                        to   { opacity: 1; transform: translateY(0); }
+                    }
+                </style>
+
+                <!-- Profile Header Section: Elegant top banner containing user avatar, user name, profile actions, and active status indicators -->
+                <div class="flex flex-col md:flex-row items-center md:rounded-2xl md:border md:border-slate-800 md:px-10 md:py-5 bg-white justify-between pb-6 mb-8 border-b border-slate-200/60">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center">
+                            <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->naam) }}&size=56&background=e2e8f0&color=475569&bold=true&font-size=0.4" alt="Profiel foto" class="w-full h-full object-cover" id="profilePhoto">
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2  mb-0.5">
+                                <h1 class="text-xl font-bold text-slate-900 m-0">{{ Auth::user()->naam }}</h1>
+                                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">
+                                    <span class="relative flex h-1.5 w-1.5">
+                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                        <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                                    </span>
+                                    Actief
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-500 font-semibold">Lid ID: {{ $lid->lid_id }} • {{ $lid->lid_type }}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Password reset link button -->
+                    <a href="{{ route('recover-password') }}" class="mt-4 md:mt-0">
+                        <button class="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl border border-slate-200 transition-all duration-200 shadow-sm cursor-pointer hover:-translate-y-0.5 active:translate-y-0">
+                            <i class="fa-solid fa-lock text-xs text-slate-400"></i>
+                            Wachtwoord resetten
+                        </button>
+                    </a>
                 </div>
 
-                <!-- Balance + Contact Details rij -->
-                <div class="flex flex-col lg:flex-row gap-6 mb-6">
+                <!-- Three Column Dashboard Cards: Informatie, Lidmaatschapskosten, and Contactgegevens -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
 
-                    <!-- Outstanding Balance dark card -->
-                    <div class="bg-slate-900 rounded-2xl p-6 text-white lg:w-[380px] flex-shrink-0">
-                        <p class="text-xs font-semibold tracking-widest text-slate-400 uppercase mb-2">Outstanding Balance</p>
-                        <p class="text-4xl font-extrabold tracking-tight text-cyan-400 mb-5">
-                            SRD {{ number_format($openstaandeBalans, 2, ',', '.') }}
-                        </p>
-
-
-                         <!-- Upcoming Deadline -->
-                        <div class="flex flex-row justify-center gap-12 pt-4 border-t border-slate-700/60">
-                            <div>
-                                <p class="text-[10px] font-semibold tracking-widest text-slate-500 uppercase mb-1">Upcoming Deadline</p>
-                                <p class="text-sm font-bold text-red-400">{{ $deadline ? $deadline->format('d M Y') : 'Geen' }}</p>
-                            </div>
-                            <div> 
-                                <p class="text-[10px] font-semibold tracking-widest text-slate-500 uppercase mb-1">Last Payment</p>
-                                <p class="text-sm font-bold text-slate-200">{{ $laatsteBetaling ? \Carbon\Carbon::parse($laatsteBetaling->ingediend_op)->translatedFormat('d M Y') : 'Geen' }}</p>
-                            </div>
-                            <div>
-                                <p class="text-[10px] font-semibold tracking-widest text-slate-500 uppercase mb-1">Upcoming Cost</p>
-                                <p class="text-sm font-bold text-emerald-400">SRD {{ number_format($UpcomingKost, 2, ',', '.') }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Contact Details card -->
-                    <div class="bg-white rounded-2xl border border-slate-200/60 shadow-sm p-6 flex-1 ">
-                        <div class="flex items-center gap-2 mb-5">
-                            <i class="fa-regular fa-address-card text-slate-500"></i>
-                            <h2 class="text-base font-bold text-slate-900 m-0">Contact Details</h2>
-                        </div>
-
-                        <div class="space-y-4">
-                            <div class="flex items-start gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
-                                    <i class="fa-regular fa-envelope text-slate-500 text-sm"></i>
+                    <!-- Card 1: Informatie -->
+                    <div class="bg-white rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] p-7 flex flex-col justify-between hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all duration-300">
+                        <div>
+                            <div class="flex items-center gap-3 mb-6">
+                                <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+                                    <i class="fa-solid fa-circle-info text-lg"></i>
                                 </div>
-                                <div>
-                                    <p class="text-[10px] font-semibold tracking-widest uppercase text-slate-400 mb-0.5">Email Address</p>
-                                    <p class="text-sm font-medium text-slate-800">{{ Auth::user()->email }}</p>
-                                </div>
+                                <h2 class="text-lg font-bold text-slate-900 m-0">Informatie</h2>
                             </div>
 
-                            <div class="flex items-start gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
-                                    <i class="fa-solid fa-phone"></i>
+                            <div class="space-y-1">
+                                <div class="flex justify-between items-center py-3.5 border-b border-slate-100">
+                                    <span class="text-[11px] font-bold tracking-wider text-slate-400 uppercase">Email</span>
+                                    <span class="text-sm font-bold text-slate-800">{{ Auth::user()->email }}</span>
                                 </div>
-                                <div>
-                                    <p class="text-[10px] font-semibold tracking-widest uppercase text-slate-400 mb-0.5">Phone Number</p>
-                                    
-                                    <p class="text-sm font-medium text-slate-800">{{ $lid->telefoonnummer ?? 'Onbekend' }}</p>
+                                <div class="flex justify-between items-center py-3.5 border-b border-slate-100">
+                                    <span class="text-[11px] font-bold tracking-wider text-slate-400 uppercase">Leeftijd</span>
+                                    <span class="text-sm font-bold text-slate-800">@if($lid->geboortedatum) {{ \Carbon\Carbon::parse($lid->geboortedatum)->age }} jaar @else Onbekend @endif</span>
                                 </div>
-                            </div>
-
-                            <div class="flex items-start gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
-                                    <i class="fa-solid fa-address-book"></i>
+                                <div class="flex justify-between items-center py-3.5 border-b border-slate-100">
+                                    <span class="text-[11px] font-bold tracking-wider text-slate-400 uppercase">Geboortedatum</span>
+                                    <span class="text-sm font-bold text-slate-800">{{ $lid->geboortedatum ? \Carbon\Carbon::parse($lid->geboortedatum)->format('d-m-Y') : 'Onbekend' }}</span>
                                 </div>
-                                <div>
-                                    <p class="text-[10px] font-semibold tracking-widest uppercase text-slate-400 mb-0.5">Home Address</p>
-                                    <p class="text-sm font-medium text-slate-800">{{ $lid->adres ?? 'Onbekend' }}</p>
-                                    @if($lid->woonplaats)
-                                        <p class="text-sm text-slate-500">{{ $lid->woonplaats }}</p>
-                                    @endif
+                                <div class="flex justify-between items-center py-3.5">
+                                    <span class="text-[11px] font-bold tracking-wider text-slate-400 uppercase">Lid sinds</span>
+                                    <span class="text-sm font-bold text-slate-800">{{ $lid->lid_sinds ? \Carbon\Carbon::parse($lid->lid_sinds)->format('d-m-Y') : 'Onbekend' }}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Card 2: Lidmaatschapskosten -->
+                    <div class="bg-slate-900 text-white rounded-3xl p-7 flex flex-col justify-between relative overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.15)] min-h-[360px] border border-slate-800">
+                        <!-- Subtle Credit Card Watermark in background -->
+                        <div class="absolute -right-8 -top-8 opacity-10 pointer-events-none transform translate-x-4 -translate-y-4">
+                            <i class="fa-solid fa-credit-card text-white text-9xl"></i>
+                        </div>
+
+                        <div>
+                            <div class="flex items-center gap-3 mb-6 relative z-10">
+                                <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white">
+                                    <i class="fa-solid fa-wallet text-base"></i>
+                                </div>
+                                <h2 class="text-lg font-bold text-white m-0">Lidmaatschapskosten</h2>
+                            </div>
+
+                            <div class="text-center py-6 relative z-10">
+                                <p class="text-[10px] font-bold tracking-widest text-slate-400 uppercase mb-3">Openstaand Saldo</p>
+                                <p class="text-4xl md:text-5xl font-extrabold tracking-tight text-white mb-6 font-mono leading-none">
+                                    SRD {{ number_format($openstaandeBalans, 2, ',', '.') }}
+                                </p>
+                                
+                                <div class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-300 text-[11px] font-bold uppercase tracking-wider">
+                                    <i class="fa-regular fa-clock text-xs"></i>
+                                    <span>Deadline: {{ $deadline ? $deadline->translatedFormat('d M Y') : 'Geen' }}</span>
+                                </div>
+                            </div>
+                        </div>
+  
+                        <!--Upload Button-->
+                      <form action="{{route('UploadBewijs')}}" method="POST" enctype="multipart/form-data" id="bewijsForm">
+                          @csrf
+                          <input type="file" name="betaling_bewijs" id="bewijsInput" accept="application/pdf" class="hidden"
+                          onchange="document.getElementById('bewijsForm').submit()">
+                          <button type="button" onclick="document.getElementById('bewijsInput').click()" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white text-slate-900 hover:bg-slate-100 font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-200 w-full transform hover:scale-[1.02]">
+                              <i class="fa-solid fa-upload"></i>
+                              <span>Upload Betaalbewijs</span>
+                          </button>
+
+                          @error('betaling_bewijs')
+                              <p class="text-red-400 text-xs mt-2">{{ $message }}</p>
+                          @enderror
+                          
+                      </form>
+                    </div>
+
+                    <!-- Card 3: Contactgegevens -->
+                    <div class="bg-white rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] p-7 flex flex-col justify-between hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all duration-300">
+                        <div>
+                            <div class="flex items-center gap-3 mb-6">
+                                <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+                                    <i class="fa-solid fa-address-book text-lg"></i>
+                                </div>
+                                <h2 class="text-lg font-bold text-slate-900 m-0">Contactgegevens</h2>
+                            </div>
+
+                            <div class="space-y-4">
+                                <!-- Email address block -->
+                                <div class="flex items-start gap-4">
+                                    <div class="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center flex-shrink-0">
+                                        <i class="fa-regular fa-envelope text-base"></i>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-[10px] font-bold tracking-wider uppercase text-slate-400 mb-0.5">Email adres</p>
+                                        <p class="text-sm font-semibold text-slate-800 truncate select-all">{{ Auth::user()->email }}</p>
+                                    </div>
+                                </div>
+
+                                <!-- Phone number block -->
+                                <div class="flex items-start gap-4">
+                                    <div class="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center flex-shrink-0">
+                                        <i class="fa-solid fa-phone text-sm"></i>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-[10px] font-bold tracking-wider uppercase text-slate-400 mb-0.5">Telefoonnummer</p>
+                                        <p class="text-sm font-semibold text-slate-800">{{ $lid->telefoonnummer ?? 'Onbekend' }}</p>
+                                    </div>
+                                </div>
+
+                                <!-- Home Address block -->
+                                <div class="flex items-start gap-4">
+                                    <div class="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center flex-shrink-0">
+                                        <i class="fa-solid fa-location-dot text-sm"></i>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-[10px] font-bold tracking-wider uppercase text-slate-400 mb-0.5">Adres</p>
+                                        <p class="text-sm font-semibold text-slate-800 whitespace-normal leading-relaxed">
+                                            {{ $lid->adres ?? 'Onbekend' }}@if($lid->woonplaats), {{ $lid->woonplaats }}@endif
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
                <!-- Geschiedenis Betaling tabel -->
@@ -243,5 +320,6 @@
             </section>
         </div>
     </div>
+    @vite('resources/js/BewijsMessage.js')
 </body>
 </html>

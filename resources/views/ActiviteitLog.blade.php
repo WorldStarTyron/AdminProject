@@ -326,6 +326,11 @@
                                             $badgeLabel = 'Betaling hersteld';
                                             $badgeStyle = 'bg-green-50 text-green-700 ring-1 ring-green-600/15';
                                         
+                                        // Upload actie
+                                        }elseif ($actStr === 'bewijs_geüpload') {
+                                            $badgeLabel = 'Bewijs geüpload';
+                                            $badgeStyle = 'bg-teal-50 text-teal-700 ring-1 ring-teal-600/15';
+                                        
                                         // gebruiker acties
                                         }elseif (in_array($actStr, ['gebruiker_toegevoegd', 'gebruiker_verwijderd', 'gebruiker_gewijzigd'])) {
                                             $badgeLabel = 'Gebruiker gewijzigd';

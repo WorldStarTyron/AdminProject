@@ -57,7 +57,7 @@
 
             <!-- Betaling — alleen admin medewerker en applicatiebeheerder -->
             @can('betalingen-bekijken')
-            <li class="rounded-lg" id="betalingDropdownContainer" data-active="{{ request()->routeIs('betalingPagina', 'DeletedRecords') ? 'true' : 'false' }}">
+            <li class="rounded-lg" id="betalingDropdownContainer" data-active="{{ request()->routeIs('betalingPagina', 'DeletedRecords', 'BewijsRecieved') ? 'true' : 'false' }}">
 
                 {{-- Dropdown toggle knop --}}
                 <button
@@ -96,6 +96,19 @@
                         </a>
                     </li>
                     @endcan
+                        
+                    <li class="rounded-lg {{ request()->routeIs('BewijsRecieved') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <a href="{{ route('BewijsRecieved') }}"
+                           class="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm"
+                           data-tooltip="Betalingsbewijzen">
+                            <i class="fa-solid fa-file-circle-check text-xs shrink-0"></i>
+                            <span class="nav-text font-medium">Betalingsbewijzen</span>
+                        </a>
+                    </li>
+
+                    
+
+
                 </ul>
             </li>
             @endcan

@@ -46,9 +46,12 @@
             <tbody class="text-sm divide-y divide-gray-100">
                 @forelse($dashboardLeden as $lid)
                     @php
-                        // Determine payment status based on latest payment
-                        $latestPayment = $lid->betalingen->sortByDesc('ingediend_op')->first();
-                        $isPaid = $latestPayment && strtolower($latestPayment->status) === 'betaald';
+                        // Determine payment status based on current month's payment
+                        $currentMonthPayment = $lid->betalingen
+                            ->where('maand', now()->month)
+                            ->where('jaar', now()->year)
+                            ->first();
+                        $isPaid = $currentMonthPayment && strtolower($currentMonthPayment->status) === 'betaald';
 
                         // Dynamic gradient for avatar
                         $gradients = [

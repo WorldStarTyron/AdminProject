@@ -11,7 +11,7 @@
 </head>
 <body class="bg-gray-50 font-sans">
     <div class="flex min-h-screen transition-all duration-300">
-        @include('layouts.Sidebars.sidebar')
+        @include('layouts.sidebar')
 
         <div class="flex-1 ml-0 md:ml-64 transition-all duration-300 min-w-0 overflow-x-hidden flex flex-col">
             @include('layouts.header')
@@ -336,6 +336,6 @@
         window.csrfToken      = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     </script>
 
-    @vite(['resources/js/Sidebar.js', 'resources/js/Rolbeheer.js'])
+    @vite(['resources/js/Sidebar.js', 'resources/js/Pages/Rolbeheer.js'])
 </body>
 </html>

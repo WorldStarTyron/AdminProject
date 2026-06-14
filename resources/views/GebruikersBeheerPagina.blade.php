@@ -4,17 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GebruikerBeheerPagina</title>
-    @vite(['resources/css/app.css', 'resources/js/Sidebar.js'])
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- Stylesheets & Scripts -->
+    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/js/Sidebar.js'])
 </head>
-<body class="min-h-screen bg-white">
-    
-    @include('layouts.Sidebars.sidebar')
-    
-    <div class="flex-1 ml-0 md:ml-64 transition-all duration-300 min-w-0 overflow-x-hidden">
-        @include('layouts.header')
+<body class="min-h-screen bg-white font-sans antialiased">
+    <!-- Main page flex wrapper -->
+    <div class="flex min-h-screen transition-all duration-300">
+        <!-- Sidebar inclusion -->
+        @include('layouts.Sidebars.sidebar')
+        
+        <!-- Main content area -->
+        <div class="flex-1 ml-0 md:ml-64 transition-all duration-300 min-w-0 overflow-x-hidden">
+            @include('layouts.header')
         
         <div class="w-full h-[calc(100vh-76px)]">
             <div class="w-full h-full p-1">
+                <!-- Flash messages -->
+                @if(session('success'))
+                    <div class="mx-5 mb-4 p-3 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-circle-check text-green-500"></i>
+                        {{ session('success') }}
+                    </div>
+                @endif
+                @if(session('error'))
+                    <div class="mx-5 mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-circle-exclamation text-red-500"></i>
+                        {{ session('error') }}
+                    </div>
+                @endif
+                @if($errors->any())
+                    <div class="mx-5 mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-circle-exclamation text-red-500"></i>
+                        {{ $errors->first() }}
+                    </div>
+                @endif
+
                 <div class="ml-5">
                     <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-2 mt-5 mb-1">
                         <i class="fas fa-user-cog mr-1 text-gray-500"></i>
@@ -244,12 +273,20 @@
                                     <!-- Acties -->
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
-                                            <button class="text-gray-400 hover:text-blue-500 transition-colors duration-150" title="Bewerken">
+                                            <!-- Edit button with trigger to show modal and prefill data -->
+                                            <button onclick="openEditModal({{ $gebruiker->gebruiker_id }}, '{{ addslashes($gebruiker->naam) }}', '{{ addslashes($gebruiker->email) }}', '{{ $gebruiker->status }}')" 
+                                                class="text-gray-400 hover:text-blue-500 transition-colors duration-150" title="Bewerken">
                                                 <i class="fas fa-pencil-alt"></i>
                                             </button>
-                                            <button class="text-gray-400 hover:text-red-500 transition-colors duration-150" title="Verwijderen">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
+                                            
+                                            <!-- Delete user form with CSRF protection and verification confirmation -->
+                                            <form action="{{ route('GebruikersBeheer.destroy', $gebruiker->gebruiker_id) }}" method="POST" onsubmit="return confirm('Weet u zeker dat u deze gebruiker wilt verwijderen? Dit verwijdert ook alle gekoppelde gegevens van het lid en diens betalingen.');" class="inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-gray-400 hover:text-red-500 transition-colors duration-150" title="Verwijderen">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>
@@ -292,6 +329,11 @@
             </div>
         </div>
     </div>
+    </div> <!-- Sluit de flex min-h-screen wrapper -->
+
+ @include('layouts.Edit-Modal.edit-Gebruiker-modal')
+   
+   
 
 </body>
 </html>

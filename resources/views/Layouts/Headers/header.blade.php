@@ -6,7 +6,10 @@
         </div>
         <div class="header-right flex items-center gap-4">
 
-           
+            <!-- Notificaties -->
+            @if(Auth::user()->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder']))
+                @include('layouts.Notificatie')
+            @endif
            
 
             <!-- Naam + Rollen -->
@@ -31,6 +34,10 @@
                     @endforelse
                 </div>
             </div>
+
+           
+             
+            
 
             {{-- Avatar --}}
             <div class="w-9 h-9 rounded-full bg-gray-800 flex items-center justify-center">

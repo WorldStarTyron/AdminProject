@@ -25,45 +25,47 @@ class ActiviteitController extends Controller
         if ($tab === 'Inloggen') {
             $query->whereIn('actie', ['ingelogd', 'uitgelogd']);
         } elseif ($tab === 'Leden') {
-            $query->whereIn('actie', ['lid_aangemaakt', 'lid_bijgewerkt', 'lid_verwijderd']);
+            $query->whereIn('actie', ['lid_aangemaakt', 'lid_bijgewerkt', 'lid_verwijderd', 'lid_gewijzigd']);
         } elseif ($tab === 'Betalingen') {
-            $query->whereIn('actie', ['betaling_hersteld','betaling_verwijderd','betaling_gewijzigd','betaling_geregistreerd']);
+            $query->whereIn('actie', ['betaling_hersteld', 'betaling_verwijderd', 'betaling_bijgewerkt', 'betaling_goedgekeurd', 'betaling_afgewezen', 'betaling_geregistreerd', 'bewijs_geüpload']);
         }elseif ($tab === 'Systeem') {
             $query->whereNotIn('actie', [
                 'ingelogd', 'uitgelogd',
-                'lid_aangemaakt', 'lid_bijgewerkt', 'lid_verwijderd','betaling_hersteld','betaling_verwijderd','betaling_gewijzigd'
+                'lid_aangemaakt', 'lid_bijgewerkt', 'lid_verwijderd', 'lid_gewijzigd',
+                'betaling_hersteld', 'betaling_verwijderd', 'betaling_bijgewerkt', 'betaling_goedgekeurd', 'betaling_afgewezen', 'betaling_geregistreerd', 'bewijs_geüpload'
             ]);
         }
 
          $actiemap = [
-                // AUTH
-                'login' => ['ingelogd'],
-                'logout' => ['uitgelogd'],
+                 // AUTH
+                 'login' => ['ingelogd'],
+                 'logout' => ['uitgelogd'],
 
-                // LEDEN
-                'lid toegevoegd' => ['lid_aangemaakt'],
-                'lid bijgewerkt' => ['lid_bijgewerkt'],
-                'lid verwijderd' => ['lid_verwijderd'],
+                 // LEDEN
+                 'lid toegevoegd' => ['lid_aangemaakt'],
+                 'lid bijgewerkt' => ['lid_bijgewerkt', 'lid_gewijzigd'],
+                 'lid verwijderd' => ['lid_verwijderd'],
 
-                // BETALINGEN
-                'betaling geregistreerd' => ['betaling_geregistreerd'],
-                'betaling hersteld' => ['betaling_hersteld'],
-                'betaling verwijderd' => ['betaling_verwijderd'],
-                'betaling gewijzigd' => ['betaling_gewijzigd'],
+                 // BETALINGEN
+                 'betaling geregistreerd' => ['betaling_geregistreerd'],
+                 'betaling hersteld' => ['betaling_hersteld'],
+                 'betaling verwijderd' => ['betaling_verwijderd'],
+                 'betaling gewijzigd' => ['betaling_bijgewerkt', 'betaling_goedgekeurd', 'betaling_afgewezen'],
+                 'bewijs geüpload' => ['bewijs_geüpload'],
 
-                // GEBRUIKERS
-                'gebruiker toegevoegd' => ['gebruiker_toegevoegd'],
-                'gebruiker verwijderd' => ['gebruiker_verwijderd'],
-                'gebruiker_gewijzigd' => ['gebruiker_gewijzigd'],
+                 // GEBRUIKERS
+                 'gebruiker toegevoegd' => ['gebruiker_toegevoegd'],
+                 'gebruiker verwijderd' => ['gebruiker_verwijderd'],
+                 'gebruiker_gewijzigd' => ['gebruiker_gewijzigd'],
 
-                //Wachtwoord gewijzigd
-                'wachtwoord_gewijzigd' => ['wachtwoord_gewijzigd'],
+                 //Wachtwoord gewijzigd
+                 'wachtwoord_gewijzigd' => ['wachtwoord_gewijzigd'],
 
-                //BONNEN
-                 'bon gegenereerd' => ['bon_aangemaakt'],
-                 'bon gedownload' => ['bon_gedownload'],
+                 //BONNEN
+                  'bon gegenereerd' => ['bon_aangemaakt'],
+                  'bon gedownload' => ['bon_gedownload'],
                 
-              ];
+               ];
 
         // Filter op zoekterm (actie, details of gebruikersnaam)
         if (!empty($search)) {

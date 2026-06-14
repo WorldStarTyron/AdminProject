@@ -19,7 +19,7 @@
     </div>
 
     <div class="diagram">
-        @include('layouts.Totalleden-Charts')
+        @include('Layouts.Charts.Totalleden-Charts')
     </div>
 
 </div>

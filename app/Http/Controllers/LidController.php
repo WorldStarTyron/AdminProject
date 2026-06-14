@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Lid;
+use App\Models\Betaling;
+use App\Models\Gebruiker;
+use App\Models\Notificatie;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -175,6 +178,88 @@ $beschikbareJaren = \App\Models\Betaling::where('lid_id', $lid->lid_id)
         $lid->gebruiker->status = 'Inactief';
         $lid->gebruiker->save();
 
+        // Activiteit loggen
+        if (auth()->check()) {
+            \App\Models\Activiteit::log(auth()->id(), 'lid_gewijzigd', [
+                'lid_id'  => $lid->lid_id,
+                'details' => 'Lid ' . $lid->gebruiker->naam . ' is succesvol gedeactiveerd.',
+            ]);
+        }
+
         return redirect()->back()->with('success', 'Account is succesvol gedeactiveerd.');
     }
+
+  public function UploadBewijs(Request $request)
+  {
+      $request->validate([
+          'betaling_bewijs' => 'required|file|mimes:pdf|max:5120', // max 5MB
+      ]);
+
+      // Get current logged-in lid
+      $lid = Lid::where('gebruiker_id', Auth::id())->firstOrFail();
+
+      $bewijs = $request->file('betaling_bewijs');
+      $pad = $bewijs->store('bewijs', 'public');
+
+      // Check if there is an outstanding or rejected payment (status Openstaand or niet_betaald)
+      $betaling = Betaling::where('lid_id', $lid->lid_id)
+          ->whereIn('status', ['Openstaand', 'niet_betaald'])
+          ->orderBy('jaar', 'asc')
+          ->orderBy('maand', 'asc')
+          ->first();
+
+      if ($betaling) {
+          $betaling->update([
+              'betaling_bewijs' => $pad,
+              'status' => 'in_afwachting',
+              'ingediend_op' => now(),
+          ]);
+      } else {
+          // If no openstaand betaling exists, create a new one
+          Betaling::create([
+              'lid_id' => $lid->lid_id,
+              'bedrag' => $lid->MaandelijkseBijdrage(),
+              'status' => 'in_afwachting',
+              'maand' => now()->month,
+              'jaar' => now()->year,
+              'betaling_bewijs' => $pad,
+              'ingediend_op' => now(),
+          ]);
+      }
+
+      // Notify admins
+      $admins = Gebruiker::whereHas('rollen', function($q) {
+          $q->whereIn('naam', ['Administratie Medewerker', 'Applicatie Beheerder']);
+      })->get();
+
+      foreach ($admins as $admin) {
+          Notificatie::create([
+              'gebruiker_id' => $admin->gebruiker_id,
+              'lid_id'       => $lid->lid_id,
+              'Notif_type'   => 'Betaling_ingediend',
+              'titel'        => 'Lid ' . $lid->gebruiker->naam . ' heeft een betalingsbewijs geüpload.',
+              'gelezen'      => false,
+              'gestuurd_op'  => now(),
+          ]);
+      }
+
+      // Log the upload activity
+      \App\Models\Activiteit::log(Auth::id(), 'bewijs_geüpload', [
+          'lid_id'  => $lid->lid_id,
+          'pad'     => $pad,
+          'details' => 'Lid ' . $lid->gebruiker->naam . ' heeft betalingsbewijs geüpload: ' . basename($pad),
+      ]);
+
+      return redirect()->back()->with('success', 'Uw betalingsbewijs is succesvol verzonden naar de beheerder ter beoordeling. U ontvangt bericht zodra het is verwerkt.');
+  }
+
+
+
+
+
+
+
+
+
+
 }

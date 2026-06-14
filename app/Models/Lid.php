@@ -47,6 +47,12 @@ class Lid extends Model
         return $this->belongsTo(Gebruiker::class, 'gebruiker_id', 'gebruiker_id');
     }
 
+    // Een lid heeft veel notificaties
+    public function notificaties()
+    {
+        return $this->hasMany(Notificatie::class, 'lid_id', 'lid_id');
+    }
+
 
     //elk lid type betaalt SRD 100 per maand (behalve bijzonder lidmaatschap)
     public function MaandelijkseBijdrage(): float

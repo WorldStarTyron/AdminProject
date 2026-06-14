@@ -11,10 +11,10 @@
 </head>
 <body class="bg-gray-50 font-sans">
     <div class="flex min-h-screen transition-all duration-300">
-        @include('layouts.sidebar')
+        @include('Layouts.Sidebars.sidebar')
 
         <div class="flex-1 ml-0 md:ml-64 transition-all duration-300 min-w-0 overflow-x-hidden flex flex-col">
-            @include('layouts.header')
+            @include('Layouts.Headers.header')
             <main class="flex-1 p-8">
 
                 <!-- Flash messages -->
@@ -336,6 +336,6 @@
         window.csrfToken      = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     </script>
 
-    @vite(['resources/js/Sidebar.js', 'resources/js/Pages/Rolbeheer.js'])
+    @vite(['resources/js/UI/Sidebar.js', 'resources/js/Pages/Rolbeheer.js'])
 </body>
 </html>

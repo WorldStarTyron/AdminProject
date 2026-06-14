@@ -11,14 +11,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/css/ledenpagina-new.css', 'resources/css/Toevoegen.css', 'resources/js/Sidebar.js', 'resources/js/FormValidator.js', 'resources/js/Modal/AddLidModal.js'])
+    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/css/ledenpagina-new.css', 'resources/css/Toevoegen.css', 'resources/js/UI/Sidebar.js', 'resources/js/Utils/FormValidator.js', 'resources/js/AddModals/AddLidModal.js'])
 </head>
 <body>
     <div class="flex min-h-screen">
-        @include('layouts.Sidebars.sidebar')
+        @include('Layouts.Sidebars.sidebar')
 
         <div class="flex-1 ml-0 md:ml-64 transition-all duration-300 min-w-0 overflow-x-hidden">
-            @include('layouts.Header-layout.AddLid-Header')
+            @include('Layouts.Headers.AddLid-Header')
             <!-- Main Leden Overzicht Table with all details -->
             <main class="lp-page-content">
                 <div class="lp-page-header">
@@ -51,7 +51,7 @@
                     <span>Er zijn momenteel <strong>{{ number_format($totaalLeden, 0, ',', '.') }}</strong> actieve leden geregistreerd in het systeem.</span>
                 </div>
 
-                @include('layouts.Totalleden-Charts')
+                @include('Layouts.Charts.Totalleden-Charts')
 
                 
                   <!--- Leden Table with all details -->
@@ -191,7 +191,7 @@
     </div>
 
     @can('leden-beheren')
-        @include('layouts.Add-Modal.add-lid-modal')
+        @include('Layouts.AddModals.add-lid-modal')
     @endcan
 
     <div class="toast-notification" id="successToast">
@@ -199,6 +199,6 @@
         <span>Lid succesvol toegevoegd!</span>
     </div>
 
-    @vite(['resources/js/Button&More.js', 'resources/js/Charts/TotalLeden-Chart.js'])
+    @vite(['resources/js/UI/Button&More.js', 'resources/js/Charts/TotalLeden-Chart.js'])
 </body>
 </html>

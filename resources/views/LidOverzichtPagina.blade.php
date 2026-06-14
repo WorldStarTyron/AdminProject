@@ -12,18 +12,18 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/js/Sidebar.js'])
+    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/js/UI/Sidebar.js'])
 </head>
 
 <body class="font-sans bg-gray-50 text-gray-800">
 
     <div class="flex min-h-screen">
 
-        @include('layouts.Sidebars.sidebar')
+        @include('Layouts.Sidebars.sidebar')
 
         <div class="flex-1 ml-0 md:ml-64 transition-all duration-300 min-w-0 overflow-x-hidden">
 
-            @include('layouts.header')
+            @include('Layouts.Headers.header')
 
             <div class="p-6 max-w-7xl mx-auto">
 
@@ -306,6 +306,6 @@
  
 
     <!-- Editpagina.js -->
-   @vite('resources/js/EditPagina.js')
+   @vite('resources/js/Pages/EditPagina.js')
 </body>
 </html>

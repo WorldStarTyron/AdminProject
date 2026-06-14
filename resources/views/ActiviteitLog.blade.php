@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/js/Sidebar.js'])
+    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/js/UI/Sidebar.js'])
 </head>
 <body class="m-0 bg-[#f0f4f8] text-slate-700 font-['Inter',sans-serif] antialiased">
 
@@ -18,13 +18,13 @@
 <div class="flex min-h-screen">
     
     <!-- INCLUDE SIDEBAR LAYOUT -->
-    @include('layouts.Sidebars.sidebar')
+    @include('Layouts.Sidebars.sidebar')
 
     <!-- MAIN PAGE CONTENT CONTAINER (offsets to make room for fixed sidebar) -->
     <div class="flex-1 ml-0 md:ml-64 transition-all duration-300 min-w-0 overflow-x-hidden">
         
         <!-- INCLUDE HEADER BAR LAYOUT -->
-        @include('layouts.header')
+        @include('Layouts.Headers.header')
         
         <!-- ==========================================================================
              MAIN CONTENT SPACE

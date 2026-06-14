@@ -16,8 +16,15 @@ class BonController extends Controller
         return null;
     }
 
-    $aantalDitJaar = Bonnen::whereYear('aangemaakt_op', now()->year)->count();
-    $bonNummer = 'BON-KA' . now()->year . '-' . str_pad($aantalDitJaar + 1, 4, '0', STR_PAD_LEFT);
+    $year = now()->year;
+    $aantalDitJaar = Bonnen::whereYear('aangemaakt_op', $year)->count();
+
+    // Loop until we find a unique receipt number
+    $index = $aantalDitJaar + 1;
+    do {
+        $bonNummer = 'BON-KA' . $year . '-' . str_pad($index, 4, '0', STR_PAD_LEFT);
+        $index++;
+    } while (Bonnen::where('bon_nummer', $bonNummer)->exists());
 
     return Bonnen::create([
         'betaling_id'   => $betaling->betaling_id,

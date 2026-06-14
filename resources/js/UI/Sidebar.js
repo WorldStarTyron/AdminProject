@@ -1,4 +1,4 @@
-import './bootstrap';
+import '../bootstrap';
 
 // sidebar menu open close + localStorage persistence
 document.addEventListener('DOMContentLoaded', function() {

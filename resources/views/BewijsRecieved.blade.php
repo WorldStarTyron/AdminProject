@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Betalingsbewijzen Beoordelen | Administratie Panel</title>
     <!-- Tailwind CSS + App JS via Vite -->
-    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/js/Sidebar.js'])
+    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/js/UI/Sidebar.js'])
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -16,13 +16,13 @@
 
     <div class="flex min-h-screen">
         {{-- Sidebar --}}
-        @include('layouts.Sidebars.sidebar')
+        @include('Layouts.Sidebars.sidebar')
 
         {{-- Main Content Container --}}
         <div class="flex-1 ml-0 md:ml-64 transition-all duration-300 min-w-0 overflow-x-hidden">
             
             {{-- Header --}}
-            @include('layouts.header')
+            @include('Layouts.Headers.header')
 
             {{-- Main Wrapper --}}
             <div class="max-w-6xl mx-auto px-6 py-10">

@@ -36,7 +36,7 @@ class PostController extends Controller
      */
     public function create()
     {
-        return view('Add-Modal/add-lid-modal');
+        return view('Layouts.AddModals.add-lid-modal');
     }
 
     /**

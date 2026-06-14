@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recover Password - Security Portal</title>
     <meta name="description" content="Reset your password by entering your registered email address to receive a secure verification code.">
-    @vite(['resources/css/app.css', 'resources/js/Sidebar.js'])
+    @vite(['resources/css/app.css', 'resources/js/UI/Sidebar.js'])
 </head>
 
 <!-- Page Body: Light gray background matching the design -->

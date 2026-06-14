@@ -53,6 +53,12 @@ class Gebruiker extends Authenticatable
         return $this->belongsTo(Rol::class, 'rol_id', 'rol_id');
     }
 
+    // Relationship: A user has many notifications
+    public function notificaties()
+    {
+        return $this->hasMany(Notificatie::class, 'gebruiker_id', 'gebruiker_id');
+    }
+
     // Check if user has any of the given role names
     public function hasAnyRole($roles): bool
     {

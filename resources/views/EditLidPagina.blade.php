@@ -8,14 +8,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/js/Sidebar.js'])
+    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/js/UI/Sidebar.js'])
 </head>
 <body class="bg-gray-50 font-[Inter]">
     <div class="flex min-h-screen">
-        @include('layouts.Sidebars.sidebar')
+        @include('Layouts.Sidebars.sidebar')
 
         <div class="flex-1 ml-0 md:ml-64 transition-all duration-300 min-w-0 overflow-x-hidden">
-            @include('layouts.header')
+            @include('Layouts.Headers.header')
 
             <div class="px-8 py-6">
                 {{-- Breadcrumb --}}

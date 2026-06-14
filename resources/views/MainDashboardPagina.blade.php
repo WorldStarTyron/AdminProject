@@ -10,15 +10,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/css/Toevoegen.css', 'resources/js/Sidebar.js'])
+    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/css/Toevoegen.css', 'resources/js/UI/Sidebar.js'])
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
 <body class="bg-[#F8F9FA] text-slate-800 font-['Inter']">
     <div class="flex min-h-screen">
-        @include('layouts.Sidebars.sidebar')
+        @include('Layouts.Sidebars.sidebar')
 
         <div class="flex-1 ml-0 md:ml-64 transition-all duration-300 min-w-0 overflow-x-hidden">
-            @include('layouts.header')
+            @include('Layouts.Headers.header')
 
             <main class="p-6 max-w-[1500px] mx-auto space-y-6">
                 <!-- Header Title Section -->
@@ -245,7 +245,7 @@
                     </div>
                 </div>
 
-                @include('layouts.Main_Dashboard Layouts.Main_Table')
+                @include('Layouts.Shared.Main_Table')
             </main>
         </div>
     </div>

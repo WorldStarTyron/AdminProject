@@ -18,8 +18,8 @@ return new class extends Migration
             $table->unsignedInteger('lid_id')->index();
             $table->foreign('lid_id')->references('lid_id')->on('leden');
             $table->decimal('bedrag', 10, 2);
-            $table->enum('methode', ['fysiek', 'overmaking'])->nullable();
-            $table->enum('status', ["Openstaand","betaald","niet_betaald"]);
+            $table->enum('methode', ['fysiek', 'overmaking'])->nullable(); 
+            $table->enum('status', ["Openstaand","betaald","niet_betaald", "in_afwachting", "goed_gekeurd","niet_goedgekeurd"]);
             $table->tinyInteger('maand');
             $table->year('jaar');
             $table->string('betaling_bewijs', 255)->nullable();

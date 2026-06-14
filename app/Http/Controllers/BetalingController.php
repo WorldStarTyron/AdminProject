@@ -7,6 +7,7 @@ use App\Models\Betaling;
 use App\Models\Gebruiker;
 use App\Models\Activiteit;
 use App\Models\Lid;
+use App\Models\Notificatie;
 use App\Http\Controllers\BonController;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Gate;
@@ -210,6 +211,21 @@ class BetalingController extends Controller
             );
         }
 
+        $admins = Gebruiker::whereHas('rollen', function($q) {
+            $q->whereIn('naam', ['Administratie Medewerker', 'Applicatie Beheerder']);
+        })->get();
+
+        foreach ($admins as $admin) {
+            Notificatie::create([
+             'gebruiker_id' => $admin->gebruiker_id,
+             'lid_id' => $lid->lid_id,
+             'Notif_type' => 'Betaling_ingediend',
+             'titel' => 'Een nieuwe betaling is geregistreerd voor lid ' . $gebruiker->naam . ' op ' . $datum->format('Y-m-d') . '.',
+             'gelezen' => false,
+             'gestuurd_op' => now(),
+            ]);
+        }
+
         // Activiteit loggen
         if (auth()->check()) {
             Activiteit::log(auth()->id(), 'betaling_geregistreerd', [
@@ -228,7 +244,8 @@ class BetalingController extends Controller
             ]);
         }
 
-
+       
+    
 
 
 
@@ -363,7 +380,60 @@ class BetalingController extends Controller
         return response()->json(['success' => true, 'message' => 'Betaling succesvol hersteld']);
     }
 
+  public function showBewijsRecieved(Request $request)
+  {
+      Gate::authorize('betalingen-verwijderen'); // Ensure admin access
 
+      // Get actual pending payments (in afwachting)
+      $pendingPayments = Betaling::where('status', 'in_afwachting')
+          ->with(['lid.gebruiker'])
+          ->orderBy('ingediend_op', 'desc')
+          ->paginate(5);
+
+      // Get recent reviews (status = betaald, goed_gekeurd, niet_goedgekeurd, or Openstaand which was rejected)
+      $recentReviews = Betaling::whereIn('status', ['betaald', 'goed_gekeurd', 'niet_goedgekeurd', 'Openstaand'])
+          ->whereNotNull('betaling_bewijs')
+          ->with(['lid.gebruiker'])
+          ->orderBy('ingediend_op', 'desc')
+          ->take(5)
+          ->get();
+
+      // Stats
+      $pendingCount = Betaling::where('status', 'in_afwachting')->count();
+      
+      $totalReviewedToday = Betaling::whereIn('status', ['betaald', 'goed_gekeurd', 'niet_goedgekeurd', 'Openstaand'])
+          ->whereNotNull('betaling_bewijs')
+          ->whereDate('ingediend_op', today())
+          ->count();
+
+      return view('BewijsRecieved', compact('pendingPayments', 'recentReviews', 'pendingCount', 'totalReviewedToday'));
+  }
+
+
+
+
+  public function DownloadBewijsFile($betaling_id)
+  {
+      Gate::authorize('betalingen-verwijderen');
+      $betaling = Betaling::findOrFail($betaling_id);
+      
+      if (!$betaling->betaling_bewijs) {
+          return redirect()->back()->with('error', 'Geen betalingsbewijs gevonden voor deze betaling.');
+      }
+
+      $filePath = storage_path('app/public/' . $betaling->betaling_bewijs);
+      if (!file_exists($filePath)) {
+          return redirect()->back()->with('error', 'Bestand bestaat niet meer.');
+      }
+
+      return response()->download($filePath);
+  }
+
+
+
+
+
+  
     
 
 

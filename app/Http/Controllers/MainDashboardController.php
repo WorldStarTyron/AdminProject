@@ -18,11 +18,18 @@ public function Maindashboard()
     // ophalen data voor widget
     $totaleInkomsten = Betaling::where('status', 'betaald')->sum('bedrag');
     $totaalLeden = Lid::count();
-    $totaalBetaald = Lid::whereHas('betalingen', function($q) {
-        $q->where('status', 'betaald');
+    $currentMonth = now()->month;
+    $currentYear = now()->year;
+
+    $totaalBetaald = Lid::whereHas('betalingen', function($q) use ($currentMonth, $currentYear) {
+        $q->where('maand', $currentMonth)
+          ->where('jaar', $currentYear)
+          ->where('status', 'betaald');
     })->count();
-    $totaalNietBetaald = Lid::whereHas('betalingen', function($q) {
-        $q->where('status', 'niet_betaald');
+    $totaalNietBetaald = Lid::whereHas('betalingen', function($q) use ($currentMonth, $currentYear) {
+        $q->where('maand', $currentMonth)
+          ->where('jaar', $currentYear)
+          ->where('status', 'niet_betaald');
     })->count();
 
     // Deadline leden ophalen, die over 1 maand vervallen

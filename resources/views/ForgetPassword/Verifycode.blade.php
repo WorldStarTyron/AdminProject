@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verify Code - Security Portal</title>
     <meta name="description" content="Enter the 6-digit verification code sent to your email to reset your password.">
-    @vite(['resources/css/app.css', 'resources/js/Sidebar.js'])
+    @vite(['resources/css/app.css', 'resources/js/UI/Sidebar.js'])
 </head>
 
 <!-- Page Body: Light gray background -->
@@ -196,7 +196,7 @@
     </footer>
 
  <!-- Auto-Focus Script: Move cursor to next    -->
-    @vite('resources/js/verifycode.js')
+    @vite('resources/js/Auth/verifycode.js')
  
 </body>
 </html>

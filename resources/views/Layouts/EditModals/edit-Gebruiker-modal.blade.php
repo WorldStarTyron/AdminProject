@@ -57,4 +57,4 @@
             </form>
         </div>
     </div>
- @vite('resources/js/Modal/EditGebruikerModal.js')
+ @vite('resources/js/EditModals/EditGebruikerModal.js')

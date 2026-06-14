@@ -8,7 +8,7 @@
 
             <!-- Notificaties -->
             @if(Auth::user()->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder']))
-                @include('layouts.Notificatie')
+                @include('Layouts.Shared.Notificatie')
             @endif
            
 

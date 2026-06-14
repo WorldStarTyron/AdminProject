@@ -5,19 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Verwijderde Betalingen</title>
-    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/js/Sidebar.js'])
+    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/js/UI/Sidebar.js'])
 </head>
 <body class="m-0 bg-[#f0f4f8] text-slate-700 font-['Inter',sans-serif] antialiased">
 <div class="flex min-h-screen">
 
     {{-- Sidebar --}}
-    @include('layouts.Sidebars.sidebar')
+    @include('Layouts.Sidebars.sidebar')
 
     {{-- Hoofdinhoud --}}
     <div class="flex-1 ml-0 md:ml-64 transition-all duration-300 min-w-0 overflow-x-hidden">
 
         {{-- Header --}}
-        @include('layouts.header')
+        @include('Layouts.Headers.header')
 
         <div class="p-6">
 
@@ -173,7 +173,7 @@
 </div>
 
 
-@vite('resources/js/Herstel.js')
+@vite('resources/js/Pages/Herstel.js')
 
 </body>
 </html>

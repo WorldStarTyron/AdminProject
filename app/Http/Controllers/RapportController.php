@@ -39,9 +39,23 @@ class RapportController extends Controller
         // Card 1: Totale inkomsten (som van alle betaalde betalingen)
         $totaleInkomsten = (clone $query)->where('status', 'betaald')->sum('bedrag');
 
-        // Card 2: Openstaand bedrag (som van niet-betaalde + openstaande betalingen)
-        $openstaandBedrag = (clone $query)->whereIn('status', ['niet_betaald', 'Openstaand'])->sum('bedrag');
-        $openstaandAantal = (clone $query)->whereIn('status', ['niet_betaald', 'Openstaand'])->distinct('lid_id')->count('lid_id');
+        // Parse date range to months and years for outstanding payments (where ingediend_op is null)
+        $startYear = (int) date('Y', strtotime($from));
+        $startMonth = (int) date('m', strtotime($from));
+        $endYear = (int) date('Y', strtotime($to));
+        $endMonth = (int) date('m', strtotime($to));
+
+        // Card 2: Openstaand bedrag (som van niet-betaalde + openstaande betalingen belonging to the period's months)
+        $openstaandBedrag = Betaling::whereIn('status', ['niet_betaald', 'Openstaand'])
+            ->whereRaw('(jaar * 12 + maand) >= ?', [$startYear * 12 + $startMonth])
+            ->whereRaw('(jaar * 12 + maand) <= ?', [$endYear * 12 + $endMonth])
+            ->sum('bedrag');
+
+        $openstaandAantal = Betaling::whereIn('status', ['niet_betaald', 'Openstaand'])
+            ->whereRaw('(jaar * 12 + maand) >= ?', [$startYear * 12 + $startMonth])
+            ->whereRaw('(jaar * 12 + maand) <= ?', [$endYear * 12 + $endMonth])
+            ->distinct('lid_id')
+            ->count('lid_id');
 
         // Als er wel openstaande betalingen zijn maar het geregistreerde bedrag is 0,
         // schatten we 150 SRD per lid
@@ -136,11 +150,15 @@ class RapportController extends Controller
             $chartOvermaking[] = (float) ($rijen[$sleutel]['overmaking']->totaal ?? 0);
         }
 
+        // Calculate real new members this quarter
+        $nieuwDitKwartaal = \App\Models\Lid::where('lid_sinds', '>=', now()->startOfQuarter())->count();
+
         return view('RapportPagina', compact(
             'totaleInkomsten',
             'openstaandBedrag',
             'openstaandAantal',
             'totaalLeden',
+            'nieuwDitKwartaal',
             'betalingen',
             'from',
             'to',

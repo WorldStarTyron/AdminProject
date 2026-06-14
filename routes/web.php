@@ -14,6 +14,7 @@ use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\RapportController;
 use App\Http\Controllers\ActiviteitController;
 use App\Http\Controllers\MainDashboardController;
+use App\Http\Controllers\NotificatieController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -39,6 +40,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/ledenpagina/addlid', [PostController::class, 'store'])->name('ledenpagina.addlid.store')->middleware('can:leden-beheren');
     Route::get('/ledenpagina/{lidId}/edit', [PostController::class, 'edit'])->name('ledenpagina.edit')->middleware('can:leden-beheren');
     Route::put('/ledenpagina/{lidId}', [PostController::class, 'update'])->name('ledenpagina.update')->middleware('can:leden-beheren');
+    Route::post('/bewijs/upload', [LidController::class, 'UploadBewijs'])->name('UploadBewijs');
 
     // Leden — verwijderen (alleen beheerder)
     Route::delete('/ledenpagina/delete/{lidId}', [PostController::class, 'destroy'])->name('ledenpagina.delete')->middleware('can:leden-verwijderen');
@@ -47,6 +49,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/leden/{lid_id}/heractiveer', [LidController::class, 'heractiveer'])->name('ledenpagina.heractiveer')->middleware('can:leden-heractiveren');
     // Leden - Deactiveer
 Route::post('/leden/{lid_id}/deactiveer', [LidController::class, 'deactiveer'])->name('ledenpagina.deactiveer')->middleware('can:leden-Deactiveren');
+
 
 
     // Betalingen
@@ -61,9 +64,19 @@ Route::post('/leden/{lid_id}/deactiveer', [LidController::class, 'deactiveer'])-
     Route::patch('/betalingen/{betaling_id}/restore', [BetalingController::class, 'restore'])->name('betalingen.restore')->middleware('can:betalingen-verwijderen');
 
 
+    // Notificaite
+    Route::get('/notificaties', [NotificatieController::class, 'index'])->name('notificaties.index');
+    Route::post('/notificaties/lezen', [NotificatieController::class, 'markeerGelezen'])->name('notificaties.lezen');
+
+
+
     //VerwijderdeBetaling Record
     Route::get('/DeletedRecords', [BetalingController::class, 'trashed'])->name('DeletedRecords')->middleware('can:betalingen-verwijderen');
-    
+
+    //BewijsBewijs
+    Route::get('/BewijsRecieved', [BetalingController::class, 'showBewijsRecieved'])->name('BewijsRecieved')->middleware('can:betalingen-verwijderen');
+    Route::get('/bewijs/{betaling_id}/download', [BetalingController::class, 'DownloadBewijsFile'])->name('DownloadBewijsFile')->middleware('can:betalingen-verwijderen');
+
 
     // Rapport & log
     Route::get('/RapportPagina', [RapportController::class, 'RapportageData'])->name('Rapport')->middleware('can:rapport-bekijken');
@@ -78,7 +91,12 @@ Route::post('/leden/{lid_id}/deactiveer', [LidController::class, 'deactiveer'])-
         Route::get('/search-users', [RolBeheerController::class, 'searchUsers'])->name('rollen-beheer.search');
     });
     
+    // Route to display the list of all users
     Route::get('/GebruikersBeheerPagina', [GebruikerController::class, 'index'])->name('GebruikersBeheer')->middleware('can:gebruikersbeheer');
+    // Route to handle updating user information (Name, Email, Status)
+    Route::put('/GebruikersBeheerPagina/{userId}', [GebruikerController::class, 'update'])->name('GebruikersBeheer.update')->middleware('can:gebruikersbeheer');
+    // Route to handle deleting a user and their associated data
+    Route::delete('/GebruikersBeheerPagina/{userId}', [GebruikerController::class, 'destroy'])->name('GebruikersBeheer.destroy')->middleware('can:gebruikersbeheer');
 });  
 
 // Login routes

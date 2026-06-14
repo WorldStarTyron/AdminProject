@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('adres', 255)->nullable();
             $table->string('woonplaats', 100)->nullable();
             $table->date('geboortedatum')->nullable();
-            $table->timestamp('lid_sinds')->useCurrent();
+            $table->timestamp('lid_sinds')->nullable(); 
             $table->timestamp('bijgewerkt_op')->useCurrent();
             $table->timestamp('aangemaakt_op')->useCurrent();
         });

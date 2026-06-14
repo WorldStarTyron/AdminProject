@@ -10,17 +10,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <!-- Stylesheets & Scripts -->
-    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/js/Sidebar.js'])
+    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/js/UI/Sidebar.js'])
 </head>
 <body class="min-h-screen bg-white font-sans antialiased">
     <!-- Main page flex wrapper -->
     <div class="flex min-h-screen transition-all duration-300">
         <!-- Sidebar inclusion -->
-        @include('layouts.Sidebars.sidebar')
+        @include('Layouts.Sidebars.sidebar')
         
         <!-- Main content area -->
         <div class="flex-1 ml-0 md:ml-64 transition-all duration-300 min-w-0 overflow-x-hidden">
-            @include('layouts.header')
+            @include('Layouts.Headers.header')
         
         <div class="w-full h-[calc(100vh-76px)]">
             <div class="w-full h-full p-1">
@@ -331,7 +331,7 @@
     </div>
     </div> <!-- Sluit de flex min-h-screen wrapper -->
 
- @include('layouts.Edit-Modal.edit-Gebruiker-modal')
+ @include('Layouts.EditModals.edit-Gebruiker-modal')
    
    
 

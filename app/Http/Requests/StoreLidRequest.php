@@ -108,8 +108,8 @@ class StoreLidRequest extends FormRequest
             'lid_sinds' => [
                 'required',
                 'date',
-                'before:today',
-                'after:1920-01-01',  // nobody born before 1920
+                'before_or_equal:today',
+                'after:1900-01-01',  
             ],
         ];
     }
@@ -163,7 +163,7 @@ class StoreLidRequest extends FormRequest
             // lid_sinds
             'lid_sinds.required' => 'Lid sinds is verplicht.',
             'lid_sinds.date'     => 'Voer een geldige datum in.',
-            'lid_sinds.before'   => 'Lid sinds moet in het verleden liggen.',
+            'lid_sinds.before_or_equal' => 'Lid sinds mag niet in de toekomst liggen.',
             'lid_sinds.after'    => 'Lid sinds is ongeldig.',
         ];
 

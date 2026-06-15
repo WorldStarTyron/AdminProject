@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 body: formData,
             })
-            .then(function (response) {
+            .then(async function (response) {
                 if (response.ok) {
                     // SUCCESS: close modal, show toast, reload page
                     closeModal();
@@ -124,12 +124,25 @@ document.addEventListener('DOMContentLoaded', function () {
                     setTimeout(function () { toast.classList.remove('show'); }, 3000);
                     setTimeout(function () { window.location.reload(); }, 1000);
                     return null;
-                } else if (response.status === 422) {
-                    // VALIDATION ERROR: server found problems
-                    return response.json();
-                } else {
-                    throw new Error('Server error');
                 }
+
+                // Try to parse JSON body for useful error info
+                var json = null;
+                try {
+                    json = await response.json();
+                } catch (err) {
+                    // ignore JSON parse errors
+                }
+
+                if (response.status === 422 && json && json.errors) {
+                    // Validation errors
+                    return json;
+                }
+
+                // Other server errors: throw an Error containing message if available
+                var msg = (json && (json.message || (json.errors && json.errors.server && json.errors.server[0]))) ?
+                    (json.message || json.errors.server[0]) : 'Server error: ' + response.status;
+                throw new Error(msg);
             })
             .then(function (data) {
                 if (data && data.errors) {
@@ -151,7 +164,9 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .catch(function (error) {
                 console.error('Error:', error);
-                errorList.innerHTML = '<li>Er is een fout opgetreden. Probeer het opnieuw.</li>';
+                // Show server-provided message when available
+                var message = (error && error.message) ? error.message : 'Er is een fout opgetreden. Probeer het opnieuw.';
+                errorList.innerHTML = '<li>' + message + '</li>';
                 errorsDiv.style.display = 'block';
             })
             .finally(function () {

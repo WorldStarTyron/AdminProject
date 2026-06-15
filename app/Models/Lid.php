@@ -19,6 +19,28 @@ class Lid extends Model
     const UPDATED_AT = 'bijgewerkt_op';
 
     /**
+     * Ensure Eloquent uses the correct timestamp column names.
+     * This prevents code from accidentally using `created_at`/`updated_at`.
+     */
+    public function getCreatedAtColumn()
+    {
+        return static::CREATED_AT;
+    }
+
+    public function getUpdatedAtColumn()
+    {
+        return static::UPDATED_AT;
+    }
+
+    /**
+     * Cast timestamp columns to Carbon instances for easy use.
+     */
+    protected $casts = [
+        'lid_sinds' => 'datetime',
+        'bijgewerkt_op' => 'datetime',
+    ];
+
+    /**
      * Fillable fields - these match the database table structure
      * Form submits (lowercase): lid_id, gebruiker_id, telefoonnummer, adres, woonplaats, geboortedatum
      * Database expects (with capitals): lid_id, gebruiker_id, telefoonnummer, adres, woonplaats, geboortedatum

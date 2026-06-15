@@ -200,5 +200,6 @@
     </div>
 
     @vite(['resources/js/UI/Button&More.js', 'resources/js/Charts/TotalLeden-Chart.js'])
+   
 </body>
 </html>

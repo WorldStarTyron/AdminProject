@@ -16,7 +16,7 @@
                 <ul id="modalErrorList"></ul>
             </div>
 
-            <form id="addLidForm" data-store-url="{{ route('ledenpagina.addlid.store') }}">
+            <form id="addLidForm" data-store-url="{{ route('ledenpagina.addlid.store') }}" method="POST">
                 @csrf
 
                 <div class="form-grid">

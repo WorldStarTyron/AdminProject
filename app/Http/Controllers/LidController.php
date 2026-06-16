@@ -255,11 +255,49 @@ $beschikbareJaren = \App\Models\Betaling::where('lid_id', $lid->lid_id)
       return redirect()->back()->with('success', 'Uw betalingsbewijs is succesvol verzonden naar de beheerder ter beoordeling. U ontvangt bericht zodra het is verwerkt.');
   }
 
+   public function store(Request $request)
+   {
+        Gate::authorize('leden-beheren');
+
+        $request->validate([
+        'naam'           => 'required|string|max:255',
+        'email'          => 'required|email',
+        'telefoonnummer' => 'required|string',
+        'adres'          => 'required|string',
+        'woonplaats'     => 'required|string',
+        'geboortedatum'  => 'required|date',
+        'lid_type'       => 'required|in:Actief,Passief,Bijzonder',
+        'lid_sinds'      => 'required|date',
+        'gebruiker_id'   => 'required|exists:gebruikers,gebruiker_id',
+        ]);
+
+        Lid::create([
+            'naam' => $request->naam,
+            'email' => $request->email,
+            'telefoonnummer' => $request->telefoonnummer,
+            'adres' => $request->adres,
+            'woonplaats' => $request->woonplaats,
+            'geboortedatum' => $request->geboortedatum,
+            'lid_type' => $request->lid_type,
+            'lid_sinds' => $request->lid_sinds,
+            'gebruiker_id' => $request->gebruiker_id,
+        ]);
+
+        return redirect()->route('GebruikersPagina')->with('success', 'Lid succesvol aangemaakt.');
+   }
 
 
 
 
 
+ public function KoppelOfEdit($gebruiker_id)
+    {
+        Gate::authorize('leden-beheren');
+        $gebruiker = Gebruiker::findOrFail($gebruiker_id);
+        $lid = $gebruiker->lid; // Null als er geen lid is
+
+        return view ('editLidPagina', compact('gebruiker', 'lid'));
+    }
 
 
 

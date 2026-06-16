@@ -88,7 +88,7 @@ class GebruikerController extends Controller
         ]);
     }
 
-    return redirect()->route('GebruikersBeheerPagina')->with('success', 'Gebruiker succesvol toegevoegd');
+    return redirect()->route('GebruikersBeheer')->with('success', 'Gebruiker succesvol toegevoegd');
     }
 
 
@@ -176,21 +176,5 @@ public function heractiveer($gebruiker_id)
 
 
 
-    public function KoppelOfEdit($id)
-    {
-        Gate::authorize('leden-beheren');
-
-        // Haal de gebruiker op
-        $gebruiker = Gebruiker::with('lid')->findOrFail($id);
-
-        // 1. Als de gebruiker al een lid is, toon de edit pagina
-        if ($gebruiker->lid) {
-            return view('leden.EditLid', compact('gebruiker'));
-        }
-
-        // 2. Als de gebruiker nog géén lid is, toon de koppel pagina (met eventueel extra info)
-        $lijstenData = $this->getLijstenData();
-
-        return view('leden.koppel-pagina', compact('gebruiker', 'lijstenData'));
-    }
+   
 }

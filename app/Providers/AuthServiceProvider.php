@@ -32,15 +32,7 @@ Gate::define('leden-beheren', fn ($user) =>
 $user->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder'])
 );
 
-Gate::define('leden-heractiveren', fn ($user) =>
-$user->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder'])
-);
 
-
-
-Gate::define('leden-verwijderen', fn ($user) =>
-$user->isApplicatieBeheerder()  // alleen volledige beheerder mag hard delete
-);
 
 // BETALINGEN
 Gate::define('betalingen-bekijken', fn ($user) =>
@@ -54,11 +46,13 @@ $user->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder'])
 // SOFT DELETE    betalingen-verwijderen
 Gate::define('leden-verwijderen', fn ($user) =>
 $user->hasAnyRole(['Applicatie Beheerder'])
-);   
+);    
 
 Gate::define('betalingen-verwijderen', fn ($user) =>
 $user->isApplicatieBeheerder()
 );
+
+
 
 // RAPPORT & LOG
 Gate::define('rapport-bekijken', fn ($user) =>
@@ -74,11 +68,6 @@ Gate::define('rollenbeheer', fn ($user) => $user->isApplicatieBeheerder());
 Gate::define('gebruikersbeheer', fn ($user) => $user->isApplicatieBeheerder());
 
 
-//Her-activeren
-// VERWIJDER deze dubbele definitie bovenaan:
-Gate::define('leden-heractiveren', fn ($user) =>
-    $user->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder'])
-);
 
 // HOUD alleen deze onderaan:
 Gate::define('leden-heractiveren', fn ($user) => 

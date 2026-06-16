@@ -177,8 +177,8 @@ class BetalingController extends Controller
         $maand = $datum->month;
         $jaar  = $datum->year;
 
-        // Gebruik de verplichte maandelijkse bijdrage van het lid
-        $bedrag = $lid->MaandelijkseBijdrage();
+        // Gebruik het ingevoerde bedrag (minimaal 150, gevalideerd hierboven)
+        $bedrag = $request->bedrag;
 
         // Bewijs opslaan als geüpload
         $bewijsPath = null;
@@ -382,7 +382,7 @@ class BetalingController extends Controller
 
   public function showBewijsRecieved(Request $request)
   {
-      Gate::authorize('betalingen-verwijderen'); // Ensure admin access
+      Gate::authorize('betalingen-beheren'); // Administratie Medewerker + Applicatie Beheerder
 
       // Get actual pending payments (in afwachting)
       $pendingPayments = Betaling::where('status', 'in_afwachting')

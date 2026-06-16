@@ -358,9 +358,17 @@
 
                                                 <!-- Acties: bewerken, deactiveren of heractiveren -->
                                                 <td class="flex gap-3 px-6 py-4">
-
+                                                        
                                                     <!-- Edit knop: opent de modal en vult de gegevens in -->
-                                                    <button
+                                                     <a href="{{ route('ledenpagina.koppel', $gebruiker->gebruiker_id) }}"
+                                                        class="text-blue-600 hover:text-blue-900 cursor-pointer"
+                                                        title="{{ $gebruiker->lid ? 'Lid bewerken' : 'Toevoegen als lid' }}">
+                                                        <i class="fas fa-id-card"></i>
+                                                     </a>
+
+
+
+                                                   <!--<button
                                                         onclick="openModal()"
                                                         class="openEditGebruikerModalBtn text-green-600 hover:text-green-900 cursor-pointer"
                                                         data-gebruiker-id="{{ $gebruiker->gebruiker_id }}"
@@ -370,7 +378,7 @@
                                                         data-status="{{ $gebruiker->status }}"
                                                         data-aangemaakt-op="{{ $gebruiker->aangemaakt_op }}">
                                                         <i class="fas fa-pencil-alt"></i>
-                                                    </button>
+                                                    </button>-->
 
                                         
                                                     @if($gebruiker->status === 'Actief')

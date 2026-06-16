@@ -87,15 +87,15 @@
 
                                 {{-- Betaalmethode met icon --}}
                                 <td class="px-5 py-3.5 text-slate-600">
-                                    @if($betaling->methode === 'Overmaking')
+                                    @if($betaling->methode === 'overmaking')
                                         <span class="inline-flex items-center gap-1.5">
                                             <i class="fa-solid fa-arrow-right-arrow-left text-slate-400 text-xs"></i>
-                                            Overmaking
+                                            overmaking
                                         </span>
-                                    @elseif($betaling->methode === 'Fysiek')
+                                    @elseif($betaling->methode === 'fysiek')
                                         <span class="inline-flex items-center gap-1.5">
                                             <i class="fa-solid fa-building-columns text-slate-400 text-xs"></i>
-                                            Fysiek
+                                            fysiek
                                         </span>
                                     @else
                                         <span class="text-slate-400 italic">Onbekend</span>

@@ -62,7 +62,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/leden/{lid_id}/heractiveer', [LidController::class, 'heractiveer'])->name('ledenpagina.heractiveer')->middleware('can:leden-heractiveren');
     // Leden - Deactiveer
     Route::post('/leden/{lid_id}/deactiveer', [LidController::class, 'deactiveer'])->name('ledenpagina.deactiveer')->middleware('can:leden-Deactiveren');
-    Route::get('/leden/{gebruiker_id}/koppel', [LidController::class, 'KoppelOfEdit'])->name('ledenpagina.koppel')->middleware('can:leden-beheren');
+   
 
     // Betalingen
     Route::get('/betalingPagina', [BetalingController::class, 'index'])->name('betalingPagina')->middleware('can:betalingen-bekijken');
@@ -83,7 +83,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/DeletedRecords', [BetalingController::class, 'trashed'])->name('DeletedRecords')->middleware('can:betalingen-verwijderen');
 
     // Bewijs
-    Route::get('/BewijsRecieved', [BetalingController::class, 'showBewijsRecieved'])->name('BewijsRecieved')->middleware('can:betalingen-verwijderen');
+    Route::get('/BewijsRecieved', [BetalingController::class, 'showBewijsRecieved'])->name('BewijsRecieved')->middleware('can:betalingen-beheren');
     Route::get('/bewijs/{betaling_id}/download', [BetalingController::class, 'DownloadBewijsFile'])->name('DownloadBewijsFile')->middleware('can:betalingen-verwijderen');
 
     // Rapport & log
@@ -106,5 +106,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/GebruikersBeheerPagina/{userId}', [GebruikerController::class, 'destroy'])->name('GebruikersBeheer.destroy')->middleware('can:gebruikersbeheer');
     Route::put('/gebruikers/{id}/deactiveer', [GebruikerController::class, 'deactiveer'])->name('GebruikersBeheer.deactiveer')->middleware('can:gebruikersbeheer');
     Route::put('/gebruikers/{id}/heractiveer', [GebruikerController::class, 'heractiveer'])->name('GebruikersBeheer.heractiveer')->middleware('can:gebruikersbeheer');
-    Route::post('/gebruikers-beheer', [GebruikerController::class, 'store'])->name('GebruikersBeheer.store');
+    Route::post('/gebruikers-beheer', [GebruikerController::class, 'store'])->name('GebruikersBeheer.store')->middleware('can:gebruikersbeheer');
+    Route::get('/leden/{gebruiker_id}/koppel', [LidController::class, 'KoppelOfEdit'])->name('ledenpagina.koppel')->middleware('can:leden-beheren');
+    Route::post('/leden/store', [LidController::class, 'store'])->name('ledenpagina.store')->middleware('can:leden-beheren');
 });

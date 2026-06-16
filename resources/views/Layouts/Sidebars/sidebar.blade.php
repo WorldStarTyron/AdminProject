@@ -97,20 +97,22 @@
                     </li>
                     @endcan
                         
+                    @can('betalingen-beheren')
                     <li class="rounded-lg {{ request()->routeIs('BewijsRecieved') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                         <a href="{{ route('BewijsRecieved') }}"
                            class="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm"
-                           data-tooltip="Betalingsbewijzen">
+                            data-tooltip="Betalingsbewijzen">
                             <i class="fa-solid fa-file-circle-check text-xs shrink-0"></i>
                             <span class="nav-text font-medium">Betalingsbewijzen</span>
                         </a>
                     </li>
+                    @endcan
 
                     
 
 
                 </ul>
-            </li>
+              </li>
             @endcan
 
             <!-- Rollen beheren — alleen applicatiebeheerder -->

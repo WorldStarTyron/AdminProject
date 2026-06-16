@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Lid Bewerken | Administratie Panel</title>
+    <title>{{ $lid ? 'Lid Bewerken' : 'Lid Toevoegen' }} | Administratie Panel</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -18,28 +18,40 @@
             @include('Layouts.Headers.header')
 
             <div class="px-8 py-6">
+
                 {{-- Breadcrumb --}}
                 <nav class="text-sm text-gray-400 mb-6 flex items-center gap-1.5">
                     <a href="{{ route('MainDashboardPagina') }}" class="hover:text-gray-600 transition-colors">Dashboard</a>
                     <span>/</span>
-                    <a href="{{ route('ledenpagina') }}" class="hover:text-gray-600 transition-colors">Members</a>
-                    <span>/</span>
-                    <a href="{{ route('ledenpagina.show', $lid->lid_id) }}" class="hover:text-gray-600 transition-colors">Lid Profiel</a>
-                    <span>/</span>
-                    <span class="text-gray-700 font-medium">Bewerken</span>
+                    @if($lid)
+                        <a href="{{ route('ledenpagina') }}" class="hover:text-gray-600 transition-colors">Leden</a>
+                        <span>/</span>
+                        <a href="{{ route('ledenpagina.show', $lid->lid_id) }}" class="hover:text-gray-600 transition-colors">Lid Profiel</a>
+                        <span>/</span>
+                        <span class="text-gray-700 font-medium">Bewerken</span>
+                    @else
+                        <a href="{{ route('GebruikersBeheer') }}" class="hover:text-gray-600 transition-colors">Gebruikersbeheer</a>
+                        <span>/</span>
+                        <span class="text-gray-700 font-medium">Lid Toevoegen</span>
+                    @endif
                 </nav>
 
                 <div class="flex gap-6 items-start">
                     <div class="flex-1">
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
 
+                            {{-- Header --}}
                             <div class="flex items-center justify-between px-8 py-5 border-b border-gray-100">
                                 <div>
-                                    <h1 class="text-base font-semibold text-gray-800">Lidmaatschapsgegevens Aanpassen</h1>
-                                    <p class="text-sm text-gray-400 mt-0.5">Bewerk de profielinformatie en status van dit lid.</p>
+                                    <h1 class="text-base font-semibold text-gray-800">
+                                        {{ $lid ? 'Lidmaatschapsgegevens Aanpassen' : 'Lid Toevoegen' }}
+                                    </h1>
+                                    <p class="text-sm text-gray-400 mt-0.5">
+                                        {{ $lid ? 'Bewerk de profielinformatie en status van dit lid.' : 'Vul de gegevens in om deze gebruiker als lid te registreren.' }}
+                                    </p>
                                 </div>
                                 <div class="flex items-center gap-3">
-                                    <a href="{{ route('ledenpagina.show', $lid->lid_id) }}"
+                                    <a href="{{ $lid ? route('ledenpagina.show', $lid->lid_id) : route('GebruikersBeheer') }}"
                                        class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
                                         Annuleren
                                     </a>
@@ -55,12 +67,20 @@
                                 </div>
                             </div>
 
-                            <form id="edit-form" action="{{ route('ledenpagina.update', $lid->lid_id) }}" method="POST">
-                                @csrf
-                                @method('PUT')
+                            {{-- Form: PUT als lid bestaat, POST als nieuw --}}
+                            @if($lid)
+                                <form id="edit-form" action="{{ route('ledenpagina.update', $lid->lid_id) }}" method="POST">
+                                    @csrf
+                                    @method('PUT')
+                            @else
+                                <form id="edit-form" action="{{ route('ledenpagina.store') }}" method="POST">
+                                    @csrf
+                                    <input type="hidden" name="gebruiker_id" value="{{ $gebruiker->gebruiker_id }}">
+                            @endif
 
                                 <div class="px-8 py-6 space-y-8">
 
+                                    {{-- Validatiefouten --}}
                                     @if($errors->any())
                                         <div class="bg-red-50 border border-red-200 rounded-xl p-4">
                                             @foreach($errors->all() as $error)
@@ -69,6 +89,7 @@
                                         </div>
                                     @endif
 
+                                    {{-- Persoonlijke Informatie --}}
                                     <div>
                                         <div class="flex items-center gap-2 mb-4">
                                             <div class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center">
@@ -82,23 +103,24 @@
 
                                         <div class="mb-4">
                                             <label for="naam" class="block text-xs font-medium text-gray-500 mb-1.5">Volledige Naam</label>
-                                            <input type="text" name="naam" id="naam" value="{{ old('naam', $lid->naam) }}" required class="w-full px-3 py-2.5 text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 transition-all placeholder-gray-300">
+                                            <input type="text" name="naam" id="naam" value="{{ old('naam', $lid->naam ?? '') }}" required class="w-full px-3 py-2.5 text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 transition-all placeholder-gray-300">
                                         </div>
 
                                         <div class="grid grid-cols-2 gap-4">
                                             <div>
                                                 <label for="email" class="block text-xs font-medium text-gray-500 mb-1.5">Email Adres</label>
-                                                <input type="email" name="email" id="email" value="{{ old('email', $lid->email) }}" required class="w-full px-3 py-2.5 text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 transition-all placeholder-gray-300">
+                                                <input type="email" name="email" id="email" value="{{ old('email', $lid->email ?? '') }}" required class="w-full px-3 py-2.5 text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 transition-all placeholder-gray-300">
                                             </div>
                                             <div>
                                                 <label for="telefoonnummer" class="block text-xs font-medium text-gray-500 mb-1.5">Telefoonnummer</label>
-                                                <input type="text" name="telefoonnummer" id="telefoonnummer" value="{{ old('telefoonnummer', $lid->telefoonnummer) }}" required class="w-full px-3 py-2.5 text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 transition-all placeholder-gray-300">
+                                                <input type="text" name="telefoonnummer" id="telefoonnummer" value="{{ old('telefoonnummer', $lid->telefoonnummer ?? '') }}" required class="w-full px-3 py-2.5 text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 transition-all placeholder-gray-300">
                                             </div>
                                         </div>
                                     </div>
 
                                     <hr class="border-gray-100">
 
+                                    {{-- Adresgegevens --}}
                                     <div>
                                         <div class="flex items-center gap-2 mb-4">
                                             <div class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center">
@@ -113,13 +135,13 @@
                                         <div class="grid grid-cols-2 gap-4">
                                             <div>
                                                 <label for="adres" class="block text-xs font-medium text-gray-500 mb-1.5">Adres & Huisnummer</label>
-                                                <input type="text" name="adres" id="adres" value="{{ old('adres', $lid->adres) }}" required class="w-full px-3 py-2.5 text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 transition-all placeholder-gray-300">
+                                                <input type="text" name="adres" id="adres" value="{{ old('adres', $lid->adres ?? '') }}" required class="w-full px-3 py-2.5 text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 transition-all placeholder-gray-300">
                                             </div>
                                             <div>
                                                 <label for="woonplaats" class="block text-xs font-medium text-gray-500 mb-1.5">Woonplaats</label>
                                                 <select name="woonplaats" id="woonplaats" class="w-full px-3 py-2.5 text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 transition-all appearance-none cursor-pointer">
                                                     @foreach(['Paramaribo','Wanica','Nickerie','Commewijne','Marowijne','Saramacca','Coronie','Sipaliwini','Brokopondo','Para'] as $district)
-                                                        <option value="{{ $district }}" {{ old('woonplaats', $lid->woonplaats) == $district ? 'selected' : '' }}>
+                                                        <option value="{{ $district }}" {{ old('woonplaats', $lid->woonplaats ?? '') == $district ? 'selected' : '' }}>
                                                             {{ $district }}
                                                         </option>
                                                     @endforeach
@@ -130,6 +152,7 @@
 
                                     <hr class="border-gray-100">
 
+                                    {{-- Lidmaatschap Details --}}
                                     <div>
                                         <div class="flex items-center gap-2 mb-4">
                                             <div class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center">
@@ -145,7 +168,7 @@
                                             <div>
                                                 <label for="geboortedatum" class="block text-xs font-medium text-gray-500 mb-1.5">Geboortedatum</label>
                                                 <input type="date" name="geboortedatum" id="geboortedatum"
-                                                       value="{{ old('geboortedatum', $lid->geboortedatum) }}"
+                                                       value="{{ old('geboortedatum', $lid->geboortedatum ?? '') }}"
                                                        required
                                                        class="w-full px-3 py-2.5 text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 transition-all">
                                             </div>
@@ -155,20 +178,21 @@
                                                         required
                                                         class="w-full px-3 py-2.5 text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 transition-all appearance-none cursor-pointer">
                                                     <option value="">Selecteer type</option>
-                                                    <option value="Actief"    {{ old('lid_type', $lid->lid_type) == 'Actief'    ? 'selected' : '' }}>Actief</option>
-                                                    <option value="Passief"   {{ old('lid_type', $lid->lid_type) == 'Passief'   ? 'selected' : '' }}>Passief</option>
-                                                    <option value="Bijzonder" {{ old('lid_type', $lid->lid_type) == 'Bijzonder' ? 'selected' : '' }}>Bijzonder</option>
+                                                    <option value="Actief"    {{ old('lid_type', $lid->lid_type ?? '') == 'Actief'    ? 'selected' : '' }}>Actief</option>
+                                                    <option value="Passief"   {{ old('lid_type', $lid->lid_type ?? '') == 'Passief'   ? 'selected' : '' }}>Passief</option>
+                                                    <option value="Bijzonder" {{ old('lid_type', $lid->lid_type ?? '') == 'Bijzonder' ? 'selected' : '' }}>Bijzonder</option>
                                                 </select>
                                             </div>
                                             <div>
                                                 <label for="lid_sinds" class="block text-xs font-medium text-gray-500 mb-1.5">Lid Sinds</label>
-                                                <input type="date" name="lid_sinds" id="lid_since" value="{{ old('lid_sinds', $lid->lid_sinds) }}" required class="w-full px-3 py-2.5 text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 transition-all">
+                                                <input type="date" name="lid_sinds" id="lid_since" value="{{ old('lid_sinds', $lid->lid_sinds ?? '') }}" required class="w-full px-3 py-2.5 text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 transition-all">
                                             </div>
                                         </div>
                                     </div>
 
                                     <hr class="border-gray-100">
 
+                                    {{-- Info blokken --}}
                                     <div class="grid grid-cols-2 gap-4">
                                         <div class="flex items-start gap-3 bg-amber-50 border border-amber-100 rounded-xl p-4">
                                             <svg class="flex-shrink-0 mt-0.5" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -192,13 +216,15 @@
                                             <div>
                                                 <p class="text-xs font-semibold text-slate-700 mb-1">Hulp Nodig?</p>
                                                 <p class="text-xs text-slate-500 leading-relaxed">
-                                                    Neem contact op met de systeembeheerder als u de status van een ereid wilt wijzigen.
+                                                    Neem contact op met de systeembeheerder als u de status van een lid wilt wijzigen.
                                                 </p>
                                             </div>
                                         </div>
                                     </div>
+
                                 </div>
                             </form>
+
                         </div>
                     </div>
                 </div>

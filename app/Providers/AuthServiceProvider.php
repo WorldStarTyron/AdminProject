@@ -36,6 +36,8 @@ Gate::define('leden-heractiveren', fn ($user) =>
 $user->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder'])
 );
 
+
+
 Gate::define('leden-verwijderen', fn ($user) =>
 $user->isApplicatieBeheerder()  // alleen volledige beheerder mag hard delete
 );

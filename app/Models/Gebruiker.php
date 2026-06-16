@@ -23,6 +23,8 @@ class Gebruiker extends Authenticatable
         "email",
         "wachtwoord_hash",
         "status",
+        "aangemaakt_op",
+        "bijgewerkt_op",
     ];
 
     protected $hidden = [

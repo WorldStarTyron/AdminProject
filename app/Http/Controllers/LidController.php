@@ -154,22 +154,24 @@ $beschikbareJaren = \App\Models\Betaling::where('lid_id', $lid->lid_id)
 }
 
     // Lid heractiveren
-    public function heractiveer($lid_id)
-    {
-        $lid = Lid::findOrFail($lid_id);
-        $lid->gebruiker->status = 'Actief';
-        $lid->gebruiker->save();
+  public function heractiveer($gebruiker_id)
+{
+    Gate::authorize('gebruikersbeheer');
 
-        // Activiteit loggen
-        if (auth()->check()) {
-            \App\Models\Activiteit::log(auth()->id(), 'lid_gewijzigd', [
-                'lid_id'  => $lid->lid_id,
-                'details' => 'Lid ' . $lid->gebruiker->naam . ' is succesvol hergeactiveerd.',
-            ]);
-        }
+    $gebruiker = Gebruiker::findOrFail($gebruiker_id);
+    $gebruiker->status = 'Actief';
+    $gebruiker->save();
 
-        return redirect()->back()->with('success', 'Account is succesvol geheractiveerd.');
+    if (auth()->check()) {
+        \App\Models\Activiteit::log(auth()->id(), 'lid_gewijzigd', [
+            'lid_id'  => $gebruiker->gebruiker_id,
+            'details' => 'Gebruiker ' . $gebruiker->naam . ' is succesvol hergeactiveerd.',
+        ]);
     }
+
+    // ✅ Consistent met deactiveer() — redirect in plaats van JSON
+    return redirect()->back()->with('success', 'Account is succesvol geheractiveerd.');
+}
 
     // Lid deactiveren
     public function deactiveer($lid_id)

@@ -19,17 +19,30 @@ use App\Http\Controllers\NotificatieController;
 Route::get('/', function () {
     return view('welcome');
 });
+
+// Login routes (geen auth vereist)
+Route::get('/login', function () { return view('login'); })->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Wachtwoord herstel routes (geen auth vereist)
+Route::get('/Recover-password', [PasswordResetController::class, 'show'])->name('recover-password');
+Route::post('/Recover-password', [PasswordResetController::class, 'sendResetCode'])->name('recover-password.post');
+Route::get('/verify-code', [PasswordResetController::class, 'verifyCode'])->name('verify-code');
+Route::post('/verify-code', [PasswordResetController::class, 'postVerifyCode'])->name('verify-code.post');
+Route::get('/Recover-password/new-password', [PasswordResetController::class, 'newPassword'])->name('new-password');
+Route::post('/Recover-password/new-password', [PasswordResetController::class, 'postNewPassword'])->name('new-password.post');
+
 // Dashboard
 Route::middleware(['auth'])->group(function () {
-Route::get('/MainDashboardPagina', [MainDashboardController::class, 'Maindashboard'])->name('MainDashboardPagina')->middleware('can:dashboard');
-Route::get('/dashboard/chart-data', [MainDashboardController::class, 'ChartData'])->name('dashboard.chartdata');
+    Route::get('/MainDashboardPagina', [MainDashboardController::class, 'Maindashboard'])->name('MainDashboardPagina')->middleware('can:dashboard');
+    Route::get('/dashboard/chart-data', [MainDashboardController::class, 'ChartData'])->name('dashboard.chartdata');
 });
- 
+
 // Leden, Betalingen, Rapport, Log, Rollen & Gebruikers routes
 Route::middleware(['auth'])->group(function () {
-    
 
- // Lid — eigen profiel
+    // Lid — eigen profiel
     Route::get('/Lidpagina', [LidController::class, 'show'])->name('GegevensPagina')->middleware('can:eigen-profiel');
 
     // Leden — lezen
@@ -45,38 +58,33 @@ Route::middleware(['auth'])->group(function () {
     // Leden — verwijderen (alleen beheerder)
     Route::delete('/ledenpagina/delete/{lidId}', [PostController::class, 'destroy'])->name('ledenpagina.delete')->middleware('can:leden-verwijderen');
 
-    // leden - Heractiveer
+    // Leden - Heractiveer
     Route::post('/leden/{lid_id}/heractiveer', [LidController::class, 'heractiveer'])->name('ledenpagina.heractiveer')->middleware('can:leden-heractiveren');
     // Leden - Deactiveer
-Route::post('/leden/{lid_id}/deactiveer', [LidController::class, 'deactiveer'])->name('ledenpagina.deactiveer')->middleware('can:leden-Deactiveren');
-
-
+    Route::post('/leden/{lid_id}/deactiveer', [LidController::class, 'deactiveer'])->name('ledenpagina.deactiveer')->middleware('can:leden-Deactiveren');
+    Route::get('/leden/{gebruiker_id}/koppel', [LidController::class, 'KoppelOfEdit'])->name('ledenpagina.koppel')->middleware('can:leden-beheren');
 
     // Betalingen
     Route::get('/betalingPagina', [BetalingController::class, 'index'])->name('betalingPagina')->middleware('can:betalingen-bekijken');
     Route::post('/betalingPagina/addBetaling', [BetalingController::class, 'store'])->name('betalingPagina.addBetaling.store')->middleware('can:betalingen-beheren');
     Route::patch('/betalingen/{betaling_id}', [BetalingController::class, 'update'])->name('betalingen.update')->middleware('can:betalingen-beheren');
     Route::get('/betalingen/chart-data', [BetalingController::class, 'chartData'])->name('betalingen.chartData')->middleware('can:betalingen-bekijken');
-    Route::put('/betalingen/{betaling}', [BetalingController::class, 'update'])->name('betalingen.update')->middleware('can:betalingen-beheren');
+    Route::put('/betalingen/{betaling}', [BetalingController::class, 'update'])->name('betalingen.update.put')->middleware('can:betalingen-beheren');
     Route::delete('/betalingen/{betaling}', [BetalingController::class, 'destroy'])->name('betalingen.destroy')->middleware('can:betalingen-beheren');
 
     Route::get('/betalingen/trashed', [BetalingController::class, 'trashed'])->name('betalingen.trashed')->middleware('can:betalingen-verwijderen');
     Route::patch('/betalingen/{betaling_id}/restore', [BetalingController::class, 'restore'])->name('betalingen.restore')->middleware('can:betalingen-verwijderen');
 
-
-    // Notificaite
+    // Notificaties
     Route::get('/notificaties', [NotificatieController::class, 'index'])->name('notificaties.index');
     Route::post('/notificaties/lezen', [NotificatieController::class, 'markeerGelezen'])->name('notificaties.lezen');
 
-
-
-    //VerwijderdeBetaling Record
+    // Verwijderde Betaling Records
     Route::get('/DeletedRecords', [BetalingController::class, 'trashed'])->name('DeletedRecords')->middleware('can:betalingen-verwijderen');
 
-    //BewijsBewijs
+    // Bewijs
     Route::get('/BewijsRecieved', [BetalingController::class, 'showBewijsRecieved'])->name('BewijsRecieved')->middleware('can:betalingen-verwijderen');
     Route::get('/bewijs/{betaling_id}/download', [BetalingController::class, 'DownloadBewijsFile'])->name('DownloadBewijsFile')->middleware('can:betalingen-verwijderen');
-
 
     // Rapport & log
     Route::get('/RapportPagina', [RapportController::class, 'RapportageData'])->name('Rapport')->middleware('can:rapport-bekijken');
@@ -90,24 +98,13 @@ Route::post('/leden/{lid_id}/deactiveer', [LidController::class, 'deactiveer'])-
         Route::put('/gebruiker/{userId}/roles', [RolBeheerController::class, 'updateUserRoles'])->name('rollen-beheer.update');
         Route::get('/search-users', [RolBeheerController::class, 'searchUsers'])->name('rollen-beheer.search');
     });
-    
-    // Route to display the list of all users
+
+    // Gebruikersbeheer
     Route::get('/GebruikersBeheerPagina', [GebruikerController::class, 'index'])->name('GebruikersBeheer')->middleware('can:gebruikersbeheer');
-    // Route to handle updating user information (Name, Email, Status)
     Route::put('/GebruikersBeheerPagina/{userId}', [GebruikerController::class, 'update'])->name('GebruikersBeheer.update')->middleware('can:gebruikersbeheer');
-    // Route to handle deleting a user and their associated data
+    Route::post('GebruikersBeheerPagina/create', [GebruikerController::class, 'create'])->name('GebruikersBeheer.create')->middleware('can:gebruikersbeheer');
     Route::delete('/GebruikersBeheerPagina/{userId}', [GebruikerController::class, 'destroy'])->name('GebruikersBeheer.destroy')->middleware('can:gebruikersbeheer');
-});  
-
-// Login routes
-Route::get('/login', function () { return view('login'); })->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.post');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
-// Wachtwoord herstel routes (geen auth vereist)
-Route::get('/Recover-password', [PasswordResetController::class, 'show'])->name('recover-password');
-Route::post('/Recover-password', [PasswordResetController::class, 'sendResetCode'])->name('recover-password.post');
-Route::get('/verify-code', [PasswordResetController::class, 'verifyCode'])->name('verify-code');
-Route::post('/verify-code', [PasswordResetController::class, 'postVerifyCode'])->name('verify-code.post');
-Route::get('/Recover-password/new-password', [PasswordResetController::class, 'newPassword'])->name('new-password');
-Route::post('/Recover-password/new-password', [PasswordResetController::class, 'postNewPassword'])->name('new-password.post');
+    Route::put('/gebruikers/{id}/deactiveer', [GebruikerController::class, 'deactiveer'])->name('GebruikersBeheer.deactiveer')->middleware('can:gebruikersbeheer');
+    Route::put('/gebruikers/{id}/heractiveer', [GebruikerController::class, 'heractiveer'])->name('GebruikersBeheer.heractiveer')->middleware('can:gebruikersbeheer');
+    Route::post('/gebruikers-beheer', [GebruikerController::class, 'store'])->name('GebruikersBeheer.store');
+});

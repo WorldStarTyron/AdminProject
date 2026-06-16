@@ -83,7 +83,7 @@
                             </div>
 
                             <!-- Tijdelijk Wachtwoord -->
-                            <div class="flex flex-col gap-1.5 flex-1 min-w-[160px]">
+                            <!--<div class="flex flex-col gap-1.5 flex-1 min-w-[160px]">
                                 <label class="text-xs text-gray-500 flex items-center gap-1">
                                     <i class="fa-solid fa-key"></i>
                                     Tijdelijk Wachtwoord (optioneel)
@@ -91,7 +91,7 @@
                                 <div class="flex items-center gap-2">
                                     <input type="text" name="tijdelijk_wachtwoord" placeholder="Wachtwoord..." class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white text-gray-700 placeholder-gray-400">
                                 </div>
-                            </div>
+                            </div>-->
 
                             <button type="submit" class="bg-gray-900 hover:bg-gray-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors whitespace-nowrap flex items-center gap-2">
                                 <i class="fa-solid fa-floppy-disk"></i>

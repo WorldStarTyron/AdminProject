@@ -1,24 +1,41 @@
-// Open edit modal and fill in values
-window.openEditModal = function(id, naam, email, status) {
-    const form = document.getElementById('editUserForm');
-    // Set form action url dynamically
-    form.action = `/GebruikersBeheerPagina/${id}`;
-    
-    // Prefill current values
-    document.getElementById('edit_naam').value = naam;
-    document.getElementById('edit_email').value = email;
-    document.getElementById('edit_status').value = status;
-    
-    // Toggle classes to show modal
-    const modal = document.getElementById('editUserModal');
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-};
+document.addEventListener("DOMContentLoaded", function () {
 
-// Close edit modal
-window.closeEditModal = function() {
-    const modal = document.getElementById('editUserModal');
-    // Toggle classes to hide modal
-    modal.classList.remove('flex');
-    modal.classList.add('hidden');
-};
+    const modal = document.getElementById("editGebruikerModal");
+    
+function openModal(btn) {
+
+        document.getElementById("edit_gebruiker_naam").value = btn.dataset.naam;
+        document.getElementById("edit_gebruiker_email").value = btn.dataset.email;
+        document.getElementById("edit_gebruiker_rol").value = btn.dataset.rol;
+        document.getElementById("edit_gebruiker_status").value = btn.dataset.status;
+ 
+        modal.classList.add("active");
+    }
+
+    function closeModal() {
+        modal.classList.remove("active");
+    }
+
+    document.querySelectorAll(".openEditGebruikerModalBtn")
+        .forEach(btn => {
+            btn.addEventListener("click", function () {
+                openModal(this);
+            });
+        });
+
+        document.querySelectorAll(".closeEditGebruikerModalBtn")
+        .forEach(btn => {
+            btn.addEventListener("click", function () {
+                closeModal(this)
+            });
+        });
+
+    // Sluiten wanneer buiten het formulier wordt geklikt
+    modal.addEventListener("click", function (event) {
+        if (event.target === modal) {
+            closeModal();
+        }
+    });
+
+});
+

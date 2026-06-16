@@ -141,7 +141,6 @@
                                             </div>
                                             <h2 class="text-sm font-semibold text-gray-700">Lidmaatschap Details</h2>
                                         </div>
-
                                         <div class="grid grid-cols-3 gap-4">
                                             <div>
                                                 <label for="geboortedatum" class="block text-xs font-medium text-gray-500 mb-1.5">Geboortedatum</label>

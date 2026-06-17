@@ -97,50 +97,45 @@ class BetalingController extends Controller
 
  
     // Bedrag per weekdag grafiek
-    public function chartData(Request $request)
-    {
-        // filters van de frontend
-        $maand = (int) $request->input('maand', now()->month);
-        $jaar  = (int) $request->input('jaar',  now()->year);
+   public function chartData(Request $request)
+{
+    $maand = (int) $request->input('maand', now()->month);
+    $jaar  = (int) $request->input('jaar',  now()->year);
 
-        // Start- en einddatum van de geselecteerde maand
-        $startDatum = Carbon::createFromDate($jaar, $maand, 1)->startOfMonth();
-        $eindDatum  = $startDatum->copy()->endOfMonth();
+    $startDatum = Carbon::createFromDate($jaar, $maand, 1)->startOfMonth();
+    $eindDatum  = $startDatum->copy()->endOfMonth();
 
-        // Haal betaalde betalingen op binnen de geselecteerde maand
-        $betalingen = Betaling::select(
-            DB::raw('DAYOFWEEK(ingediend_op) as weekdag'),
-            DB::raw('SUM(bedrag) as totaal')
-        )
-        ->where('status', 'betaald')
-        ->whereBetween('ingediend_op', [$startDatum->toDateString(), $eindDatum->toDateString()])
-        ->groupBy('weekdag')
-        ->get()
-        ->keyBy('weekdag');
+    // Groepeer op kalenderdag
+    $betalingen = Betaling::select(
+        DB::raw('DAY(ingediend_op) as dag'),
+        DB::raw('SUM(bedrag) as totaal_bedrag')
+    )
+    ->where('status', 'betaald')
+    ->whereBetween('ingediend_op', [$startDatum->toDateString(), $eindDatum->toDateString()])
+    ->groupBy('dag')
+    ->get()
+    ->keyBy('dag');
 
-        // DAYOFWEEK: 1=Zondag, 2=Maandag, ... 7=Zaterdag
-        // Wij willen Ma(2) t/m Zo(1)
-        $dagNamen = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'];
-        $dagKeys  = [2, 3, 4, 5, 6, 7, 1]; // MySQL DAYOFWEEK volgorde
+    $aantalDagen = $eindDatum->day;
 
-        $labels   = [];
-        $bedragen = [];
+    $labels = [];
+    $data   = [];
 
-        for ($i = 0; $i < 7; $i++) {
-            $labels[]   = $dagNamen[$i];
-            $bedragen[] = (float) ($betalingen->get($dagKeys[$i])->totaal ?? 0);
-        }
-
-        return response()->json([
-            'labels' => $labels,
-            'series' => [
-                [
-                    'name' => 'Totaal Bedrag',
-                    'data' => $bedragen,
-                ]
-            ]
-        ]);
+    for ($dag = 1; $dag <= $aantalDagen; $dag++) {
+        $labels[] = (string) $dag;
+        $data[]   = (float) ($betalingen->get($dag)->totaal_bedrag ?? 0);
     }
+
+    return response()->json([
+        'labels' => $labels,
+        'series' => [
+            [
+                'name' => 'Totaal Bedrag',
+                'data' => $data,  // was $bedragen
+            ]
+        ],
+    ]);
+}
 
 
 
@@ -353,6 +348,9 @@ class BetalingController extends Controller
     }
 
 
+
+
+
     public function restore($betaling_id)
     {
         Gate::authorize('betalingen-verwijderen');
@@ -380,7 +378,13 @@ class BetalingController extends Controller
         return response()->json(['success' => true, 'message' => 'Betaling succesvol hersteld']);
     }
 
-  public function showBewijsRecieved(Request $request)
+
+
+
+
+
+
+  public function showBewijsReceived(Request $request)
   {
       Gate::authorize('betalingen-beheren'); // Administratie Medewerker + Applicatie Beheerder
 
@@ -406,36 +410,68 @@ class BetalingController extends Controller
           ->whereDate('ingediend_op', today())
           ->count();
 
-      return view('BewijsRecieved', compact('pendingPayments', 'recentReviews', 'pendingCount', 'totalReviewedToday'));
+          // Dit zijn de variabelen voor de pdf/afbeelding weergave. Zorgen ervoor dat de afbeelding niet wordt geladen bij opstarten
+          $betaling = null;
+          $bewijsUrl = null;
+          $isPdf = false;
+
+      return view('BewijsReceived', compact('pendingPayments', 'recentReviews', 'pendingCount', 'totalReviewedToday', 'betaling', 'bewijsUrl', 'isPdf'));
   }
 
 
 
 
-  public function DownloadBewijsFile($betaling_id)
-  {
-      Gate::authorize('betalingen-verwijderen');
-      $betaling = Betaling::findOrFail($betaling_id);
-      
-      if (!$betaling->betaling_bewijs) {
-          return redirect()->back()->with('error', 'Geen betalingsbewijs gevonden voor deze betaling.');
-      }
-
-      $filePath = storage_path('app/public/' . $betaling->betaling_bewijs);
-      if (!file_exists($filePath)) {
-          return redirect()->back()->with('error', 'Bestand bestaat niet meer.');
-      }
-
-      return response()->download($filePath);
-  }
-
-
-
-
+  public function ViewBewijsFile($betaling_id)
+{
+    Gate::authorize('betalingen-beheren');
+ 
+    // Find the payment or show a 404 page if it doesn't exist
+    $betaling = Betaling::findOrFail($betaling_id);
+ 
+    // Check 1: does this payment even have a proof file attached?
+    if (!$betaling->betaling_bewijs) {
+        return redirect()->back()->with('error', 'Geen betalingsbewijs gevonden voor deze betaling.');
+    }
+ 
+    // Check 2: does the file physically exist on disk?
+    if (!\Storage::disk('public')->exists($betaling->betaling_bewijs)) {
+        return redirect()->back()->with('error', 'Bestand niet gevonden op de server.');
+    }
+ 
+    // Build a public URL so the browser can display the file directly
+    $bewijsUrl = \Storage::url($betaling->betaling_bewijs);
+ 
+    // Detect whether the file is a PDF or an image so the view
+    // can render it correctly (PDF uses <iframe>, image uses <img>)
+    $extensie   = strtolower(pathinfo($betaling->betaling_bewijs, PATHINFO_EXTENSION));
+    $isPdf      = $extensie === 'pdf';
 
   
-    
+     
+    $bewijsUrl = \Storage::url($betaling->betaling_bewijs);
+    // Pass everything the view needs to the preview page
+    return view('BewijsReceived', compact('betaling', 'bewijsUrl', 'isPdf'));
+}
 
 
 
+public function ApproveBewijs(Request $request, $betaling_id){
+    $betaling = Betaling::findOrFail($betaling_id);
+    $betaling->status = 'betaald';
+    $betaling->save();
+
+    return redirect()->back()->with('success', 'Betaling goedgekeurd');
+
+    //Activieiten Log
+
+}
+
+public function RejectBewijs(Request $request, $betaling_id){
+    $betaling = Betaling::findOrFail($betaling_id);
+    $betaling->status = 'Openstaand';
+    $betaling->save();
+
+    return redirect()->back()->with('success', 'Betaling afgekeurd');
+
+}
 }

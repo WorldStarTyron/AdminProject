@@ -71,6 +71,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/betalingen/chart-data', [BetalingController::class, 'chartData'])->name('betalingen.chartData')->middleware('can:betalingen-bekijken');
     Route::put('/betalingen/{betaling}', [BetalingController::class, 'update'])->name('betalingen.update.put')->middleware('can:betalingen-beheren');
     Route::delete('/betalingen/{betaling}', [BetalingController::class, 'destroy'])->name('betalingen.destroy')->middleware('can:betalingen-beheren');
+    Route::get('/bewijs/download/{betaling_id}', [BetalingController::class, 'downloadBewijs'])->name('DownloadBewijsFile')->middleware('can:betalingen-beheren'); 
 
     Route::get('/betalingen/trashed', [BetalingController::class, 'trashed'])->name('betalingen.trashed')->middleware('can:betalingen-verwijderen');
     Route::patch('/betalingen/{betaling_id}/restore', [BetalingController::class, 'restore'])->name('betalingen.restore')->middleware('can:betalingen-verwijderen');
@@ -83,8 +84,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/DeletedRecords', [BetalingController::class, 'trashed'])->name('DeletedRecords')->middleware('can:betalingen-verwijderen');
 
     // Bewijs
-    Route::get('/BewijsRecieved', [BetalingController::class, 'showBewijsRecieved'])->name('BewijsRecieved')->middleware('can:betalingen-beheren');
-    Route::get('/bewijs/{betaling_id}/download', [BetalingController::class, 'DownloadBewijsFile'])->name('DownloadBewijsFile')->middleware('can:betalingen-verwijderen');
+    Route::get('/BewijsReceived',                [BetalingController::class, 'showBewijsReceived'])->name('BewijsReceived')->middleware('can:betalingen-beheren');
+    Route::get('/bewijs/{betaling_id}',          [BetalingController::class, 'ViewBewijsFile'])->name('ViewBewijsFile')->middleware('can:betalingen-beheren');
+    Route::patch('/bewijs/{betaling_id}/approve',[BetalingController::class, 'ApproveBewijs'])->name('BewijsReceived.Approve')->middleware('can:betalingen-beheren');
+    Route::patch('/bewijs/{betaling_id}/reject', [BetalingController::class, 'RejectBewijs'])->name('BewijsReceived.Reject')->middleware('can:betalingen-beheren');
 
     // Rapport & log
     Route::get('/RapportPagina', [RapportController::class, 'RapportageData'])->name('Rapport')->middleware('can:rapport-bekijken');

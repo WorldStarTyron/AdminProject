@@ -50,6 +50,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     rotate: -45,
                     style: { fontSize: '10px' },
                 },
+                formatter: function(val, index){
+                    return (index +1 ) % 5 === 0 || index === 0 ? val : '';
+                },
                 tickPlacement: 'on',
             },
             yaxis: {

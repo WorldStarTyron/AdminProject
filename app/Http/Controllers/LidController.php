@@ -16,7 +16,7 @@ class LidController extends Controller
     // Leden overzichtspagina
     public function index(Request $request)
     {
-        Gate::authorize('leden-bekijken');
+        Gate::authorize('eigen-profiel');
 
         // Haal leden op met gebruikersgegevens
         $query = Lid::select(
@@ -191,8 +191,12 @@ $beschikbareJaren = \App\Models\Betaling::where('lid_id', $lid->lid_id)
         return redirect()->back()->with('success', 'Account is succesvol gedeactiveerd.');
     }
 
+
+
   public function UploadBewijs(Request $request)
   {
+    
+
       $request->validate([
           'betaling_bewijs' => 'required|file|mimes:pdf|max:5120', // max 5MB
       ]);
@@ -201,7 +205,7 @@ $beschikbareJaren = \App\Models\Betaling::where('lid_id', $lid->lid_id)
       $lid = Lid::where('gebruiker_id', Auth::id())->firstOrFail();
 
       $bewijs = $request->file('betaling_bewijs');
-      $pad = $bewijs->store('bewijs', 'public');
+      $pad = $bewijs->store('bewijzen', 'public');
 
       // Check if there is an outstanding or rejected payment (status Openstaand or niet_betaald)
       $betaling = Betaling::where('lid_id', $lid->lid_id)
@@ -255,6 +259,10 @@ $beschikbareJaren = \App\Models\Betaling::where('lid_id', $lid->lid_id)
       return redirect()->back()->with('success', 'Uw betalingsbewijs is succesvol verzonden naar de beheerder ter beoordeling. U ontvangt bericht zodra het is verwerkt.');
   }
 
+  
+
+
+
    public function store(Request $request)
    {
         Gate::authorize('leden-beheren');
@@ -283,13 +291,15 @@ $beschikbareJaren = \App\Models\Betaling::where('lid_id', $lid->lid_id)
             'gebruiker_id' => $request->gebruiker_id,
         ]);
 
-        return redirect()->route('GebruikersPagina')->with('success', 'Lid succesvol aangemaakt.');
+        return redirect()->route('GebruikersBeheer')->with('success', 'Lid succesvol aangemaakt.');
    }
 
 
 
 
 
+
+   
  public function KoppelOfEdit($gebruiker_id)
     {
         Gate::authorize('leden-beheren');

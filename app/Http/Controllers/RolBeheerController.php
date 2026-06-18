@@ -80,14 +80,7 @@ class RolBeheerController extends Controller
             $gebruiker->rollen()->attach($validated['rol_id']);
         }
 
-        // Handle temporary password
-        $pwChanged = false;
-        if (!empty($validated['tijdelijk_wachtwoord'])) {
-            $gebruiker->wachtwoord_hash = bcrypt($validated['tijdelijk_wachtwoord']);
-            $gebruiker->force_password_change = $validated['verplicht_wijzigen'] ?? false;
-            $gebruiker->save();
-            $pwChanged = true;
-        }
+       
 
         // Log the activity
         if (auth()->check()) {
@@ -145,4 +138,18 @@ class RolBeheerController extends Controller
         return redirect()->route('rollen-beheer')
                          ->with('success', 'Rollen voor ' . $gebruiker->naam . ' zijn bijgewerkt.');
     }
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
 }

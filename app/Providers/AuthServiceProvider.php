@@ -25,11 +25,11 @@ $user->isLid()
 
 // LEDEN
 Gate::define('leden-bekijken', fn ($user) =>
-$user->hasAnyRole(['Administratie Medewerker', 'Voorzitter', 'Applicatie Beheerder'])
+$user->hasAnyRole(['Administratie Medewerker', 'Voorzitter', 'Applicatie beheerder'])
 );
 
 Gate::define('leden-beheren', fn ($user) =>
-$user->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder'])
+$user->hasAnyRole(['Administratie Medewerker', 'Applicatie beheerder'])
 );
 
 

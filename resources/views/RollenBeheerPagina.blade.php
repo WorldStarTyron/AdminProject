@@ -82,16 +82,7 @@
                                 </select>
                             </div>
 
-                            <!-- Tijdelijk Wachtwoord -->
-                            <!--<div class="flex flex-col gap-1.5 flex-1 min-w-[160px]">
-                                <label class="text-xs text-gray-500 flex items-center gap-1">
-                                    <i class="fa-solid fa-key"></i>
-                                    Tijdelijk Wachtwoord (optioneel)
-                                </label>
-                                <div class="flex items-center gap-2">
-                                    <input type="text" name="tijdelijk_wachtwoord" placeholder="Wachtwoord..." class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white text-gray-700 placeholder-gray-400">
-                                </div>
-                            </div>-->
+                           
 
                             <button type="submit" class="bg-gray-900 hover:bg-gray-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors whitespace-nowrap flex items-center gap-2">
                                 <i class="fa-solid fa-floppy-disk"></i>
@@ -99,13 +90,6 @@
                             </button>
                         </div>
 
-                        <div class="mt-3 flex items-center gap-2">
-                            <input type="checkbox" name="verplicht_wijzigen" id="verplicht_wachtwoord" value="1" class="w-3.5 h-3.5 rounded border-gray-300 text-gray-900 focus:ring-gray-400 cursor-pointer">
-                            <label for="verplicht_wachtwoord" class="text-xs text-gray-500 cursor-pointer flex items-center gap-1">
-                                <i class="fa-solid fa-rotate text-gray-400"></i>
-                                Verplicht wachtwoord wijzigen bij eerste inlog
-                            </label>
-                        </div>
                     </form>
                 </div>
 

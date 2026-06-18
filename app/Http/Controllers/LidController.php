@@ -16,7 +16,8 @@ class LidController extends Controller
     // Leden overzichtspagina
     public function index(Request $request)
     {
-        Gate::authorize('eigen-profiel');
+        // Alleen gebruikers met leden-bekijken mogen het overzicht zien (niet eigen-profiel — dat is voor leden zelf)
+        Gate::authorize('leden-bekijken');
 
         // Haal leden op met gebruikersgegevens
         $query = Lid::select(

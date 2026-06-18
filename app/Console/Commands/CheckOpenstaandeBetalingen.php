@@ -66,6 +66,9 @@ class CheckOpenstaandeBetalingen extends Command
                     $this->info('Nieuwe betaling aangemaakt voor huidige maand voor lid #' . $betaling->lid_id);
                 }
             }
+            else{
+                // Als er is al betaald
+            }
         }
 
         // -------------------------------------------------------

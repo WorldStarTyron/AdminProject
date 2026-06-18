@@ -46,12 +46,12 @@
             <tbody class="text-sm divide-y divide-gray-100">
                 @forelse($dashboardLeden as $lid)
                     @php
-                        // Determine payment status based on current month's payment
-                        $currentMonthPayment = $lid->betalingen
-                            ->where('maand', now()->month)
-                            ->where('jaar', now()->year)
-                            ->first();
-                        $isPaid = $currentMonthPayment && strtolower($currentMonthPayment->status) === 'betaald';
+                        // Gebruik dezelfde status-logica als de dashboard kaarten (Betaling model)
+                        $currentMonthPayment = $lid->betalingVoorMaand($currentMonth ?? now()->month, $currentYear ?? now()->year);
+                        $paymentStatus = $currentMonthPayment?->status;
+                        $isPaid = \App\Models\Betaling::isBetaald($paymentStatus);
+                        $isOpenstaand = $paymentStatus === 'Openstaand';
+                        $isInAfwachting = $paymentStatus === 'in_afwachting';
 
                         // Dynamic gradient for avatar
                         $gradients = [
@@ -78,7 +78,7 @@
                     <tr class="hover:bg-gray-50/50 transition-colors">
                         <td class="py-4 px-6">
                             <span class="inline-flex px-2 py-0.5 text-[11px] font-extrabold tracking-wide text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-md font-mono">
-                                {{ str_pad($lid->lid_id, 3,) }}
+                                {{ str_pad($lid->lid_id, 3, '0', STR_PAD_LEFT) }}
                             </span>
                         </td>
                         <td class="py-4 px-6">
@@ -94,11 +94,25 @@
                         </td>
                         <td class="py-4 px-6 text-center">
                             @if($isPaid)
+                                <!-- Betaald: groene badge -->
                                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100/50 shadow-[0_1px_2px_rgba(16,185,129,0.02)]">
                                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                     Betaald
                                 </span>
+                            @elseif($isOpenstaand)
+                                <!-- Openstaand: amber badge -->
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-100/50">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                    Openstaand
+                                </span>
+                            @elseif($isInAfwachting)
+                                <!-- In afwachting: blauwe badge -->
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-sky-50 text-sky-700 border border-sky-100/50">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+                                    In afwachting
+                                </span>
                             @else
+                                <!-- Niet betaald of geen betaling: rode badge -->
                                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-100/50 shadow-[0_1px_2px_rgba(239,68,68,0.02)]">
                                     <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
                                     Niet betaald

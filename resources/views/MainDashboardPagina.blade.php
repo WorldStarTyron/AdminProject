@@ -40,7 +40,7 @@
                         </div>
                         <div>
                             <div class="text-[11px] text-indigo-300/80 font-semibold mb-0.5">Srd</div>
-                            <div class="text-3xl font-bold text-white tracking-tight leading-none mb-3">{{number_format($totaleInkomsten, 2)}}</div>
+                            <div class="text-3xl font-bold text-white tracking-tight leading-none mb-3">{{ number_format($totaleInkomsten, 2, ',', '.') }}</div>
                             <div class="flex items-center gap-1.5">
                                 <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold font-mono">+12%</span>
                                 <span class="text-xs text-indigo-200/80">elk maand</span>
@@ -134,11 +134,15 @@
                             <div class="space-y-3.5">
                                 @forelse($deadlineLeden as $lid)
                                     @php
-                                        // Retrieve the first unpaid payment to determine the deadline
+                                        // Haal de eerste openstaande betaling op voor deadline-berekening
                                         $firstPayment = $lid->betalingen->first();
                                         if ($firstPayment) {
-                                            // The payment deadline is 1 month after the submission date (ingediend_op)
-                                            $deadline = \Carbon\Carbon::parse($firstPayment->ingediend_op)->addMonth();
+                                            // Deadline = laatste dag van de maand waarvoor de betaling geldt
+                                            $deadline = \Carbon\Carbon::createFromDate(
+                                                $firstPayment->jaar,
+                                                $firstPayment->maand,
+                                                1
+                                            )->endOfMonth();
                                             
                                             // Calculate the signed number of days left until the deadline day
                                             $daysLeft = now()->startOfDay()->diffInDays($deadline->startOfDay(), false);
@@ -228,7 +232,7 @@
                                             </div>
                                         </div>
                                         <div class="text-sm font-bold text-gray-900">
-                                            € {{ number_format($lid->betalingen->sum('bedrag'), 2, ',', '.') }}
+                                            Srd {{ number_format($lid->betalingen->sum('bedrag'), 2, ',', '.') }}
                                         </div>
                                     </div>
                                 @empty

@@ -82,6 +82,29 @@ class Lid extends Model
     return 150.00; 
 }
 
+    // Alleen leden met een actieve gebruiker (inactieve gebruikers tellen niet mee)
+    public function scopeMetActieveGebruiker($query)
+    {
+        return $query->whereHas('gebruiker', function ($q) {
+            $q->where('status', 'Actief');
+        });
+    }
+
+    // Totaal aantal actieve leden voor het dashboard
+    public static function totaalActieveLeden(): int
+    {
+        return (int) self::metActieveGebruiker()->count();
+    }
+
+    // Haal de betaling van de huidige maand op voor dit lid
+    public function betalingVoorMaand(int $maand, int $jaar)
+    {
+        return $this->betalingen
+            ->where('maand', $maand)
+            ->where('jaar', $jaar)
+            ->first();
+    }
+
 }
 
  

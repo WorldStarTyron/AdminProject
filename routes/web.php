@@ -67,11 +67,10 @@ Route::middleware(['auth'])->group(function () {
     // Betalingen
     Route::get('/betalingPagina', [BetalingController::class, 'index'])->name('betalingPagina')->middleware('can:betalingen-bekijken');
     Route::post('/betalingPagina/addBetaling', [BetalingController::class, 'store'])->name('betalingPagina.addBetaling.store')->middleware('can:betalingen-beheren');
-    Route::patch('/betalingen/{betaling_id}', [BetalingController::class, 'update'])->name('betalingen.update')->middleware('can:betalingen-beheren');
+    Route::put('/betalingen/{betaling_id}', [BetalingController::class, 'update'])->name('betalingen.update')->middleware('can:betalingen-beheren');
     Route::get('/betalingen/chart-data', [BetalingController::class, 'chartData'])->name('betalingen.chartData')->middleware('can:betalingen-bekijken');
     Route::put('/betalingen/{betaling}', [BetalingController::class, 'update'])->name('betalingen.update.put')->middleware('can:betalingen-beheren');
     Route::delete('/betalingen/{betaling}', [BetalingController::class, 'destroy'])->name('betalingen.destroy')->middleware('can:betalingen-beheren');
-    Route::get('/bewijs/download/{betaling_id}', [BetalingController::class, 'downloadBewijs'])->name('DownloadBewijsFile')->middleware('can:betalingen-beheren'); 
 
     Route::get('/betalingen/trashed', [BetalingController::class, 'trashed'])->name('betalingen.trashed')->middleware('can:betalingen-verwijderen');
     Route::patch('/betalingen/{betaling_id}/restore', [BetalingController::class, 'restore'])->name('betalingen.restore')->middleware('can:betalingen-verwijderen');

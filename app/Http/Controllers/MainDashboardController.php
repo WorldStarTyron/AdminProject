@@ -15,43 +15,52 @@ class MainDashboardController extends Controller
 
 public function Maindashboard()
 {
-    // ophalen data voor widget
-    $totaleInkomsten = Betaling::where('status', 'betaald')->sum('bedrag');
-    $totaalLeden = Lid::count();
+    // Huidige maand en jaar voor alle dashboard berekeningen
     $currentMonth = now()->month;
     $currentYear = now()->year;
 
-    $totaalBetaald = Lid::whereHas('betalingen', function($q) use ($currentMonth, $currentYear) {
-        $q->where('maand', $currentMonth)
-          ->where('jaar', $currentYear)
-          ->where('status', 'betaald');
-    })->count();
-    $totaalNietBetaald = Lid::whereHas('betalingen', function($q) use ($currentMonth, $currentYear) {
-        $q->where('maand', $currentMonth)
-          ->where('jaar', $currentYear)
-          ->where('status', 'niet_betaald');
-    })->count();
+    // Alle kaart-statistieken op één plek berekenen (Betaling model)
+    $stats = Betaling::dashboardStatistieken($currentMonth, $currentYear);
+    $totaleInkomsten   = $stats['totaleInkomsten'];
+    $openstaandBedrag  = $stats['openstaandBedrag'];
+    $totaalLeden       = $stats['totaalLeden'];
+    $totaalBetaald     = $stats['totaalBetaald'];
+    $totaalNietBetaald = $stats['totaalNietBetaald'];
 
-    // Deadline leden ophalen, die over 1 maand vervallen
-    $deadlineLeden = Lid::whereHas('betalingen', function($q) {
-        $q->where('status', 'niet_betaald')
-          ->whereRaw('DATE_ADD(ingediend_op, INTERVAL 1 MONTH) BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 7 DAY)');
-    })->with(['betalingen' => function($q) {
-        $q->where('status', 'niet_betaald');
-    }, 'gebruiker'])->get();
+    // Deadline leden: openstaande betalingen waarvan de maand-deadline binnen 7 dagen valt
+    $deadlineLeden = Lid::metActieveGebruiker()
+        ->whereHas('betalingen', function ($q) {
+            $q->whereIn('status', Betaling::ONBETAALDE_STATUSSEN)
+              ->whereRaw(
+                  'LAST_DAY(STR_TO_DATE(CONCAT(jaar, "-", maand, "-01"), "%Y-%m-%d")) BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)'
+              );
+        })
+        ->with(['betalingen' => function ($q) {
+            $q->whereIn('status', Betaling::ONBETAALDE_STATUSSEN);
+        }, 'gebruiker'])
+        ->get();
 
-    // Leden ophalen voor het Leden Overzicht tabel op het dashboard
-    $dashboardLeden = Lid::with(['gebruiker', 'betalingen'])
+    // Leden voor het dashboard-tabel: alleen actieve leden, met betalingen van de huidige maand
+    $dashboardLeden = Lid::metActieveGebruiker()
+        ->with([
+            'gebruiker',
+            'betalingen' => function ($q) use ($currentMonth, $currentYear) {
+                $q->where('maand', $currentMonth)->where('jaar', $currentYear);
+            },
+        ])
         ->orderBy('lid_id', 'desc')
         ->paginate(5);
 
     return view('MainDashboardPagina', compact(
         'totaleInkomsten',
+        'openstaandBedrag',
         'totaalLeden',
         'totaalBetaald',
         'totaalNietBetaald',
         'deadlineLeden',
-        'dashboardLeden'
+        'dashboardLeden',
+        'currentMonth',
+        'currentYear'
     ));
 }
 

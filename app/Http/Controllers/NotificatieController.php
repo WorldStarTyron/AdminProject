@@ -32,6 +32,7 @@ class NotificatieController extends Controller
 
 
 
+    
     // Markeert alle notifcaties van de ingelogde gebruiker als gelezen
     public function markeerGelezen(){
         if (!Auth::user()->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder'])) {

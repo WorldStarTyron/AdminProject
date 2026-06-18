@@ -70,10 +70,10 @@ class Gebruiker extends Authenticatable
         $normalizedRoles = [];
         foreach ($roles as $role) {
             $normalizedRoles[] = $role;
-            if ($role === 'Applicatie Beheerder') {
+            if ($role === 'Applicatie beheerder') {
                 $normalizedRoles[] = 'Applicatie beheerder';
             } elseif ($role === 'Applicatie beheerder') {
-                $normalizedRoles[] = 'Applicatie Beheerder';
+                $normalizedRoles[] = 'Applicatie beheerder';
             }
         }
         
@@ -89,13 +89,20 @@ class Gebruiker extends Authenticatable
     // Check if user has the applicatiebeheerder role
     public function isApplicatieBeheerder(): bool
     {
-        return $this->rollen()->whereIn('naam', ['Applicatie beheerder', 'ApplicatieBeheerder', 'Applicatie Beheerder'])->exists();
+        return $this->rollen()->whereIn('naam', ['Applicatie beheerder'])->exists();
     }
 
     // Check if user has the voorzitter role
     public function isVoorzitter(): bool
     {
-        return $this->rollen()->where('naam', 'Voorzitter')->exists();
+        return $this->rollen()->where('naam', 'voorzitter')->exists();
+    }
+     
+
+    // Check if user has Administratie Medewerker role
+    public function isAdminratieMedewerker(): bool
+    {
+        return $this->rollen()->where('naam', 'Administratie Medewerker')->exists();
     }
 
     // Hash and set password

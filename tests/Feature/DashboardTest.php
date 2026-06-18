@@ -83,14 +83,14 @@ class DashboardTest extends TestCase
             'ingediend_op' => $lastMonth
         ]);
 
-        // Payment for current month (Unpaid/niet_betaald)
+        // Payment for current month (Openstaand) — should count as unpaid
         Betaling::create([
             'lid_id' => $lid->lid_id,
             'bedrag' => 150.00,
-            'status' => 'niet_betaald',
+            'status' => 'Openstaand',
             'maand' => $currentMonth->month,
             'jaar' => $currentMonth->year,
-            'methode' => 'overmaking',
+            'methode' => null,
             'ingediend_op' => $currentMonth
         ]);
 
@@ -103,7 +103,7 @@ class DashboardTest extends TestCase
         $newNietBetaald = $response->original->getData()['totaalNietBetaald'];
 
         $this->assertEquals(0, $newBetaald - $baselineBetaald, 'Last-month paid payment should not count in current month');
-        $this->assertEquals(1, $newNietBetaald - $baselineNietBetaald, 'Current-month unpaid payment should count');
+        $this->assertEquals(1, $newNietBetaald - $baselineNietBetaald, 'Current-month Openstaand payment should count as unpaid');
 
         // Verify the member appears in the dashboard table with correct current-month status
         $dashboardLeden = $response->original->getData()['dashboardLeden'];
@@ -111,15 +111,64 @@ class DashboardTest extends TestCase
 
         $this->assertNotNull($memberInView, 'New member should appear in dashboard');
 
-        // Run the current month payment logic used by the view
-        $currentMonthPayment = $memberInView->betalingen
-            ->where('maand', now()->month)
-            ->where('jaar', now()->year)
-            ->first();
+        // Run the same status logic used by the view
+        $currentMonthPayment = $memberInView->betalingVoorMaand(now()->month, now()->year);
 
-        $isPaid = $currentMonthPayment && strtolower($currentMonthPayment->status) === 'betaald';
+        $isPaid = \App\Models\Betaling::isBetaald($currentMonthPayment?->status);
 
-        // Assert that the member is indeed recognized as unpaid for the current month in the table
+        // Assert that the member is recognized as unpaid (Openstaand) for the current month
         $this->assertFalse($isPaid);
+        $this->assertEquals('Openstaand', $currentMonthPayment?->status);
+    }
+
+    /**
+     * Test that totaalBetaald + totaalNietBetaald equals totaalLeden for active members.
+     */
+    public function test_dashboard_card_totals_are_consistent(): void
+    {
+        $admin = $this->createUserWithRole('Applicatie Beheerder');
+        $this->actingAs($admin);
+
+        $response = $this->get(route('MainDashboardPagina'));
+        $response->assertStatus(200);
+
+        $data = $response->original->getData();
+
+        $this->assertEquals(
+            $data['totaalLeden'],
+            $data['totaalBetaald'] + $data['totaalNietBetaald'],
+            'Paid + unpaid member counts should equal total active members'
+        );
+    }
+
+    /**
+     * Test that inactive users are excluded from dashboard totals.
+     */
+    public function test_inactive_users_excluded_from_dashboard_totals(): void
+    {
+        $admin = $this->createUserWithRole('Applicatie Beheerder');
+        $this->actingAs($admin);
+
+        $baselineResponse = $this->get(route('MainDashboardPagina'));
+        $baselineLeden = $baselineResponse->original->getData()['totaalLeden'];
+
+        // Create an inactive member with a paid payment
+        $lid = $this->createLid();
+        $lid->gebruiker->update(['status' => 'Inactief']);
+
+        Betaling::create([
+            'lid_id' => $lid->lid_id,
+            'bedrag' => 150.00,
+            'status' => 'betaald',
+            'maand' => now()->month,
+            'jaar' => now()->year,
+            'methode' => 'overmaking',
+            'ingediend_op' => now(),
+        ]);
+
+        $response = $this->get(route('MainDashboardPagina'));
+        $newLeden = $response->original->getData()['totaalLeden'];
+
+        $this->assertEquals($baselineLeden, $newLeden, 'Inactive members should not increase totaalLeden');
     }
 }

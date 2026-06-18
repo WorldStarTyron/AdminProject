@@ -71,7 +71,7 @@ class BetalingController extends Controller
             ->where('betalingen.status', 'betaald')
             ->where('betalingen.ingediend_op', '>=', now()->subDays(30))
             ->orderBy('betalingen.ingediend_op', 'desc')
-            ->get(4);
+            ->take(5)->get();
 
         // Totaal betaald deze maand (voor stats card)
         $maandTotaal = Betaling::where('status', 'betaald')
@@ -383,7 +383,7 @@ class BetalingController extends Controller
 
 
 
-
+        // Betaal Bewijs Overzicht
   public function showBewijsReceived(Request $request)
   {
       Gate::authorize('betalingen-beheren'); // Administratie Medewerker + Applicatie Beheerder
@@ -420,7 +420,7 @@ class BetalingController extends Controller
 
 
 
-
+// Betaal Bewijs Bekijken
   public function ViewBewijsFile($betaling_id)
 {
     Gate::authorize('betalingen-beheren');
@@ -442,29 +442,53 @@ class BetalingController extends Controller
     $bewijsUrl = \Storage::url($betaling->betaling_bewijs);
  
     // Detect whether the file is a PDF or an image so the view
-    // can render it correctly (PDF uses <iframe>, image uses <img>)
     $extensie   = strtolower(pathinfo($betaling->betaling_bewijs, PATHINFO_EXTENSION));
     $isPdf      = $extensie === 'pdf';
 
-  
-     
+      
+   
+      
+       
+    
+
+    // PDF of Afbeelding weergeven
     $bewijsUrl = \Storage::url($betaling->betaling_bewijs);
     // Pass everything the view needs to the preview page
     return view('BewijsReceived', compact('betaling', 'bewijsUrl', 'isPdf'));
 }
 
 
-
-public function ApproveBewijs(Request $request, $betaling_id){
+     // Betaal Bewijs Goed Keuren
+    public function ApproveBewijs(Request $request, $betaling_id){
     $betaling = Betaling::findOrFail($betaling_id);
     $betaling->status = 'betaald';
+    $betaling->methode = 'overmaking';
     $betaling->save();
 
+    if(!$betaling->bon){
+        $gebruiker = $betaling->lid->gebruiker;
+        $datum  = \Carbon\Carbon::parse($betaling->ingediend_op);
+        
+        BonController::genereer(
+            $betaling,
+            $gebruiker->naam,
+            $datum->translatedFormat('F Y')
+            
+        );
+    }
+    
+    if(auth()->check()){
+        Activiteit::log(auth()->id(), 'betaling_goedgekeurd', [
+            'betaling_id' => $betaling->betaling_id,
+            'details'     => 'Betaling #' . $betaling->betaling_id . ' goedgekeurd door '. auth()->user()->naam,
+        ]);
+    }
+
+
     return redirect()->back()->with('success', 'Betaling goedgekeurd');
-
-    //Activieiten Log
-
 }
+
+
 
 public function RejectBewijs(Request $request, $betaling_id){
     $betaling = Betaling::findOrFail($betaling_id);

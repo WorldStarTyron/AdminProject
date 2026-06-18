@@ -37,7 +37,7 @@
                         <div>
                             <div class="bp-stat-value">Srd {{number_format($maandTotaal, 2)}}</div>
                             <div class="bp-stat-meta">
-                                {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
+                                {{ \Carbon\Carbon::createFromDate($jaar, $maand, 1)->translatedFormat('F Y') }}
                             </div>
                         </div>
                     </div>

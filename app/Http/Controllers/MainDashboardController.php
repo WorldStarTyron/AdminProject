@@ -89,16 +89,16 @@ public function ChartData(Request $request)
         ->groupByRaw('MONTH(lid_sinds)')
         ->pluck('totaal', 'maand');
 
-    // Betaald per maand
+// Betaald per maand (includes both 'betaald' and 'goed_gekeurd')
     $betaald = Betaling::whereYear('ingediend_op', $jaar)
-        ->where('status', 'betaald')
+        ->whereIn('status', ['betaald', 'goed_gekeurd'])
         ->selectRaw('MONTH(ingediend_op) as maand, COUNT(*) as totaal')
         ->groupByRaw('MONTH(ingediend_op)')
         ->pluck('totaal', 'maand');
 
-    // Niet betaald per maand
+    // Niet betaald per maand (includes all unpaid statuses)
     $nietBetaald = Betaling::whereYear('ingediend_op', $jaar)
-        ->where('status', 'niet_betaald')
+        ->whereIn('status', ['niet_betaald', 'Openstaand', 'in_afwachting'])
         ->selectRaw('MONTH(ingediend_op) as maand, COUNT(*) as totaal')
         ->groupByRaw('MONTH(ingediend_op)')
         ->pluck('totaal', 'maand');

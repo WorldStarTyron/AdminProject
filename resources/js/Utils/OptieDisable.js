@@ -7,12 +7,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const addBewijsContainer = document.getElementById('betalingBewijsContainer');
     const addBewijsInput = document.getElementById('betaling_bewijs');
     const addFileText = document.getElementById('fileUploadText');
+    const addStatusSelect = document.getElementById('betaling_status');
 
     if (addMethodSelect && addBewijsContainer && addBewijsInput) {
         function toggleAddBewijs() {
             if (addMethodSelect.value === 'overmaking') {
                 addBewijsContainer.style.display = 'flex';
                 addBewijsInput.setAttribute('required', 'required');
+
+                // Automatisch status op in_wachting zetten als bewijs wordt geüpload
+                if (addStatusSelect) {
+                    addStatusSelect.value = 'in_wachting';
+                }
             } else {
                 addBewijsContainer.style.display = 'none';
                 addBewijsInput.removeAttribute('required');

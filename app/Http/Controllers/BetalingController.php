@@ -31,7 +31,7 @@ class BetalingController extends Controller
         $ledenStatus = [];
         foreach ($leden as $lid) {
 
-            // Vind of maak een betalingsrecord aan voor deze maand/jaar
+// Vind of maak een betalingsrecord aan voor deze maand/jaar
             $betaling = Betaling::firstOrCreate(
                 [
                     'lid_id' => $lid->lid_id,
@@ -145,11 +145,11 @@ class BetalingController extends Controller
     {
         Gate::authorize('betalingen-beheren');
 
-        $request->validate([
+$request->validate([
             'naam'            => 'required|string',
             'datum'           => 'required|date',
             'methode'         => 'required|in:fysiek,overmaking',
-            'status'          => 'required|in:Openstaand,betaald,niet_betaald',
+            'status'          => 'required|in:Openstaand,in_afwachting,afgewezen,betaald,niet_betaald',
             'bedrag'          => 'required|numeric|min:150', //alleen betaling van 150
             'betaling_bewijs' => 'nullable|file|max:5120',
         ],[
@@ -256,10 +256,10 @@ class BetalingController extends Controller
     {
         Gate::authorize('betalingen-beheren');
 
-        $request->validate([
+$request->validate([
             'bedrag'          => 'required|numeric|min:150', //alleen betaling van 100
             'methode'         => 'required|in:fysiek,overmaking',
-            'status'          => 'required|in:Openstaand,betaald,niet_betaald',
+            'status'          => 'required|in:Openstaand,in_wachting,afgewezen,betaald,niet_betaald',
             'datum'           => 'required|date',
             'betaling_bewijs' => 'nullable|file|max:5120',
         ]);
@@ -496,7 +496,60 @@ public function RejectBewijs(Request $request, $betaling_id){
     $betaling->status = 'Openstaand';
     $betaling->save();
 
+    // Log de activiteit (audit trail)
+    if(auth()->check()){
+        Activiteit::log(auth()->id(), 'betaling_afgewezen', [
+            'betaling_id' => $betaling->betaling_id,
+            
+            'details'     => 'Betaling #' . $betaling->betaling_id . ' afgewezen door '. auth()->user()->naam,
+        ]);
+    }
+
     return redirect()->back()->with('success', 'Betaling afgekeurd');
 
 }
+
+
+// Verwijder dubbele betalingen
+    // Dit zorgt ervoor dat als een lid al heeft betaald voor deze maand,
+    // er geen nieuwe openstaande betaling wordt aangemaakt
+    public function removeduplicateBetalingen()
+    {
+        // Haal alle betalingen op die:
+        // - Status is Openstaand
+        // - Geen methode hebben (dus nog niet betaald)
+        $allebetalingen = Betaling::with('bonnen')
+            ->where('status', 'Openstaand')
+            ->whereNull('methode')
+            ->get();
+
+        // Groepeer op lid_id + maand + jaar
+        // Dan weten we welke betalingen voor dezelfde persoon en maand zijn
+        $gegroepeerd = $allebetalingen->groupBy(function ($betaling) {
+            return $betaling->lid_id . '-' . $betaling->maand . '-' . $betaling->jaar;
+        });
+
+        $verwijderd = 0;
+
+        // Loop door elke groep
+        foreach ($gegroepeerd as $groep) {
+            // Als er meer dan 1 betaling is voor dezelfde maand
+            if ($groep->count() > 1) {
+                // Houd de eerste (oudste) betaling
+                // Verwijder de rest
+                $tehouden = $groep->first();
+
+                foreach ($groep as $index => $betaling) {
+                    // Skip de eerste, die houden we
+                    if ($index === 0) continue;
+
+                    // Verwijder de dubbele betaling
+                    $betaling->delete();
+                    $verwijderd++;
+                }
+            }
+        }
+
+        return redirect()->back()->with('success', $verwijderd . ' dubbele betaling(en) verwijderd');
+    }
 }

@@ -3,11 +3,11 @@
 
 document.addEventListener('DOMContentLoaded', function () {
 
-    // Basis instellingen voor de grafiek
+// Basis instellingen voor de grafiek
     var options = {
         series: [],
         chart: {
-            type: 'bar',
+            type: 'area',
             height: 300,
             stacked: false,
             toolbar: { show: false },
@@ -18,41 +18,70 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         },
         plotOptions: {
-            bar: {
+            area: {
                 horizontal: false,
                 columnWidth: '55%',
-                borderRadius: 2
+                borderRadius: 4,
+                dataLabels: { position: 'top' }
             }
         },
         dataLabels: { enabled: false },
         stroke: {
             show: true,
-            width: 2,
-            colors: ['transparent']
+            width: 3,
+            curve: 'smooth',
+            colors: ['#0ea5e9', '#22c55e', '#f59e0b']
         },
         xaxis: {
             categories: [],
             axisBorder: { show: false },
             axisTicks: { show: false },
             labels: {
-                style: { colors: '#94a3b8', fontSize: '12px' }
+                style: { colors: '#64748b', fontSize: '11px' }
             }
         },
         yaxis: {
-            labels: { show: false }
+            labels: {
+                show: true,
+                style: { colors: '#64748b', fontSize: '11px' },
+                formatter: function(val) {
+                    if (val >= 1000) return (val/1000).toFixed(1) + 'K';
+                    return val;
+                }
+            }
         },
-        grid: { show: true },
-        fill: { opacity: 1 },
-        colors: ['#1e293b', '#64748b', '#94a3b8', '#cbd5e1'],
+        grid: {
+            show: true,
+            borderColor: '#e2e8f0',
+            strokeDashArray: 4
+        },
+        fill: {
+            type: 'gradient',
+            gradient: {
+                shadeIntensity: 1,
+                opacityFrom: 0.4,
+                opacityTo: 0.1,
+                stops: [0, 100]
+            }
+        },
+        colors: ['#0ea5e9', '#22c55e', '#f59e0b'],
         legend: {
             position: 'top',
             horizontalAlign: 'center',
             markers: { radius: 12 },
-            itemMargin: { horizontal: 10, vertical: 0 }
+            itemMargin: { horizontal: 10, vertical: 0 },
+            fontSize: '12px'
         },
         noData: {
             text: 'Gegevens laden...',
             style: { color: '#94a3b8', fontSize: '14px' }
+        },
+        tooltip: {
+            y: {
+                formatter: function(val) {
+                    return val.toLocaleString('nl-NL');
+                }
+            }
         }
     };
 
@@ -95,12 +124,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
 
-            // Gegevens in de grafiek zetten
+// Gegevens in de grafiek zetten
             chart.updateSeries([
-                { name: 'Contributie (Srd)', data: data.contributie },
-                { name: 'Leden',             data: data.leden },
-                { name: 'Betaald',           data: data.betaald },
-                { name: 'Niet betaald',      data: data.niet_betaald }
+                { name: 'Inkomen (SRD)', data: data.contributie },
+                { name: 'Betaald',         data: data.betaald },
+                { name: 'Niet betaald',   data: data.niet_betaald }
             ]);
 
             // Jaar dropdown vullen (alleen eerst keer)

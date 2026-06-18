@@ -64,8 +64,8 @@ class GebruikerController extends Controller
               'naam' => 'required|string|max:255',
               'email' => 'required|email|unique:gebruikers,email',
               'wachtwoord' => 'required|string|min:8|confirmed',
-              
-            
+
+
         ]);
 
          $gebruiker = Gebruiker::create([
@@ -125,7 +125,7 @@ class GebruikerController extends Controller
     $gebruiker = Gebruiker::findOrFail($id);
     $gebruiker->update($validated);
 
-   return redirect()->back()->with('succes', 'Account is geupdate');
+return redirect()->back()->with('success', 'Account is geupdate');
 
 }
 
@@ -140,7 +140,7 @@ public function deactiveer($gebruiker_id)
     $gebruiker->status = 'Inactief';
     $gebruiker->save();
 
-    return redirect()->back()->with('succes', 'Acount is gedeactiveerd');
+return redirect()->back()->with('success', 'Account is gedeactiveerd');
 }
 
 // Gebruiker heractiveren
@@ -162,7 +162,7 @@ public function heractiveer($gebruiker_id)
         ]);
     }
 
-    return redirect()->route('GebruikersBeheer')->with('succes', 'Account is succesvol hergeactiveerd.');
+return redirect()->route('GebruikersBeheer')->with('success', 'Account is succesvol hergeactiveerd.');
 }
 
     /**
@@ -176,5 +176,5 @@ public function heractiveer($gebruiker_id)
 
 
 
-   
+
 }

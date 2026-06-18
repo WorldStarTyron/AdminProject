@@ -101,7 +101,7 @@ class RapportController extends Controller
                     'betaald'        => 'Betaald',
                     'niet_betaald'   => 'Niet betaald',
                     'Openstaand'     => 'Openstaand',
-                    'in_behandeling' => 'In behandeling',
+'in_afwachting' => 'In afwachting',
                     default          => ucfirst($b->status),
                 };
                 return $b;

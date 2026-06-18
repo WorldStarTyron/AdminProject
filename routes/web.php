@@ -58,19 +58,22 @@ Route::middleware(['auth'])->group(function () {
     // Leden — verwijderen (alleen beheerder)
     Route::delete('/ledenpagina/delete/{lidId}', [PostController::class, 'destroy'])->name('ledenpagina.delete')->middleware('can:leden-verwijderen');
 
-    // Leden - Heractiveer
+// Leden - Heractiveer
     Route::post('/leden/{lid_id}/heractiveer', [LidController::class, 'heractiveer'])->name('ledenpagina.heractiveer')->middleware('can:leden-heractiveren');
     // Leden - Deactiveer
     Route::post('/leden/{lid_id}/deactiveer', [LidController::class, 'deactiveer'])->name('ledenpagina.deactiveer')->middleware('can:leden-Deactiveren');
-   
-    Route::post('lidpagina/removeduplicateBetalingen', [LidController::class, 'removeduplicateBetalingen'])->name('lidpagina.removeduplicateBetalingen');
 
-    // Betalingen
+    // Verwijder dubbele betalingen (voor ledenpagina)
+    Route::post('/lidpagina/removeduplicateBetalingen', [LidController::class, 'removeduplicateBetalingen'])->name('lidpagina.removeduplicateBetalingen');
+
+// Betalingen
     Route::get('/betalingPagina', [BetalingController::class, 'index'])->name('betalingPagina')->middleware('can:betalingen-bekijken');
     Route::post('/betalingPagina/addBetaling', [BetalingController::class, 'store'])->name('betalingPagina.addBetaling.store')->middleware('can:betalingen-beheren');
-    Route::put('/betalingen/{betaling_id}', [BetalingController::class, 'update'])->name('betalingen.update')->middleware('can:betalingen-beheren');
+    Route::put('/betalingen/{betaling}', [BetalingController::class, 'update'])->name('betalingen.update')->middleware('can:betalingen-beheren');
     Route::get('/betalingen/chart-data', [BetalingController::class, 'chartData'])->name('betalingen.chartData')->middleware('can:betalingen-bekijken');
-    Route::put('/betalingen/{betaling}', [BetalingController::class, 'update'])->name('betalingen.update.put')->middleware('can:betalingen-beheren');
+
+// Verwijder dubbele betalingen (voor betalingenpagina)
+    Route::post('/betalingen/remove-duplicates', [BetalingController::class, 'removeduplicateBetalingen'])->name('betalingen.removeDuplicates');
     Route::delete('/betalingen/{betaling}', [BetalingController::class, 'destroy'])->name('betalingen.destroy')->middleware('can:betalingen-beheren');
 
     Route::get('/betalingen/trashed', [BetalingController::class, 'trashed'])->name('betalingen.trashed')->middleware('can:betalingen-verwijderen');

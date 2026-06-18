@@ -14,9 +14,9 @@ class AuthServiceProvider extends ServiceProvider
     {
        // app/Providers/AuthServiceProvider.php
 
-       //
+//
 Gate::define('dashboard', fn ($user) =>
-$user->hasAnyRole(['Administratie Medewerker', 'Voorzitter', 'Applicatie Beheerder', 'Applicatie beheerder'])
+$user->hasAnyRole(['Administratie Medewerker', 'Voorzitter', 'Applicatie Beheerder'])
 );
 
 Gate::define('eigen-profiel', fn ($user) =>
@@ -25,27 +25,27 @@ $user->isLid()
 
 // LEDEN
 Gate::define('leden-bekijken', fn ($user) =>
-$user->hasAnyRole(['Administratie Medewerker', 'Voorzitter', 'Applicatie Beheerder', 'Applicatie beheerder'])
+$user->hasAnyRole(['Administratie Medewerker', 'Voorzitter', 'Applicatie Beheerder'])
 );
 
 Gate::define('leden-beheren', fn ($user) =>
-$user->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder', 'Applicatie beheerder'])
+$user->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder'])
 );
 
 
 
 // BETALINGEN
 Gate::define('betalingen-bekijken', fn ($user) =>
-$user->hasAnyRole(['Administratie Medewerker', 'Voorzitter', 'Applicatie Beheerder', 'Applicatie beheerder'])
+$user->hasAnyRole(['Administratie Medewerker', 'Voorzitter', 'Applicatie Beheerder'])
 );
 
 Gate::define('betalingen-beheren', fn ($user) =>
-$user->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder', 'Applicatie beheerder'])
+$user->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder'])
 );
 
 // SOFT DELETE    betalingen-verwijderen
 Gate::define('leden-verwijderen', fn ($user) =>
-$user->hasAnyRole(['Applicatie Beheerder', 'Applicatie beheerder'])
+$user->hasAnyRole(['Applicatie Beheerder'])
 );
 
 Gate::define('betalingen-verwijderen', fn ($user) =>
@@ -56,11 +56,11 @@ $user->isApplicatieBeheerder()
 
 // RAPPORT & LOG
 Gate::define('rapport-bekijken', fn ($user) =>
-$user->hasAnyRole(['Applicatie Beheerder', 'Applicatie beheerder', "Voorzitter"])
+$user->hasAnyRole(['Applicatie Beheerder', 'Voorzitter'])
 );
 
 Gate::define('activiteitlog-bekijken', fn ($user) =>
-$user->hasAnyRole(['Applicatie Beheerder', 'Applicatie beheerder'])
+$user->hasAnyRole(['Applicatie Beheerder'])
 );
 
 // BEHEER
@@ -71,12 +71,12 @@ Gate::define('gebruikersbeheer', fn ($user) => $user->isApplicatieBeheerder());
 
 // HOUD alleen deze onderaan:
 Gate::define('leden-heractiveren', fn ($user) =>
-    $user->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder', 'Applicatie beheerder'])
+    $user->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder'])
 );
 
 // Leden deactiveren
 Gate::define('leden-Deactiveren', fn($user) =>
-    $user->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder', 'Applicatie beheerder'])
+    $user->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder'])
 );
 
     }

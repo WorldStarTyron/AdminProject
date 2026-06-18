@@ -61,23 +61,15 @@ class Gebruiker extends Authenticatable
         return $this->hasMany(Notificatie::class, 'gebruiker_id', 'gebruiker_id');
     }
 
-// Check if user has any of the given role names (case-insensitive for Applicatie Beheerder)
+// Check if user has any of the given role names (case-insensitive for ALL roles)
     public function hasAnyRole($roles): bool
     {
         $roles = is_array($roles) ? $roles : [$roles];
 
-        // Use case-insensitive comparison for Applicatie Beheerder role
+        // Use case-insensitive comparison for ALL roles
         foreach ($roles as $role) {
-            if (strtolower($role) === strtolower('Applicatie Beheerder') || strtolower($role) === strtolower('Applicatie beheerder')) {
-                // Check case-insensitively for Applicatie Beheerder
-                if ($this->rollen()->whereRaw('LOWER(naam) = ?', [strtolower('Applicatie Beheerder')])->exists()) {
-                    return true;
-                }
-            } else {
-                // Regular case-sensitive check for other roles
-                if ($this->rollen()->where('naam', $role)->exists()) {
-                    return true;
-                }
+            if ($this->rollen()->whereRaw('LOWER(naam) = ?', [strtolower($role)])->exists()) {
+                return true;
             }
         }
 
@@ -98,17 +90,17 @@ class Gebruiker extends Authenticatable
             ->exists();
     }
 
-    // Check if user has the voorzitter role
+// Check if user has the voorzitter role (case-insensitive)
     public function isVoorzitter(): bool
     {
-        return $this->rollen()->where('naam', 'voorzitter')->exists();
+        return $this->rollen()->whereRaw('LOWER(naam) = ?', ['voorzitter'])->exists();
     }
 
 
-    // Check if user has Administratie Medewerker role
+    // Check if user has Administratie Medewerker role (case-insensitive)
     public function isAdminratieMedewerker(): bool
     {
-        return $this->rollen()->where('naam', 'Administratie Medewerker')->exists();
+        return $this->rollen()->whereRaw('LOWER(naam) = ?', [strtolower('Administratie Medewerker')])->exists();
     }
 
     // Hash and set password

@@ -1,42 +1,17 @@
-<!-- Alpine.js Dynamic CDN Loader Fallback -->
-<script>
-    if (typeof window.Alpine === 'undefined') {
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js';
-        script.defer = true;
-        document.head.appendChild(script);
-    }
-</script>
-
-<div class="relative" 
-     x-data="{ 
-        open: false, 
-        notificaties: [], 
+  @vite('resources/js/UI/Notificatie.js')
+  
+  <div class="relative"
+     x-data="{
+        open: false,
+        notificaties: [],
         ongelezen: 0,
         fetchNotifications() {
             fetch('{{ route('notificaties.index') }}')
                 .then(res => res.json())
-                .then(data => { 
-                    this.notificaties = data.notificaties; 
-                    this.ongelezen = data.ongelezen; 
+                .then(data => {
+                    this.notificaties = data.notificaties;
+                    this.ongelezen = data.ongelezen;
                 });
-        },
-        formatTime(dateStr) {
-            if (!dateStr) return '—';
-            const date = new Date(dateStr);
-            const now = new Date();
-            const diffMs = now - date;
-            const diffMins = Math.floor(diffMs / 60000);
-            const diffHrs = Math.floor(diffMins / 60);
-            const diffDays = Math.floor(diffHrs / 24);
-
-            if (diffMins < 1) return 'Zojuist';
-            if (diffMins < 60) return `${diffMins}m geleden`;
-            if (diffHrs < 24) return `${diffHrs}u geleden`;
-            if (diffDays === 1) return 'Gisteren';
-            if (diffDays < 7) return `${diffDays}d geleden`;
-            
-            return date.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
         },
         markAsRead() {
             if (this.ongelezen > 0) {
@@ -47,7 +22,6 @@
                 .then(res => res.json())
                 .then(() => {
                     this.ongelezen = 0;
-                    // Visually mark loaded ones as read too
                     this.notificaties.forEach(n => n.gelezen = true);
                 });
             }
@@ -60,16 +34,16 @@
     <button @click="open = !open; if(open) markAsRead()"
             class="relative p-2 rounded-xl text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200 focus:outline-none flex items-center justify-center">
         <i class="fa-solid fa-bell text-lg" :class="ongelezen > 0 ? 'animate-[swing_1s_ease-in-out_infinite]' : ''"></i>
-        
+
         <!-- Unread badge -->
-        <span x-show="ongelezen > 0" 
+        <span x-show="ongelezen > 0"
               x-text="ongelezen"
               class="absolute -top-0.5 -right-0.5 bg-rose-500 text-white font-bold text-[10px] rounded-full min-w-5 h-5 px-1 flex items-center justify-center border-2 border-white shadow-sm animate-pulse">
         </span>
     </button>
 
     <!-- Dropdown Menu -->
-    <div x-show="open" 
+    <div x-show="open"
          x-cloak
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 translate-y-3"
@@ -78,21 +52,17 @@
          x-transition:leave-start="opacity-100 translate-y-0"
          x-transition:leave-end="opacity-0 translate-y-3"
          class="absolute right-0 mt-3 w-96 max-w-[calc(100vw-2rem)] bg-white border border-gray-100 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.08)] z-50 overflow-hidden">
-        
+
         <!-- Header -->
         <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-slate-50/50">
             <div class="flex items-center gap-2">
                 <span class="font-bold text-gray-900 text-sm">Notificaties</span>
-                <span x-show="ongelezen > 0" 
+                <span x-show="ongelezen > 0"
                       x-text="ongelezen + ' nieuw'"
                       class="bg-indigo-50 text-indigo-600 text-[10px] font-bold px-2 py-0.5 rounded-full">
                 </span>
             </div>
-            <button x-show="ongelezen > 0" 
-                    @click="markAsRead()"
-                    class="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 transition-colors">
-                Markeer alles als gelezen
-            </button>
+
         </div>
 
         <!-- Notification List -->
@@ -114,7 +84,7 @@
             <template x-for="notificatie in notificaties" :key="notificatie.notificatie_id">
                 <div class="p-4 hover:bg-slate-50/50 transition-colors flex gap-3 items-start relative"
                      :class="!notificatie.gelezen ? 'bg-indigo-50/20' : ''">
-                    
+
                     <!-- Icon based on Notif_type -->
                     <div class="shrink-0">
                         <!-- Betaling ingediend -->
@@ -148,8 +118,7 @@
 
                     <!-- Content -->
                     <div class="flex-1 min-w-0">
-                        <p class="text-xs text-gray-700 leading-relaxed font-medium" x-text="notificatie.titel"></p>
-                        <span class="text-[10px] text-gray-400 mt-1 block" x-text="formatTime(notificatie.gestuurd_op)"></span>
+                     <p class="text-xs text-gray-700 leading-relaxed font-medium" x-text="notificatie.titel"></p>
                     </div>
 
                     <!-- Unread dot indicator -->
@@ -176,7 +145,7 @@
         85% { transform: rotate(-2deg); }
         100% { transform: rotate(0); }
     }
-    
+
     /* Sleek scrollbar styles */
     .scrollbar-thin::-webkit-scrollbar {
         width: 6px;

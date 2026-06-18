@@ -27,7 +27,7 @@ class ActiviteitController extends Controller
         } elseif ($tab === 'Leden') {
             $query->whereIn('actie', ['lid_aangemaakt', 'lid_bijgewerkt', 'lid_verwijderd', 'lid_gewijzigd']);
         } elseif ($tab === 'Betalingen') {
-            $query->whereIn('actie', ['betaling_hersteld', 'betaling_verwijderd', 'betaling_bijgewerkt', 'betaling_goedgekeurd', 'betaling_afgewezen', 'betaling_geregistreerd', 'bewijs_geüpload']);
+$query->whereIn('actie', ['betaling_hersteld', 'betaling_verwijderd', 'betaling_bijgewerkt', 'betaling_goedgekeurd', 'betaling_afgewezen', 'betaling_geregistreerd', 'bewijs_geüpload']);
         }elseif ($tab === 'Systeem') {
             $query->whereNotIn('actie', [
                 'ingelogd', 'uitgelogd',

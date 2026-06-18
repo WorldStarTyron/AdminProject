@@ -73,40 +73,30 @@ class LidController extends Controller
     }
 
 
+// Verwijder dubbele betalingen (voor lidpagina)
+    // Als een betaling geen methode heeft en voor dezelfde maand is, verwijder het
     public function removeduplicateBetalingen()
     {
-    // Haal alle betalingen met dezelfde lid_id, maand en jaar op, waarbij we de oudste betaling bewaren
-    $duplicates = Betaling::select('lid_id', 'maand', 'jaar', DB::raw('COUNT(*) as count'))
-        ->groupBy('lid_id', 'maand', 'jaar')
-        ->having('COUNT(*) > 1',)
-        ->get();
+        // Huidige maand en jaar
+        $huidigeMaand = now()->month;
+        $huidigeJaar = now()->year;
 
-    // Loop door elke groep duplicaten en verwijder de oudste
-    foreach ($duplicates as $duplicate) {
-        // Haal alle betalingen voor deze specifieke combinatie op
-        $betalingen = Betaling::where('lid_id', $duplicate->lid_id)
-            ->where('maand', $duplicate->maand)
-            ->where('jaar', $duplicate->jaar)
-            ->orderBy('ingediend_op', 'asc') // Sorteer op datum (oudste eerst)
+        // Haal alle betalingen op die geen methode hebben en voor deze maand zijn
+        $betalingen = Betaling::whereNull('methode')
+            ->where('maand', $huidigeMaand)
+            ->where('jaar', $huidigeJaar)
             ->get();
 
-        // Skip de eerste betaling (de oudste) en verwijder de rest
-        $toBeRemoved = $betalingen->skip(1);
+        $verwijderd = 0;
 
-        foreach ($toBeRemoved as $betaling) {
+        // Verwijder elke betaling zonder methode voor deze maand
+        foreach ($betalingen as $betaling) {
             $betaling->delete();
-            \Log::info('Verwijderde dubbele betaling:', [
-                'lid_id' => $betaling->lid_id,
-                'maand' => $betaling->maand,
-                'jaar' => $betaling->jaar,
-                'betaling_id' => $betaling->betaling_id
-            ]);
+            $verwijderd++;
         }
+
+        return redirect()->back()->with('success', $verwijderd . ' dubbele betaling(en) verwijderd');
     }
-
-    return back()->with('success', 'Dubbele betalingen verwijderd.');
-}
-
 
 
 
@@ -225,7 +215,7 @@ $beschikbareJaren = \App\Models\Betaling::where('lid_id', $lid->lid_id)
         ]);
     }
 
-    // ✅ Consistent met deactiveer() — redirect in plaats van JSON
+// ✅ Consistent met deactiveer() — redirect in plaats van JSON
     return redirect()->back()->with('success', 'Account is succesvol geheractiveerd.');
 }
 
@@ -266,13 +256,14 @@ $beschikbareJaren = \App\Models\Betaling::where('lid_id', $lid->lid_id)
       $bewijs = $request->file('betaling_bewijs');
       $pad = $bewijs->store('bewijzen', 'public');
 
-      // Check if there is an outstanding or rejected payment (status Openstaand or niet_betaald)
+       // Check if there is an outstanding or rejected betaling (status Openstaand or niet_betaald)
       $betaling = Betaling::where('lid_id', $lid->lid_id)
           ->whereIn('status', ['Openstaand', 'niet_betaald'])
           ->orderBy('jaar', 'asc')
           ->orderBy('maand', 'asc')
           ->first();
-
+ 
+          // als een Openstaande betaling word ge-upload word het in afwachting gezet door de gebruiker
       if ($betaling) {
           $betaling->update([
               'betaling_bewijs' => $pad,
@@ -322,13 +313,11 @@ $beschikbareJaren = \App\Models\Betaling::where('lid_id', $lid->lid_id)
 
 
 
-   public function store(Request $request)
+public function store(Request $request)
    {
         Gate::authorize('leden-beheren');
 
         $request->validate([
-        'naam'           => 'required|string|max:255',
-        'email'          => 'required|email',
         'telefoonnummer' => 'required|string',
         'adres'          => 'required|string',
         'woonplaats'     => 'required|string',
@@ -338,17 +327,24 @@ $beschikbareJaren = \App\Models\Betaling::where('lid_id', $lid->lid_id)
         'gebruiker_id'   => 'required|exists:gebruikers,gebruiker_id',
         ]);
 
-        Lid::create([
-            'naam' => $request->naam,
-            'email' => $request->email,
+        // Create the lid
+        $lid = Lid::create([
             'telefoonnummer' => $request->telefoonnummer,
-            'adres' => $request->adres,
-            'woonplaats' => $request->woonplaats,
+            'adres'          => $request->adres,
+            'woonplaats'     => $request->woonplaats,
             'geboortedatum' => $request->geboortedatum,
-            'lid_type' => $request->lid_type,
-            'lid_sinds' => $request->lid_sinds,
-            'gebruiker_id' => $request->gebruiker_id,
+            'lid_type'      => $request->lid_type,
+            'lid_sinds'     => $request->lid_sinds,
+            'gebruiker_id'  => $request->gebruiker_id,
         ]);
+
+        // Log activiteit
+        if (auth()->check()) {
+            \App\Models\Activiteit::log(auth()->id(), 'lid_aangemaakt', [
+                'lid_id'   => $lid->lid_id,
+                'details' => 'Lid succesvol aangemaakt.',
+            ]);
+        }
 
         return redirect()->route('GebruikersBeheer')->with('success', 'Lid succesvol aangemaakt.');
    }

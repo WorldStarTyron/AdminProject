@@ -1,3 +1,6 @@
+// Dit bestand zorgt voor de "meer" knop met een uitklapmenu
+// Als je op de knop klikt, klapt het menu uit
+
 document.addEventListener('DOMContentLoaded', () => {
     const btnMore = document.querySelectorAll('.btn-more');
     const dropdownMenus = document.querySelectorAll('.dropdown-menu');

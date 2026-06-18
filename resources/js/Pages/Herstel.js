@@ -1,4 +1,7 @@
-// Maak de waarschuwings-overlay aan en zet hem in de pagina
+// Dit bestand zorgt voor het herstellen van een betaling
+// We vragen of je het zeker bent en sturen dan de gegevens naar de server
+
+// Waarschuwing scherm maken en in de pagina zetten
 var waarschuwingHTML = `
 <style>
     @keyframes waarschuwingPop {
@@ -11,7 +14,7 @@ var waarschuwingHTML = `
             transform: scale(1) translateY(0);
         }
     }
-    
+
     #herstel-waarschuwing .modal-content {
         animation: waarschuwingPop 0.2s ease-out forwards;
     }
@@ -32,11 +35,11 @@ var waarschuwingHTML = `
         padding: 28px 28px 24px;
         max-width: 380px;
         width: calc(100% - 48px);
-        box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
         font-family: 'Inter', sans-serif;
     ">
 
-        <!-- Icoon - centered -->
+        <!-- Icoon -->
         <div style="
             width: 48px; height: 48px;
             background: #fef9c3;
@@ -83,18 +86,19 @@ var waarschuwingHTML = `
 `;
 document.body.insertAdjacentHTML('beforeend', waarschuwingHTML);
 
+// Elementen ophalen
 var overlay     = document.getElementById('herstel-waarschuwing');
 var annuleerBtn = document.getElementById('herstel-annuleer');
 var bevestigBtn = document.getElementById('herstel-bevestig');
 var actieveKnop = null;
 
-// Sluit de waarschuwing
+// Waarschuwing sluiten
 function sluitWaarschuwing() {
     overlay.style.display = 'none';
     actieveKnop = null;
 }
 
-// Klik op herstel-knop → toon waarschuwing
+// Klik op herstel knop → toon waarschuwing
 document.querySelectorAll('.restore-betaling-btn').forEach(function(knop) {
     knop.addEventListener('click', function() {
         actieveKnop = this;
@@ -102,15 +106,15 @@ document.querySelectorAll('.restore-betaling-btn').forEach(function(knop) {
     });
 });
 
-// Annuleer → sluit, doe niks
+// Annuleer → sluit
 annuleerBtn.addEventListener('click', sluitWaarschuwing);
 
-// Klik buiten het venster → sluit ook
+// Klik buiten → sluit ook
 overlay.addEventListener('click', function(e) {
     if (e.target === overlay) sluitWaarschuwing();
 });
 
-// Bevestig → stuur PATCH verzoek
+// Bevestig → verstuur
 bevestigBtn.addEventListener('click', function() {
     if (!actieveKnop) return;
 

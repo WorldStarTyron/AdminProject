@@ -11,7 +11,7 @@ use App\Models\Notificatie;
 use App\Http\Controllers\BonController;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Storage; 
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 
 class BetalingController extends Controller
@@ -73,8 +73,9 @@ class BetalingController extends Controller
             ->orderBy('betalingen.ingediend_op', 'desc')
             ->take(5)->get();
 
-        // Totaal betaald deze maand (voor stats card)
-        $maandTotaal = Betaling::where('status', 'betaald')
+// Totaal betaald deze maand (voor stats card)
+        // Includes both 'betaald' and 'goed_gekeurd' as paid income
+        $maandTotaal = Betaling::whereIn('status', ['betaald', 'goed_gekeurd'])
             ->where('maand', $maand)
             ->where('jaar', $jaar)
             ->sum('bedrag');
@@ -95,7 +96,7 @@ class BetalingController extends Controller
         ));
     }
 
- 
+
     // Bedrag per weekdag grafiek
    public function chartData(Request $request)
 {
@@ -150,9 +151,9 @@ class BetalingController extends Controller
             'methode'         => 'required|in:fysiek,overmaking',
             'status'          => 'required|in:Openstaand,betaald,niet_betaald',
             'bedrag'          => 'required|numeric|min:150', //alleen betaling van 150
-            'betaling_bewijs' => 'nullable|file|max:5120', 
+            'betaling_bewijs' => 'nullable|file|max:5120',
         ],[
-            'bedrag.min' => 'Het bedrag moet minimaal SRD150 zijn', 
+            'bedrag.min' => 'Het bedrag moet minimaal SRD150 zijn',
         ]);
 
 
@@ -239,8 +240,8 @@ class BetalingController extends Controller
             ]);
         }
 
-       
-    
+
+
 
 
 
@@ -303,7 +304,7 @@ class BetalingController extends Controller
 
 
 
-    // Soft delete 
+    // Soft delete
     public function destroy($betaling_id)
     {
         Gate::authorize('betalingen-beheren');
@@ -322,8 +323,8 @@ class BetalingController extends Controller
                 'betaling_id' => $betaling->betaling_id,
                 'details'     => 'Betaling #'. $betaling->betaling_id . ' ('. $betaling->ingediend_op .') van lid: ' . $betaling->lid->gebruiker->naam . ' verwijderd door '. auth()->user()->naam,
             ]);
-        } 
-        
+        }
+
         return redirect()->back()->with('success','Betaling verwijderd');
     }
 
@@ -333,7 +334,7 @@ class BetalingController extends Controller
     public function trashed()
     {
         Gate::authorize('betalingen-verwijderen');
-          
+
         $verwijderdeBetalingen = Betaling::onlyTrashed()
         ->Select('betalingen.*','gebruikers.naam')
         ->join('leden','leden.lid_id', '=','betalingen.lid_id')
@@ -341,8 +342,8 @@ class BetalingController extends Controller
         ->orderBy('betalingen.deleted_at', 'desc')
         ->get();
 
-     
-      
+
+
 
         return view('DeletedRecords', compact('verwijderdeBetalingen'));
     }
@@ -363,7 +364,7 @@ class BetalingController extends Controller
         if(!$betaling){
             return response()->json(['success' => false, 'message' => 'Betaling niet gevonden']);
         }
-         
+
         //restore() haalt de betaling terug uit de trash
         $betaling->restore();
 
@@ -404,7 +405,7 @@ class BetalingController extends Controller
 
       // Stats
       $pendingCount = Betaling::where('status', 'in_afwachting')->count();
-      
+
       $totalReviewedToday = Betaling::whereIn('status', ['betaald', 'goed_gekeurd', 'niet_goedgekeurd', 'Openstaand'])
           ->whereNotNull('betaling_bewijs')
           ->whereDate('ingediend_op', today())
@@ -424,32 +425,32 @@ class BetalingController extends Controller
   public function ViewBewijsFile($betaling_id)
 {
     Gate::authorize('betalingen-beheren');
- 
+
     // Find the payment or show a 404 page if it doesn't exist
     $betaling = Betaling::findOrFail($betaling_id);
- 
+
     // Check 1: does this payment even have a proof file attached?
     if (!$betaling->betaling_bewijs) {
         return redirect()->back()->with('error', 'Geen betalingsbewijs gevonden voor deze betaling.');
     }
- 
+
     // Check 2: does the file physically exist on disk?
     if (!\Storage::disk('public')->exists($betaling->betaling_bewijs)) {
         return redirect()->back()->with('error', 'Bestand niet gevonden op de server.');
     }
- 
+
     // Build a public URL so the browser can display the file directly
     $bewijsUrl = \Storage::url($betaling->betaling_bewijs);
- 
+
     // Detect whether the file is a PDF or an image so the view
     $extensie   = strtolower(pathinfo($betaling->betaling_bewijs, PATHINFO_EXTENSION));
     $isPdf      = $extensie === 'pdf';
 
-      
-   
-      
-       
-    
+
+
+
+
+
 
     // PDF of Afbeelding weergeven
     $bewijsUrl = \Storage::url($betaling->betaling_bewijs);
@@ -468,15 +469,15 @@ class BetalingController extends Controller
     if(!$betaling->bon){
         $gebruiker = $betaling->lid->gebruiker;
         $datum  = \Carbon\Carbon::parse($betaling->ingediend_op);
-        
+
         BonController::genereer(
             $betaling,
             $gebruiker->naam,
             $datum->translatedFormat('F Y')
-            
+
         );
     }
-    
+
     if(auth()->check()){
         Activiteit::log(auth()->id(), 'betaling_goedgekeurd', [
             'betaling_id' => $betaling->betaling_id,

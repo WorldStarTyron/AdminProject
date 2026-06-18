@@ -61,23 +61,27 @@ class Gebruiker extends Authenticatable
         return $this->hasMany(Notificatie::class, 'gebruiker_id', 'gebruiker_id');
     }
 
-    // Check if user has any of the given role names
+// Check if user has any of the given role names (case-insensitive for Applicatie Beheerder)
     public function hasAnyRole($roles): bool
     {
         $roles = is_array($roles) ? $roles : [$roles];
-        
-        // Normalize role names to also check "Applicatie beheerder" if "Applicatie Beheerder" is passed, and vice versa
-        $normalizedRoles = [];
+
+        // Use case-insensitive comparison for Applicatie Beheerder role
         foreach ($roles as $role) {
-            $normalizedRoles[] = $role;
-            if ($role === 'Applicatie beheerder') {
-                $normalizedRoles[] = 'Applicatie beheerder';
-            } elseif ($role === 'Applicatie beheerder') {
-                $normalizedRoles[] = 'Applicatie beheerder';
+            if (strtolower($role) === strtolower('Applicatie Beheerder') || strtolower($role) === strtolower('Applicatie beheerder')) {
+                // Check case-insensitively for Applicatie Beheerder
+                if ($this->rollen()->whereRaw('LOWER(naam) = ?', [strtolower('Applicatie Beheerder')])->exists()) {
+                    return true;
+                }
+            } else {
+                // Regular case-sensitive check for other roles
+                if ($this->rollen()->where('naam', $role)->exists()) {
+                    return true;
+                }
             }
         }
-        
-        return $this->rollen()->whereIn('naam', $normalizedRoles)->exists();
+
+        return false;
     }
 
     // Check if user has the 'Lid' role
@@ -86,10 +90,12 @@ class Gebruiker extends Authenticatable
         return $this->rollen()->where('naam', 'Lid')->exists();
     }
 
-    // Check if user has the applicatiebeheerder role
+// Check if user has the applicatiebeheerder role (case-insensitive)
     public function isApplicatieBeheerder(): bool
     {
-        return $this->rollen()->whereIn('naam', ['Applicatie beheerder'])->exists();
+        return $this->rollen()
+            ->whereRaw('LOWER(naam) = ?', [strtolower('Applicatie Beheerder')])
+            ->exists();
     }
 
     // Check if user has the voorzitter role
@@ -97,7 +103,7 @@ class Gebruiker extends Authenticatable
     {
         return $this->rollen()->where('naam', 'voorzitter')->exists();
     }
-     
+
 
     // Check if user has Administratie Medewerker role
     public function isAdminratieMedewerker(): bool

@@ -1,19 +1,13 @@
-/**
- * Rolbeheer.js — Role management page logic
- * Uses global vars set in the Blade template:
- *   window.alleRollenData  — array of all roles
- *   window.searchUsersUrl  — URL for user autocomplete search
- *   window.updateRolUrl    — base URL for updating user roles
- *   window.csrfToken       — CSRF token
- */
+// Dit bestand zorgt voor het beheren van rollen
+// We zoeken naar gebruikers en kunnen rollen toewijzen
 
 document.addEventListener('DOMContentLoaded', () => {
-    initAutocomplete();
+    initZoeken();
 });
 
-// ─── Autocomplete for quick role assignment ──────────────────────────
+// === Zoeken naar gebruikers ===
 
-function initAutocomplete() {
+function initZoeken() {
     const searchInput = document.getElementById('user_search');
     const resultsDiv = document.getElementById('autocomplete_results');
     const userIdField = document.getElementById('selected_user_id');
@@ -54,7 +48,7 @@ function initAutocomplete() {
         }, 300);
     });
 
-    // Select a suggestion
+    // Keuze aanklikken
     resultsDiv.addEventListener('click', (e) => {
         const item = e.target.closest('.autocomplete-suggestion');
         if (item) {
@@ -64,7 +58,7 @@ function initAutocomplete() {
         }
     });
 
-    // Close dropdown when clicking outside
+    // Sluiten als je ergens anders klikt
     document.addEventListener('click', (e) => {
         if (!searchInput.contains(e.target) && !resultsDiv.contains(e.target)) {
             resultsDiv.classList.add('hidden');
@@ -72,15 +66,15 @@ function initAutocomplete() {
     });
 }
 
-// ─── Role edit modal ─────────────────────────────────────────────────
+// === Rol bewerken modal ===
 
 function openRoleModal(userId) {
     if (!userId) {
-        alert('Nieuw gebruikers aanmaken kan via het registratieformulier.');
+        alert('Nieuwe gebruikers maak je via het formulier.');
         return;
     }
 
-    // Fetch current roles for this user
+    // Rollen ophalen voor deze gebruiker
     fetch(`${window.updateRolUrl}/${userId}/roles`, {
         headers: { 'Accept': 'application/json' }
     })
@@ -105,7 +99,7 @@ function openRoleModal(userId) {
             modal.classList.remove('hidden');
             modal.classList.add('flex');
         })
-        .catch(() => alert('Kan gebruikersrollen niet ophalen.'));
+        .catch(() => alert('Kon rollen niet ophalen.'));
 }
 
 function closeRoleModal() {
@@ -114,6 +108,6 @@ function closeRoleModal() {
     modal.classList.remove('flex');
 }
 
-// Expose to global scope for onclick handlers in Blade
+// Beschikbaar maken voor andere scripts
 window.openRoleModal = openRoleModal;
 window.closeRoleModal = closeRoleModal;

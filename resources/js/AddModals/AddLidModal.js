@@ -1,18 +1,9 @@
-// AddLidModal.js
-// ===============
-// This file handles the Add Member modal popup:
-// - Opening and closing the modal
-// - Submitting the form via AJAX (without page reload)
-// - Showing success/error messages
-// - Client-side search in the members table
-//
-// VALIDATION is handled by FormValidator.js (separate file).
+// Dit bestand zorgt voor het toevoegen van een lid
+// We laten het formulier zien, sturen de gegevens naar de server en zoeken in de tabel
 
 document.addEventListener('DOMContentLoaded', function () {
 
-    // ==============================
-    // STEP 1: Get all the elements we need
-    // ==============================
+    // === Stap 1: Alle elementen ophalen ===
     var modal     = document.getElementById('addLidModal');
     var openBtn   = document.getElementById('openModalBtn');
     var closeBtn  = document.getElementById('closeModalBtn');
@@ -24,53 +15,47 @@ document.addEventListener('DOMContentLoaded', function () {
     var submitBtn = document.getElementById('submitBtn');
 
 
-    // ==============================
-    // STEP 2: Open the modal
-    // ==============================
+    // === Stap 2: Modal openen ===
     function openModal() {
         modal.classList.add('active');
-        document.body.style.overflow = 'hidden'; // prevent scrolling behind modal
+        document.body.style.overflow = 'hidden';
     }
 
 
-    // ==============================
-    // STEP 3: Close the modal
-    // ==============================
+    // === Stap 3: Modal sluiten ===
     function closeModal() {
         modal.classList.remove('active');
-        document.body.style.overflow = ''; // re-enable scrolling
+        document.body.style.overflow = '';
         form.reset();
         errorsDiv.style.display = 'none';
         errorList.innerHTML = '';
 
-        // Reset today's date as default
+        // Vandaag als standaarddatum zetten
         var dateField = document.getElementById('geboortedatum');
         if (dateField) {
             dateField.value = new Date().toISOString().split('T')[0];
         }
 
-        // Reset validation styles (from FormValidator.js)
+        // Validatie resetten
         if (typeof window.resetFormValidation === 'function') {
             window.resetFormValidation();
         }
     }
 
 
-    // ==============================
-    // STEP 4: Button click listeners
-    // ==============================
+    // === Stap 4: Knoppen koppelen ===
     if (openBtn)   openBtn.addEventListener('click', openModal);
     if (closeBtn)  closeBtn.addEventListener('click', closeModal);
     if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
 
-    // Close when clicking the dark overlay behind the modal
+    // Sluiten als je op de donkere achtergrond klikt
     if (modal) {
         modal.addEventListener('click', function (e) {
             if (e.target === modal) closeModal();
         });
     }
 
-    // Close when pressing Escape key
+    // Sluiten als je op Escape drukt
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && modal && modal.classList.contains('active')) {
             closeModal();
@@ -78,36 +63,32 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 
-    // ==============================
-    // STEP 5: Submit the form
-    // ==============================
+    // === Stap 5: Formulier versturen ===
     if (form) {
         form.addEventListener('submit', function (e) {
-            e.preventDefault(); // stop the normal form submit
+            e.preventDefault();
 
-            // Run client-side validation first (from FormValidator.js)
+            // Eerst checken of alles klopt
             if (typeof window.checkAllFields === 'function') {
                 var allValid = window.checkAllFields();
                 if (!allValid) {
-                    return; // stop if any field is invalid
+                    return;
                 }
             }
 
-            // Disable the button and show "loading" text
+            // Knop uitschakelen tijdens versturen
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span class="spinner"></span> Bezig...';
 
-            // Hide previous errors
+            // Oude fouten verbergen
             errorsDiv.style.display = 'none';
             errorList.innerHTML = '';
 
-            // Collect all form data
+            // Gegevens verzamelen
             var formData = new FormData(form);
-
-            // Get the store URL from the form's data attribute
             var storeUrl = form.getAttribute('data-store-url');
 
-            // Send to the server
+            // Versturen naar server
             fetch(storeUrl, {
                 method: 'POST',
                 headers: {
@@ -118,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .then(async function (response) {
                 if (response.ok) {
-                    // SUCCESS: close modal, show toast, reload page
+                    // Success: modal sluiten en melding tonen
                     closeModal();
                     toast.classList.add('show');
                     setTimeout(function () { toast.classList.remove('show'); }, 3000);
@@ -126,27 +107,26 @@ document.addEventListener('DOMContentLoaded', function () {
                     return null;
                 }
 
-                // Try to parse JSON body for useful error info
+                // JSON lezen voor foutinfo
                 var json = null;
                 try {
                     json = await response.json();
                 } catch (err) {
-                    // ignore JSON parse errors
+                    // negeren
                 }
 
                 if (response.status === 422 && json && json.errors) {
-                    // Validation errors
                     return json;
                 }
 
-                // Other server errors: throw an Error containing message if available
+                // Andere fout
                 var msg = (json && (json.message || (json.errors && json.errors.server && json.errors.server[0]))) ?
-                    (json.message || json.errors.server[0]) : 'Server error: ' + response.status;
+                    (json.message || json.errors.server[0]) : 'Server fout: ' + response.status;
                 throw new Error(msg);
             })
             .then(function (data) {
                 if (data && data.errors) {
-                    // Show each error from the server
+                    // Foutmeldingen tonen
                     errorList.innerHTML = '';
                     var errorKeys = Object.keys(data.errors);
 
@@ -163,14 +143,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             })
             .catch(function (error) {
-                console.error('Error:', error);
-                // Show server-provided message when available
-                var message = (error && error.message) ? error.message : 'Er is een fout opgetreden. Probeer het opnieuw.';
+                console.error('Fout:', error);
+                var message = (error && error.message) ? error.message : 'Er is iets fout gegaan. Probeer opnieuw.';
                 errorList.innerHTML = '<li>' + message + '</li>';
                 errorsDiv.style.display = 'block';
             })
             .finally(function () {
-                // Re-enable the button
+                // Knop weer inschakelen
                 submitBtn.disabled = false;
                 submitBtn.innerHTML =
                     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none">' +
@@ -181,9 +160,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    // ==============================
-    // STEP 6: Client-side search in the table
-    // ==============================
+    // === Stap 6: Zoeken in de tabel ===
     var searchInput = document.getElementById('searchInput');
     if (searchInput) {
         searchInput.addEventListener('input', function () {

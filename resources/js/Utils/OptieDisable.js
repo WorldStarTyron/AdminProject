@@ -1,5 +1,8 @@
+// Dit bestand zorgt voor het betaling bewijs
+// Als je kiest voor overmaking, moet je een bestand uploaden
+
 document.addEventListener('DOMContentLoaded', () => {
-    // === ADD MODAL ===
+    // === Toevoegen modal ===
     const addMethodSelect = document.getElementById('betaling_methode');
     const addBewijsContainer = document.getElementById('betalingBewijsContainer');
     const addBewijsInput = document.getElementById('betaling_bewijs');
@@ -24,19 +27,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (addCloseBtn) {
             addCloseBtn.addEventListener('click', () => {
                 addMethodSelect.value = '';
-                toggleAddBewijs();
+                toggleAddBewijs()
             });
         }
         const addCancelBtn = document.getElementById('cancelBetalingModalBtn');
         if (addCancelBtn) {
             addCancelBtn.addEventListener('click', () => {
                 addMethodSelect.value = '';
-                toggleAddBewijs();
+                toggleAddBewijs()
             });
         }
     }
 
-    // === EDIT MODAL ===
+    // === Bewerken modal ===
     const editMethodSelect = document.getElementById('edit_betaling_methode');
     const editBewijsContainer = document.getElementById('editBetalingBewijsContainer');
     const editBewijsInput = document.getElementById('edit_betaling_bewijs');
@@ -78,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Toggle the payment proof container when the edit modal opens
+        // Tonen als bewerk modal opent
         document.addEventListener('click', function (e) {
             var btn = e.target.closest('.edit-betaling-btn');
             if (btn) {

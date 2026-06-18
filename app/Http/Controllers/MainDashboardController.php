@@ -27,7 +27,8 @@ public function Maindashboard()
     $totaalBetaald     = $stats['totaalBetaald'];
     $totaalNietBetaald = $stats['totaalNietBetaald'];
 
-    // Deadline leden: openstaande betalingen waarvan de maand-deadline binnen 7 dagen valt
+// Deadline leden: openstaande betalingen waarvan de maand-deadline binnen 7 dagen valt
+    // Sorted by jaar DESC, maand DESC to get the LATEST payment first for deadline display
     $deadlineLeden = Lid::metActieveGebruiker()
         ->whereHas('betalingen', function ($q) {
             $q->whereIn('status', Betaling::ONBETAALDE_STATUSSEN)
@@ -36,7 +37,11 @@ public function Maindashboard()
               );
         })
         ->with(['betalingen' => function ($q) {
-            $q->whereIn('status', Betaling::ONBETAALDE_STATUSSEN);
+            // Sort by jaar DESC, maand DESC so the first() gets the LATEST openstaande betaling
+            // This ensures the deadline shown is from the most recent payment
+            $q->whereIn('status', Betaling::ONBETAALDE_STATUSSEN)
+              ->orderBy('jaar', 'desc')
+              ->orderBy('maand', 'desc');
         }, 'gebruiker'])
         ->get();
 

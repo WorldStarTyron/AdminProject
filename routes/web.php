@@ -63,6 +63,7 @@ Route::middleware(['auth'])->group(function () {
     // Leden - Deactiveer
     Route::post('/leden/{lid_id}/deactiveer', [LidController::class, 'deactiveer'])->name('ledenpagina.deactiveer')->middleware('can:leden-Deactiveren');
    
+    Route::post('lidpagina/removeduplicateBetalingen', [LidController::class, 'removeduplicateBetalingen'])->name('lidpagina.removeduplicateBetalingen');
 
     // Betalingen
     Route::get('/betalingPagina', [BetalingController::class, 'index'])->name('betalingPagina')->middleware('can:betalingen-bekijken');

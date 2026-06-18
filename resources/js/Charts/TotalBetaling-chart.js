@@ -1,3 +1,6 @@
+// Dit bestand zorgt voor de contributie grafiek
+// We halen de gegevens op en tekenen de grafiek
+
 document.addEventListener('DOMContentLoaded', function () {
 
     const container = document.querySelector('#contributieChart');
@@ -6,6 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const maandSelect = document.querySelector('#maand');
     const jaarSelect  = document.querySelector('#jaar');
 
+    // Gegevens ophalen van de server
     function loadChart() {
         const maand = maandSelect ? maandSelect.value : '';
         const jaar  = jaarSelect ? jaarSelect.value : '';
@@ -28,8 +32,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Grafiek tekenen
     function renderChart(labels, series) {
-        container.innerHTML = ''; // belangrijk: oude chart verwijderen
+        container.innerHTML = '';
 
         var options = {
             series: series,
@@ -77,10 +82,10 @@ document.addEventListener('DOMContentLoaded', function () {
         chart.render();
     }
 
-    // init load
+    // Eerste keer laden
     loadChart();
 
-    // refresh bij wijziging filter
+    // Opnieuw laden als filter verandert
     if (maandSelect) maandSelect.addEventListener('change', loadChart);
     if (jaarSelect) jaarSelect.addEventListener('change', loadChart);
 

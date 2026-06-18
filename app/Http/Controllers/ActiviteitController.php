@@ -18,8 +18,8 @@ class ActiviteitController extends Controller
         $search = $request->input('search');
         $tab = $request->input('tab', 'Alle');
 
-        // Basisquery met de bijbehorende gebruiker
-        $query = Activiteit::with('gebruiker');
+// Basisquery met de bijbehorende gebruiker en rollen
+        $query = Activiteit::with(['gebruiker', 'gebruiker.rollen']);
 
         // acties die worden ingedeeld in categorieen
         if ($tab === 'Inloggen') {
@@ -64,7 +64,7 @@ class ActiviteitController extends Controller
                  //BONNEN
                   'bon gegenereerd' => ['bon_aangemaakt'],
                   'bon gedownload' => ['bon_gedownload'],
-                
+
                ];
 
         // Filter op zoekterm (actie, details of gebruikersnaam)
@@ -75,8 +75,8 @@ class ActiviteitController extends Controller
                 if(str_contains(strtolower($label), strtolower($search))){
                     $zoekActies = array_merge($zoekActies, $acties);
                 }
-             } 
-             
+             }
+
 
             $query->where(function ($q) use ($search, $zoekActies){
                 $q->where('actie', 'like', "%$search%")
@@ -88,8 +88,8 @@ class ActiviteitController extends Controller
                 if(!empty($zoekActies)){
                     $q->orWhereIn('actie', $zoekActies);
                 }
-             }); 
-        } 
+             });
+        }
 
         // Nieuwste activiteiten eerst
         $query->orderBy('aangemaakt_op', 'desc')->orderBy('log_id', 'desc');

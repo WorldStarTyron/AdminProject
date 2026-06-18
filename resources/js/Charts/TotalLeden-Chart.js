@@ -1,7 +1,5 @@
-// TotalLeden-Chart.js
-// Chart initialization for the ledenpagina.
-// Reads $labels and $values from data attributes on the #joinChart canvas element,
-// which are set in the blade template via @json().
+// Dit bestand zorgt voor de grafiek met het aantal leden
+// We lezen de gegevens uit de HTML en tekenen de grafiek
 
 document.addEventListener('DOMContentLoaded', function() {
     const canvas = document.getElementById('joinChart');
@@ -12,17 +10,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const ctx = canvas.getContext('2d');
 
-    // Create gradient
+    // Normale kleur
     const gradient = ctx.createLinearGradient(0, 0, 0, 300);
     gradient.addColorStop(0, 'rgba(203, 213, 225, 0.8)');
     gradient.addColorStop(1, 'rgba(226, 232, 240, 0.3)');
 
-    // Highlight gradient for the last bar with data
+    // Achterste Balk was blauw
     const highlightGradient = ctx.createLinearGradient(0, 0, 0, 300);
     highlightGradient.addColorStop(0, 'rgba(191, 219, 254, 1)');
     highlightGradient.addColorStop(1, 'rgba(219, 234, 254, 0.6)');
 
-    // Determine which bar to highlight (last non-zero or last)
+    // Bepaal welke balk moet opvallen
     let highlightIndex = values.length - 1;
     for (let i = values.length - 1; i >= 0; i--) {
         if (values[i] > 0) {

@@ -1,13 +1,9 @@
-// EditBetalingModal.js
-// ====================
-// Handles the Edit Betaling modal popup:
-// - Opening and closing the modal
-// - Populating data from the clicked edit button
-// - Submitting the PATCH request to update the payment
+// Dit bestand zorgt voor het bewerken van een betaling
+// We vullen de gegevens in en sturen de wijzigingen naar de server
 
 document.addEventListener('DOMContentLoaded', function () {
 
-    // STEP 1: Get all elements
+    // === Stap 1: Elementen ophalen ===
     var modal = document.getElementById('editBetalingModal');
     var closeBtn = document.getElementById('closeEditBetalingModalBtn');
     var cancelBtn = document.getElementById('cancelEditBetalingModalBtn');
@@ -16,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var errorList = document.getElementById('editBetalingModalErrorList');
     var submitBtn = document.getElementById('submitEditBetalingBtn');
 
-    // Fields
+    // Velden
     var idInput = document.getElementById('edit_betaling_id');
     var naamInput = document.getElementById('edit_betaling_naam');
     var datumInput = document.getElementById('edit_betaling_datum');
@@ -24,11 +20,12 @@ document.addEventListener('DOMContentLoaded', function () {
     var statusInput = document.getElementById('edit_betaling_status');
     var bedragInput = document.getElementById('edit_betaling_bedrag');
 
-    // STEP 2: Open and Populate
+
+    // === Stap 2: Modal openen en invullen ===
     function openModal(btn) {
         if (!modal) return;
 
-        // Retrieve data attributes
+        // Gegevens ophalen van de knop
         var id = btn.getAttribute('data-id');
         var naam = btn.getAttribute('data-naam');
         var datum = btn.getAttribute('data-datum');
@@ -36,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var status = btn.getAttribute('data-status');
         var bedrag = btn.getAttribute('data-bedrag');
 
-        // Populate fields
+        // Velden vullen
         if (idInput) idInput.value = id;
         if (naamInput) naamInput.value = naam;
         if (datumInput) datumInput.value = datum;
@@ -44,18 +41,18 @@ document.addEventListener('DOMContentLoaded', function () {
         if (statusInput) statusInput.value = status;
         if (bedragInput) bedragInput.value = bedrag;
 
-        // Reset error messages
+        // Foutmeldingen wissen
         if (errorsDiv) {
             errorsDiv.style.display = 'none';
             errorList.innerHTML = '';
         }
 
-        // Show modal
+        // Modal tonen
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
     }
 
-    // Register click listener for all edit buttons (using delegation for pagination / updates)
+    // Knip listener voor alle bewerk knoppen
     document.addEventListener('click', function (e) {
         var btn = e.target.closest('.edit-betaling-btn');
         if (btn) {
@@ -63,8 +60,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    
-    // STEP 3: Close the modal
+
+    // === Stap 3: Modal sluiten ===
     function closeModal() {
         if (modal) {
             modal.classList.remove('active');
@@ -80,14 +77,14 @@ document.addEventListener('DOMContentLoaded', function () {
     if (closeBtn) closeBtn.addEventListener('click', closeModal);
     if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
 
-    // Close when clicking the dark overlay behind the modal
+    // Sluiten als je op de donkere achtergrond klikt
     if (modal) {
         modal.addEventListener('click', function (e) {
             if (e.target === modal) closeModal();
         });
     }
 
-    // Close when pressing Escape key
+    // Sluiten als je op Escape drukt
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && modal && modal.classList.contains('active')) {
             closeModal();
@@ -96,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-    // STEP 4: Form submission
+    // === Stap 4: Formulier versturen ===
     if (form) {
         form.addEventListener('submit', function (e) {
             e.preventDefault();
@@ -104,20 +101,20 @@ document.addEventListener('DOMContentLoaded', function () {
             var id = idInput.value;
             if (!id) return;
 
-            // Disable submit button
+            // Knop uitschakelen
             submitBtn.disabled = true;
             var originalBtnText = submitBtn.textContent;
             submitBtn.innerHTML = '<span class="spinner"></span> Bezig...';
 
-            // Hide previous errors
+            // Oude fouten verbergen
             errorsDiv.style.display = 'none';
             errorList.innerHTML = '';
 
-            // Collect form data
+            // Gegevens verzamelen
             var formData = new FormData(form);
-            formData.append('_method', 'PUT'); // Laravel method spoofing
+            formData.append('_method', 'PUT');
 
-            // Fetch request (using POST with _method PATCH for Laravel compatibility with multipart/form-data if ever needed)
+            // Versturen
             var updateUrl = '/betalingen/' + id;
 
             fetch(updateUrl, {
@@ -133,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         return response.json().then(function (data) {
                             closeModal();
 
-                            // Show success toast
+                            // Success melding
                             var toast = document.getElementById('betalingSuccessToast');
                             if (toast) {
                                 var toastText = toast.querySelector('span');
@@ -146,14 +143,14 @@ document.addEventListener('DOMContentLoaded', function () {
                                 }, 3000);
                             }
 
-                            // Reload page to show new values
+                            // Pagina vernieuwen
                             setTimeout(function () {
                                 window.location.reload();
                             }, 1000);
                         });
                     } else {
                         return response.json().then(function (data) {
-                            // Show validation errors
+                            // Foutmeldingen tonen
                             if (data.errors) {
                                 errorsDiv.style.display = 'block';
                                 errorsDiv.classList.remove('hidden');
@@ -178,7 +175,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     errorsDiv.style.display = 'block';
                     errorsDiv.classList.remove('hidden');
                     var li = document.createElement('li');
-                    li.textContent = 'Er is een fout opgetreden. Probeer het opnieuw.';
+                    li.textContent = 'Er is iets fout gegaan. Probeer opnieuw.';
                     errorList.appendChild(li);
                 })
                 .finally(function () {
@@ -188,6 +185,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    
+
 
 });

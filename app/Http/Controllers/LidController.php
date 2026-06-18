@@ -13,6 +13,10 @@ use Illuminate\Support\Facades\Gate;
 
 class LidController extends Controller
 {
+
+
+
+
     // Leden overzichtspagina
     public function index(Request $request)
     {
@@ -68,7 +72,45 @@ class LidController extends Controller
         return view('ledenpagina', compact('leden', 'totaalLeden', 'labels', 'values', 'woonplaatsen'));
     }
 
-    // Lid detailpagina
+
+    public function removeduplicateBetalingen()
+    {
+    // Haal alle betalingen met dezelfde lid_id, maand en jaar op, waarbij we de oudste betaling bewaren
+    $duplicates = Betaling::select('lid_id', 'maand', 'jaar', DB::raw('COUNT(*) as count'))
+        ->groupBy('lid_id', 'maand', 'jaar')
+        ->having('COUNT(*) > 1',)
+        ->get();
+
+    // Loop door elke groep duplicaten en verwijder de oudste
+    foreach ($duplicates as $duplicate) {
+        // Haal alle betalingen voor deze specifieke combinatie op
+        $betalingen = Betaling::where('lid_id', $duplicate->lid_id)
+            ->where('maand', $duplicate->maand)
+            ->where('jaar', $duplicate->jaar)
+            ->orderBy('ingediend_op', 'asc') // Sorteer op datum (oudste eerst)
+            ->get();
+
+        // Skip de eerste betaling (de oudste) en verwijder de rest
+        $toBeRemoved = $betalingen->skip(1);
+
+        foreach ($toBeRemoved as $betaling) {
+            $betaling->delete();
+            \Log::info('Verwijderde dubbele betaling:', [
+                'lid_id' => $betaling->lid_id,
+                'maand' => $betaling->maand,
+                'jaar' => $betaling->jaar,
+                'betaling_id' => $betaling->betaling_id
+            ]);
+        }
+    }
+
+    return back()->with('success', 'Dubbele betalingen verwijderd.');
+}
+
+
+
+
+// Lid detailpagina
     public function show(Request $request, $id = null)
 {
     $lid = \App\Models\Lid::where('gebruiker_id', Auth::id())->firstOrFail();
@@ -142,6 +184,15 @@ $beschikbareJaren = \App\Models\Betaling::where('lid_id', $lid->lid_id)
     ->orderByDesc('jaar')
     ->pluck('jaar');
 
+    // Checken als een lid al betaald heeft voor deze maand
+    $currentMonth = now()->month;
+    $currentYear = now()->year;
+    $hasPaidThisMonth = \App\Models\Betaling::where('lid_id', $lid->lid_id)
+        ->where('maand', $currentMonth)
+        ->where('jaar', $currentYear)
+        ->whereIn('status', ['betaald', 'goed_gekeurd'])
+        ->exists();
+
     return view('lidpagina', compact(
         'lid',
         'betalingen',
@@ -150,9 +201,13 @@ $beschikbareJaren = \App\Models\Betaling::where('lid_id', $lid->lid_id)
         'UpcomingBetaling',
         'deadline',
         'UpcomingKost',
-        'beschikbareJaren'
+        'beschikbareJaren',
+        'hasPaidThisMonth'
     ));
 }
+
+
+
 
     // Lid heractiveren
   public function heractiveer($gebruiker_id)
@@ -194,9 +249,12 @@ $beschikbareJaren = \App\Models\Betaling::where('lid_id', $lid->lid_id)
 
 
 
+
+
+
   public function UploadBewijs(Request $request)
   {
-    
+
 
       $request->validate([
           'betaling_bewijs' => 'required|file|mimes:pdf|max:5120', // max 5MB
@@ -260,7 +318,7 @@ $beschikbareJaren = \App\Models\Betaling::where('lid_id', $lid->lid_id)
       return redirect()->back()->with('success', 'Uw betalingsbewijs is succesvol verzonden naar de beheerder ter beoordeling. U ontvangt bericht zodra het is verwerkt.');
   }
 
-  
+
 
 
 
@@ -300,7 +358,7 @@ $beschikbareJaren = \App\Models\Betaling::where('lid_id', $lid->lid_id)
 
 
 
-   
+
  public function KoppelOfEdit($gebruiker_id)
     {
         Gate::authorize('leden-beheren');

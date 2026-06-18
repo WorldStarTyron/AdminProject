@@ -82,7 +82,7 @@
                             <p class="text-xs text-slate-500 font-semibold">Lid ID: {{ $lid->lid_id }} • {{ $lid->lid_type }}</p>
                         </div>
                     </div>
-                    
+
                     <!-- Password reset link button -->
                     <a href="{{ route('recover-password') }}" class="mt-4 md:mt-0">
                         <button class="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl border border-slate-200 transition-all duration-200 shadow-sm cursor-pointer hover:-translate-y-0.5 active:translate-y-0">
@@ -146,15 +146,32 @@
                                 <p class="text-4xl md:text-5xl font-extrabold tracking-tight text-white mb-6 font-mono leading-none">
                                     SRD {{ number_format($openstaandeBalans, 2, ',', '.') }}
                                 </p>
-                                
-                                <div class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-300 text-[11px] font-bold uppercase tracking-wider">
+
+<div class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-300 text-[11px] font-bold uppercase tracking-wider">
                                     <i class="fa-regular fa-clock text-xs"></i>
                                     <span>Deadline: {{ $deadline ? $deadline->translatedFormat('d M Y') : 'Geen' }}</span>
                                 </div>
                             </div>
                         </div>
-  
-                        <!--Upload Button-->
+
+                        <!-- Warning: Already paid for this month -->
+                        @if($hasPaidThisMonth) 
+                            <div class="relative z-10 mt-4 mb-5">
+                                <div class="bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-3">
+                                    <div class="flex items-center justify-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                                            <i class="fa-solid fa-triangle-exclamation text-amber-600 text-sm"></i>
+                                        </div>
+                                        <div class="">
+                                            <p class="text-sm font-bold text-amber-200">U heeft voor deze maand al betaald</p>
+                                            <p class="text-xs text-amber-300/80 mt-0.5">U heeft reeds betaald voor {{ now()->translatedFormat('F Y') }}. Wacht op de volgende openstaande betaling.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        <!--Upload Button (disable if already paid this month)-->
                       <form action="{{route('UploadBewijs')}}" method="POST" enctype="multipart/form-data" id="bewijsForm">
                           @csrf
                           <input type="file" name="betaling_bewijs" id="bewijsInput" accept="application/pdf" class="hidden"
@@ -167,7 +184,7 @@
                           @error('betaling_bewijs')
                               <p class="text-red-400 text-xs mt-2">{{ $message }}</p>
                           @enderror
-                          
+
                       </form>
                     </div>
 
@@ -263,7 +280,8 @@
             @endif
         </form>
     </div>
-
+  
+    <!-- Lid betaling table -->
     <div class="overflow-x-auto">
         <table class="w-full text-sm" id="paymentHistoryTable">
             <thead>

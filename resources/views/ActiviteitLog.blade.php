@@ -16,16 +16,16 @@
      MAIN WRAPPER: Responsive dashboard container with flexible sidebar placement
      ========================================================================== -->
 <div class="flex min-h-screen">
-    
+
     <!-- INCLUDE SIDEBAR LAYOUT -->
     @include('Layouts.Sidebars.sidebar')
 
     <!-- MAIN PAGE CONTENT CONTAINER (offsets to make room for fixed sidebar) -->
     <div class="flex-1 ml-0 md:ml-64 transition-all duration-300 min-w-0 overflow-x-hidden">
-        
+
         <!-- INCLUDE HEADER BAR LAYOUT -->
         @include('Layouts.Headers.header')
-        
+
         <!-- ==========================================================================
              MAIN CONTENT SPACE
              ========================================================================== -->
@@ -35,10 +35,10 @@
             @php
                 // Fetch dynamic items from controller pagination
                 $displayLogs = $activiteiten->items();
-                
+
                 // Determine whether to display sample mockup data when database logs are empty
                 $showMockData = count($displayLogs) === 0 && empty($search) && $tab === 'Alle';
-                
+
                 if ($showMockData) {
                     // Populate mockup objects mimicking the design layout screenshot
                     $displayLogs = [
@@ -114,7 +114,7 @@
                  KPI SUMMARY CARDS GRID
                  ========================================================================== -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                
+
                 <!-- CARD: Totaal Activiteiten -->
                 <div class="bg-white rounded-2xl border border-slate-100 shadow-[0_2px_12px_-3px_rgba(0,0,0,0.04)] p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-6px_rgba(0,0,0,0.08)] flex items-start justify-between">
                     <div class="space-y-3">
@@ -143,12 +143,12 @@
                  FILTER & SEARCH BAR CONTROL SECTION
                  ========================================================================== -->
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                
+
                 <!-- SEARCH INPUT CONTROL FORM -->
                 <form method="GET" action="{{ route('ActiviteitLog') }}" class="w-full lg:w-96 flex items-center">
                     <!-- Maintain tab status in hidden input across search events -->
                     <input type="hidden" name="tab" value="{{ $tab }}">
-                    
+
                     <div class="relative w-full">
                         <!-- Centered magnifying glass search icon vector -->
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
@@ -177,7 +177,7 @@
                  LOGS DATA PRESENTATION TABLE CARD
                  ========================================================================== -->
             <div class="bg-white rounded-2xl border border-slate-100 shadow-[0_2px_12px_-3px_rgba(0,0,0,0.04)] overflow-hidden">
-                
+
                 <!-- Table View container -->
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm text-left">
@@ -195,12 +195,12 @@
                             @forelse($displayLogs as $act)
                                 <!-- Row Item with smooth hover states -->
                                 <tr class="hover:bg-slate-50/50 transition-colors duration-150">
-                                    
+
                                     <!-- LOG ID Column with Monospace layout -->
                                     <td class="px-6 py-4 text-center font-mono text-slate-400 text-xs font-semibold">
                                         #{{ $act->log_id }}
                                     </td>
-                                    
+
                                     <!-- GEBRUIKER Column: Photo/Initials Bubble + Identity Sub-texting -->
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
@@ -219,7 +219,7 @@
                                                     } else {
                                                         $initials = 'U';
                                                     }
-                                                    
+
                                                     // Map specific initials to custom visual gradients
                                                     $colors = [
                                                         'PH' => 'from-blue-400 to-indigo-500', // Pieter Heijn
@@ -233,19 +233,25 @@
                                                     {{ $initials }}
                                                 </div>
                                             @endif
-                                            
-                                            <!-- User Name + User Database ID labels -->
+
+<!-- User Name + User Database ID labels -->
                                             <div class="flex flex-col">
                                                 <span class="font-bold text-slate-800 leading-tight">
                                                     {{ $act->gebruiker ? $act->gebruiker->naam : 'Onbekende Gebruiker' }}
                                                 </span>
                                                 <span class="text-[10px] text-slate-400 font-bold tracking-wider uppercase mt-0.5">
-                                                    {{ $act->gebruiker ? $act->gebruiker->rollen->pluck('naam')->join(', ') : 'Geen rol' }}
-                                                </span> 
+                                                    @php
+                                                        $rolLabel = 'Geen rol';
+                                                        if ($act->gebruiker && $act->gebruiker->rollen && $act->gebruiker->rollen->count() > 0) {
+                                                            $rolLabel = $act->gebruiker->rollen->pluck('naam')->join(', ');
+                                                        }
+                                                    @endphp
+                                                    {{ $rolLabel }}
+                                                </span>
                                             </div>
                                         </div>
                                     </td>
-                                    
+
                                     <!-- ACTIE Column: Categorized Dynamic Colored Badge Pills -->
                                     <td class="px-6 py-4">
                                        @php
@@ -319,23 +325,48 @@
                                         } elseif ($actStr === 'betaling_verwijderd') {
                                             $badgeLabel = 'Betaling verwijderd';
                                             $badgeStyle = 'bg-amber-50 text-amber-700 ring-1 ring-amber-600/15';
-                                        
+
 
                                             //Betaling hersteld
                                         }elseif (in_array($actStr, ['betaling_hersteld'])) {
                                             $badgeLabel = 'Betaling hersteld';
                                             $badgeStyle = 'bg-green-50 text-green-700 ring-1 ring-green-600/15';
-                                        
+
                                         // Upload actie
                                         }elseif ($actStr === 'bewijs_geüpload') {
                                             $badgeLabel = 'Bewijs geüpload';
                                             $badgeStyle = 'bg-teal-50 text-teal-700 ring-1 ring-teal-600/15';
-                                        
-                                        // gebruiker acties
+
+// gebruiker acties
                                         }elseif (in_array($actStr, ['gebruiker_toegevoegd', 'gebruiker_verwijderd', 'gebruiker_gewijzigd'])) {
                                             $badgeLabel = 'Gebruiker gewijzigd';
                                             $badgeStyle = 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/15';
-                                        
+
+                                        // systeem acties
+                                        }elseif (in_array($actStr, ['systeem_scan', 'systeem_onderhoud', 'backup gemaakt'])) {
+                                            $badgeLabel = 'Systeem';
+                                            $badgeStyle = 'bg-slate-100 text-slate-700 ring-1 ring-slate-600/15';
+
+                                        // lid gekoppeld
+                                        }elseif ($actStr === 'lid_gekoppeld') {
+                                            $badgeLabel = 'Lid gekoppeld';
+                                            $badgeStyle = 'bg-violet-50 text-violet-700 ring-1 ring-violet-600/15';
+
+                                        // email verzonden
+                                        }elseif (in_array($actStr, ['email verzonden', 'notificatie_verzonden'])) {
+                                            $badgeLabel = 'Notificatie verzonden';
+                                            $badgeStyle = 'bg-cyan-50 text-cyan-700 ring-1 ring-cyan-600/15';
+
+                                        // lid deactiveren
+                                        }elseif ($actStr === 'lid_deactiveer') {
+                                            $badgeLabel = 'Lid gedeactiveerd';
+                                            $badgeStyle = 'bg-red-50 text-red-700 ring-1 ring-red-600/15';
+
+                                        // lid heractiveren
+                                        }elseif ($actStr === 'lid_reactiveer') {
+                                            $badgeLabel = 'Lid geheractiveerd';
+                                            $badgeStyle = 'bg-green-50 text-green-700 ring-1 ring-green-600/15';
+
                                         // fallback (alles wat niet past)
                                         } else {
                                             $badgeLabel = 'Systeem';
@@ -346,7 +377,7 @@
                                             {{ $badgeLabel }}
                                         </span>
                                     </td>
-                                    
+
                                     <!-- DETAILS Column: Formats JSON blocks and wraps text strings -->
                                     <td class="px-6 py-4 font-medium text-slate-600">
                                         @if(is_array($act->details))
@@ -359,13 +390,13 @@
                                                     unset($metadata['message']);
                                                 }
                                             @endphp
-                                            
+
                                             @if($textMsg)
                                                 <div class="text-slate-800 font-semibold text-sm leading-snug">
                                                     {{ $textMsg }}
                                                 </div>
                                             @endif
-                                            
+
                                             @if(count($metadata) > 0)
                                                 <!-- Render remaining metadata JSON configurations in monospace dark bubbles -->
                                                 <code class="text-[11px] font-mono text-slate-500 bg-slate-50 border border-slate-100 rounded-lg px-2 py-1 select-all break-all shadow-inner inline-block max-w-lg mt-1.5">
@@ -383,7 +414,7 @@
                                             </span>
                                         @endif
                                     </td>
-                                    
+
                                     <!-- TIJDSTIP Column: Clock Icon prefix + formatted timestamp -->
                                     <td class="px-6 py-4 text-slate-400 text-xs font-medium">
                                         <i class="fa-regular fa-clock mr-1 text-slate-300 text-sm"></i>
@@ -411,12 +442,12 @@
                      ========================================================================== -->
                 @if(!$showMockData)
                     <div class="px-6 py-5 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-                        
+
                         <!-- Page Index Count indicator -->
                         <span class="text-xs text-slate-400 font-semibold tracking-wide uppercase">
                             Toont {{ $activiteiten->firstItem() ?? 0 }}-{{ $activiteiten->lastItem() ?? 0 }} van {{ $activiteiten->total() }} resultaten
                         </span>
-                        
+
                         <!-- Beautiful Paginated Link controllers mapped directly to backend parameters -->
                         <div class="flex items-center gap-1">
                             <!-- Left arrow control link -->

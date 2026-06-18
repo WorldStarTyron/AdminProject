@@ -1,6 +1,9 @@
+// Dit bestand zorgt voor de grafiek op het dashboard
+// We halen de gegevens op en laten de grafiek zien
+
 document.addEventListener('DOMContentLoaded', function () {
 
-    // Chart opties
+    // Basis instellingen voor de grafiek
     var options = {
         series: [],
         chart: {
@@ -48,19 +51,20 @@ document.addEventListener('DOMContentLoaded', function () {
             itemMargin: { horizontal: 10, vertical: 0 }
         },
         noData: {
-            text: 'Data laden...',
+            text: 'Gegevens laden...',
             style: { color: '#94a3b8', fontSize: '14px' }
         }
     };
 
+    // Grafiek maken
     var chart = new ApexCharts(document.querySelector("#performanceChart"), options);
     chart.render();
 
-    // Referenties naar de dropdowns
+    // Dropdowns ophalen
     var jaarSelect = document.getElementById('filterJaar');
     var maandSelect = document.getElementById('filterMaand');
 
-    // Functie om chart data op te halen met filters
+    // Gegevens ophalen met filters
     function loadChartData() {
         var params = new URLSearchParams();
 
@@ -84,14 +88,14 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .then(response => response.json())
         .then(data => {
-            // Update x-as labels
+            // Labels updaten
             chart.updateOptions({
                 xaxis: {
                     categories: data.labels
                 }
             });
 
-            // Update chart series (alleen de 4 relevante datasets)
+            // Gegevens in de grafiek zetten
             chart.updateSeries([
                 { name: 'Contributie (Srd)', data: data.contributie },
                 { name: 'Leden',             data: data.leden },
@@ -99,13 +103,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 { name: 'Niet betaald',      data: data.niet_betaald }
             ]);
 
-            // Vul de Jaar dropdown (alleen bij eerste keer laden)
+            // Jaar dropdown vullen (alleen eerst keer)
             if (jaarSelect && jaarSelect.options.length <= 1) {
                 data.Totaaljaren.forEach(function(jaar) {
                     var opt = document.createElement('option');
                     opt.value = jaar;
                     opt.textContent = jaar;
-                    // Selecteer het huidige jaar
                     if (jaar === data.huidigJaar) {
                         opt.selected = true;
                     }
@@ -113,10 +116,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
             }
 
-            // Vul de Maand dropdown opnieuw (maanden kunnen per jaar anders zijn)
+            // Maand dropdown vullen
             if (maandSelect) {
                 var currentMaandValue = maandSelect.value;
-                // Bewaar alleen de eerste "Alle maanden" optie
                 while (maandSelect.options.length > 1) {
                     maandSelect.remove(1);
                 }
@@ -139,14 +141,13 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         })
         .catch(err => {
-            console.error('Chart data kon niet geladen worden:', err);
+            console.error('Kon gegevens niet laden:', err);
         });
     }
 
-    // Event listeners voor de dropdowns
+    // Bij verandering van jaar of maand, opnieuw laden
     if (jaarSelect) {
         jaarSelect.addEventListener('change', function() {
-            // Reset maand selectie wanneer jaar verandert
             if (maandSelect) {
                 maandSelect.value = '';
             }

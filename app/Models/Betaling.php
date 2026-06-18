@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Betaling extends Model
 {
     use SoftDeletes;
-    
+
     public $timestamps = false;
 
     protected $primaryKey = 'betaling_id';
@@ -57,10 +57,11 @@ class Betaling extends Model
         return in_array($status, self::ONBETAALDE_STATUSSEN, true);
     }
 
-    // Som van alle goedgekeurde/betaalde betalingen (soft-deleted records worden automatisch uitgesloten)
+// Som van alle goedgekeurde/betaalde betalingen
+    // Includes both 'betaald' and 'goed_gekeurd' as paid income
     public static function totaleInkomsten(): float
     {
-        return (float) self::where('status', 'betaald')->sum('bedrag');
+        return (float) self::whereIn('status', ['betaald', 'goed_gekeurd'])->sum('bedrag');
     }
 
     // Som van openstaande bedragen voor een maand (niet_betaald + Openstaand + in_afwachting)
@@ -71,12 +72,14 @@ class Betaling extends Model
             ->sum('bedrag');
     }
 
-    // Aantal actieve leden met een betaalde betaling in de gekozen maand
+// Aantal actieve leden met een betaalde betaling in de gekozen maand
+    // Includes both 'betaald' and 'goed_gekeurd'
     public static function aantalBetaaldeLeden(int $maand, int $jaar): int
     {
         return (int) Lid::metActieveGebruiker()
             ->whereHas('betalingen', function ($q) use ($maand, $jaar) {
-                $q->voorMaand($maand, $jaar)->where('status', 'betaald');
+                $q->voorMaand($maand, $jaar)
+                  ->whereIn('status', ['betaald', 'goed_gekeurd']);
             })
             ->count();
     }

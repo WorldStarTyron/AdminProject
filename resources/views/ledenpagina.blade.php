@@ -43,7 +43,7 @@
                         </form>
                     </div>
                 </div>
- 
+
                 <div class="lp-info-banner">
                     <div class="lp-info-icon">
                         <i class="fa-solid fa-circle-info"></i>
@@ -53,7 +53,7 @@
 
                 @include('Layouts.Charts.Totalleden-Charts')
 
-                
+
                   <!--- Leden Table with all details -->
                 <div class="lp-table-section">
                     <div class="lp-table-wrapper">
@@ -91,17 +91,18 @@
                                                     <i class="fa-solid fa-ellipsis-vertical"></i>
                                                 </button>
                                                 <ul class="dropdown-menu hidden">
-                                                    <li><a href="{{ route('ledenpagina.show', $lid->lid_id) }}">
+<li><a href="{{ route('ledenpagina.show', $lid->lid_id) }}">
                                                         <i class="fa-regular fa-eye"></i>
                                                         Bekijken
-                                                    </a></li>
+                                                    </a>
+                                                </li>
                                                 </ul>
                                             </div>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="lp-empty-state">
+<td colspan="6" class="lp-empty-state">
                                             <div class="lp-empty-content">
                                                 <i class="fa-regular fa-users" style="font-size: 48px; color: #94a3b8;"></i>
                                                 <p>Geen leden gevonden</p>
@@ -115,7 +116,7 @@
                     </div>
 
 
-                           <!-- Pagination --> 
+                           <!-- Pagination -->
                     @if($leden->hasPages())
                     <div class="lp-table-footer">
                         <div class="lp-pagination-info">
@@ -158,7 +159,7 @@
                         </div>
                     </div>
                     @endif
-                </div> 
+                </div>
 
                 <!-- Stats: Total members, active members -->
                 <div class="lp-stats-row">
@@ -200,6 +201,6 @@
     </div>
 
     @vite(['resources/js/UI/Button&More.js', 'resources/js/Charts/TotalLeden-Chart.js'])
-   
+
 </body>
 </html>

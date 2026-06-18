@@ -17,8 +17,8 @@ class RapportController extends Controller
     //Rapportage Pagina Data
     public function RapportageData(Request $request)
     {
-         Gate::authorize('rapport-bekijken'); 
-         
+         Gate::authorize('rapport-bekijken');
+
         // We zoeken de oudste en nieuwste betaling in de database
         $oudsteDatum = Betaling::min('ingediend_op');
         $nieuwsteDatum = Betaling::max('ingediend_op');
@@ -35,9 +35,10 @@ class RapportController extends Controller
         $query = Betaling::query()->whereBetween('ingediend_op', [$fromStart, $toEnd]);
 
 
-        
-        // Card 1: Totale inkomsten (som van alle betaalde betalingen)
-        $totaleInkomsten = (clone $query)->where('status', 'betaald')->sum('bedrag');
+
+// Card 1: Totale inkomsten (som van alle betaalde betalingen)
+        // Includes both 'betaald' and 'goed_gekeurd' as paid income
+        $totaleInkomsten = (clone $query)->whereIn('status', ['betaald', 'goed_gekeurd'])->sum('bedrag');
 
         // Parse date range to months and years for outstanding payments (where ingediend_op is null)
         $startYear = (int) date('Y', strtotime($from));
@@ -67,11 +68,12 @@ class RapportController extends Controller
         $totaalVerwacht = $totaleInkomsten + $openstaandBedrag;
         $dekkingsgraad = $totaalVerwacht > 0 ? round(($totaleInkomsten / $totaalVerwacht) * 100, 1) : 100;
 
-        // We berekenen de echte omzetverdeling per betaalmethode binnen de geselecteerde periode
-        $overmakingBedrag = (clone $query)->where('status', 'betaald')->where('methode', 'overmaking')->sum('bedrag');
-        $fysiekBedrag = (clone $query)->where('status', 'betaald')->where('methode', 'fysiek')->sum('bedrag');
+// We berekenen de echte omzetverdeling per betaalmethode binnen de geselecteerde periode
+        // Includes both 'betaald' and 'goed_gekeurd' as paid income
+        $overmakingBedrag = (clone $query)->whereIn('status', ['betaald', 'goed_gekeurd'])->where('methode', 'overmaking')->sum('bedrag');
+        $fysiekBedrag = (clone $query)->whereIn('status', ['betaald', 'goed_gekeurd'])->where('methode', 'fysiek')->sum('bedrag');
         $totaalBedragMethoden = $overmakingBedrag + $fysiekBedrag;
- 
+
 
         //Berekening van de dekkingsgraad op basis van overmakingen en fysieke betalingen.
         if ($totaalBedragMethoden > 0) {
@@ -130,9 +132,10 @@ class RapportController extends Controller
             }
         }
 
-        // We halen de inkomsten op per maand en per betaalmethode
+// We halen de inkomsten op per maand en per betaalmethode
+        // Includes both 'betaald' and 'goed_gekeurd' as paid income
         $rijen = Betaling::selectRaw('jaar, maand, methode, SUM(bedrag) as totaal')
-            ->where('status', 'betaald')
+            ->whereIn('status', ['betaald', 'goed_gekeurd'])
             ->whereBetween('ingediend_op', [$fromStart, $toEnd])
             ->groupBy('jaar', 'maand', 'methode')
             ->get()

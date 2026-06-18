@@ -1,15 +1,9 @@
-// AddBetalingModal.js
-// ====================
-// Handles the Add Betaling modal popup:
-// - Opening and closing the modal
-// - File upload label update
-// - Form submission placeholder (ready for backend route)
+// Dit bestand zorgt voor het toevoegen van een betaling
+// We laten het formulier zien en sturen de gegevens naar de server
 
 document.addEventListener('DOMContentLoaded', function () {
 
-    // ==============================
-    // STEP 1: Get all elements
-    // ==============================
+    // === Stap 1: Alle elementen ophalen ===
     var modal = document.getElementById('addBetalingModal');
     var openBtn = document.getElementById('openBetalingModal');
     var closeBtn = document.getElementById('closeBetalingModalBtn');
@@ -22,9 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var fileText = document.getElementById('fileUploadText');
 
 
-    // ==============================
-    // STEP 2: Open the modal
-    // ==============================
+    // === Stap 2: Modal openen ===
     function openModal() {
         if (modal) {
             modal.classList.add('active');
@@ -33,9 +25,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    // ==============================
-    // STEP 3: Close the modal
-    // ==============================
+    // === Stap 3: Modal sluiten ===
     function closeModal() {
         if (modal) {
             modal.classList.remove('active');
@@ -48,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         if (fileText) fileText.textContent = 'Bestand uploaden';
 
-        // Reset today's date as default
+        // Vandaag als standaarddatum zetten
         var dateField = document.getElementById('betaling_datum');
         if (dateField) {
             dateField.value = new Date().toISOString().split('T')[0];
@@ -56,21 +46,19 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    // ==============================
-    // STEP 4: Button click listeners
-    // ==============================
+    // === Stap 4: Knoppen koppelen ===
     if (openBtn) openBtn.addEventListener('click', openModal);
     if (closeBtn) closeBtn.addEventListener('click', closeModal);
     if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
 
-    // Close when clicking the dark overlay behind the modal
+    // Sluiten als je op de donkere achtergrond klikt
     if (modal) {
         modal.addEventListener('click', function (e) {
             if (e.target === modal) closeModal();
         });
     }
 
-    // Close when pressing Escape key
+    // Sluiten als je op Escape drukt
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && modal && modal.classList.contains('active')) {
             closeModal();
@@ -78,9 +66,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 
-    // ==============================
-    // STEP 5: File upload label update
-    // ==============================
+    // === Stap 5: Bestandsnaam updaten ===
     if (fileInput && fileText) {
         fileInput.addEventListener('change', function () {
             if (this.files && this.files.length > 0) {
@@ -92,25 +78,24 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    // ==============================
-    // STEP 6: Form submission
-    // ==============================
+    // === Stap 6: Formulier versturen ===
     if (form) {
         form.addEventListener('submit', function (e) {
             e.preventDefault();
 
-            // Disable submit button
+            // Knop uitschakelen tijdens versturen
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span class="spinner"></span> Bezig...';
 
-            // Hide previous errors
+            // Oude fouten verbergen
             errorsDiv.classList.add('hidden');
             errorList.innerHTML = '';
 
-            // Collect form data (including file)
+            // Gegevens verzamelen
             var formData = new FormData(form);
             var storeUrl = form.getAttribute('data-store-url');
 
+            // Versturen naar server
             fetch(storeUrl, {
                 method: 'POST',
                 headers: {
@@ -124,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         return response.json().then(function (data) {
                             closeModal();
 
-                            // Show success toast
+                            // Success melding tonen
                             var toast = document.getElementById('betalingSuccessToast');
                             if (toast) {
                                 toast.classList.add('show');
@@ -133,14 +118,14 @@ document.addEventListener('DOMContentLoaded', function () {
                                 }, 3000);
                             }
 
-                            // Reload page to show new betaling in the table
+                            // Pagina vernieuwen
                             setTimeout(function () {
                                 window.location.reload();
                             }, 1000);
                         });
                     } else {
                         return response.json().then(function (data) {
-                            // Show validation errors
+                            // Foutmeldingen tonen
                             if (data.errors) {
                                 errorsDiv.classList.remove('hidden');
                                 for (var field in data.errors) {
@@ -157,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 .catch(function () {
                     errorsDiv.classList.remove('hidden');
                     var li = document.createElement('li');
-                    li.textContent = 'Er is een fout opgetreden. Probeer het opnieuw.';
+                    li.textContent = 'Er is iets fout gegaan. Probeer opnieuw.';
                     errorList.appendChild(li);
                 })
                 .finally(function () {

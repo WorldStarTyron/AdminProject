@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Betaling;
 use App\Models\Lid;
+use Carbon\Carbon;
 
 class MainDashboardController extends Controller
 {
@@ -13,6 +14,7 @@ class MainDashboardController extends Controller
     }
 
 
+    
 public function Maindashboard()
 {
     // Huidige maand en jaar voor alle dashboard berekeningen
@@ -27,23 +29,31 @@ public function Maindashboard()
     $totaalBetaald     = $stats['totaalBetaald'];
     $totaalNietBetaald = $stats['totaalNietBetaald'];
 
-// Deadline leden: openstaande betalingen waarvan de maand-deadline binnen 7 dagen valt
-    // Sorted by jaar DESC, maand DESC to get the LATEST payment first for deadline display
-    $deadlineLeden = Lid::metActieveGebruiker()
-        ->whereHas('betalingen', function ($q) {
-            $q->whereIn('status', Betaling::ONBETAALDE_STATUSSEN)
-              ->whereRaw(
-                  'LAST_DAY(STR_TO_DATE(CONCAT(jaar, "-", maand, "-01"), "%Y-%m-%d")) BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)'
-              );
-        })
-        ->with(['betalingen' => function ($q) {
-            // Sort by jaar DESC, maand DESC so the first() gets the LATEST openstaande betaling
-            // This ensures the deadline shown is from the most recent payment
-            $q->whereIn('status', Betaling::ONBETAALDE_STATUSSEN)
-              ->orderBy('jaar', 'desc')
-              ->orderBy('maand', 'desc');
-        }, 'gebruiker'])
+    // Deadline leden: leden met aankomende of verlopen betalingsdeadlines
+    // Gebruikt volgende_deadline uit de meest recente betaalde betaling
+    $vandaag = Carbon::today();
+    $overZevenDagen = $vandaag->copy()->addDays(7);
+
+    // Haal alle actieve leden op met hun meest recente betaalde betaling
+    $alleLeden = Lid::metActieveGebruiker()
+        ->with(['gebruiker', 'laatsteBetaaldeBetaling'])
         ->get();
+
+    // Filter en sorteer leden op basis van hun actieve deadline
+    $deadlineLeden = $alleLeden->map(function ($lid) {
+        $lid->_deadline = $lid->actieveDeadline();
+        return $lid;
+    })
+    ->filter(function ($lid) use ($vandaag, $overZevenDagen) {
+        // Toon alleen leden met een deadline die verlopen is of binnen 7 dagen valt
+        if (!$lid->_deadline) return false;
+        return $lid->_deadline->lte($overZevenDagen);
+    })
+    ->sortBy(function ($lid) {
+        // Verlopen deadlines eerst, dan op datum
+        return $lid->_deadline->timestamp;
+    })
+    ->values();
 
     // Leden voor het dashboard-tabel: alleen actieve leden, met betalingen van de huidige maand
     $dashboardLeden = Lid::metActieveGebruiker()
@@ -77,10 +87,7 @@ public function ChartData(Request $request)
     $jaar = $request->input('jaar', now()->year);
     $selectedMaand = $request->input('maand'); // null = alle maanden
 
-    // --- FIX: Groepeer op 'maand' veld (voor welke maand de betaling is),
-    // NIET op 'ingediend_op' (wanneer betaling is ingediend)
-    // Dit zorgt ervoor dat betalingen voor bv. Juli ook bij Juli tonen,
-    // zelfs als ze eerder zijn ingediend.
+
 
     // Contributie: som van bedrag per maand waarvoor betaald moet worden
     // Groepeer op 'maand' veld uit de betalingen tabel

@@ -105,6 +105,41 @@ class Lid extends Model
             ->first();
     }
 
+    /**
+     * Relatie: de meest recente betaalde betaling voor dit lid.
+     * Wordt gebruikt om de volgende_deadline te bepalen.
+     */
+    public function laatsteBetaaldeBetaling()
+    {
+        return $this->hasOne(Betaling::class, 'lid_id', 'lid_id')
+            ->whereIn('status', ['betaald', 'goed_gekeurd'])
+            ->orderBy('ingediend_op', 'desc')
+            ->latest('betaling_id');
+    }
+
+    /**
+     * Geeft de actieve (volgende) deadline voor dit lid.
+     * - Als er een betaalde betaling is met volgende_deadline → gebruik die
+     * - Als het lid nog nooit betaald heeft → lid_sinds + 1 maand
+     *
+     * @return \Carbon\Carbon|null
+     */
+    public function actieveDeadline(): ?\Carbon\Carbon
+    {
+        $laatsteBetaling = $this->laatsteBetaaldeBetaling;
+
+        if ($laatsteBetaling && $laatsteBetaling->volgende_deadline) {
+            return \Carbon\Carbon::parse($laatsteBetaling->volgende_deadline);
+        }
+
+        // Fallback: lid_sinds + 1 maand als eerste deadline
+        if ($this->lid_sinds) {
+            return \Carbon\Carbon::parse($this->lid_sinds)->addMonth();
+        }
+
+        return null;
+    }
+
 }
 
  

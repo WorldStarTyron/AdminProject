@@ -198,6 +198,11 @@ $request->validate([
             ]
         );
 
+        // Bereken volgende deadline als de betaling als betaald is geregistreerd
+        if (in_array($request->status, ['betaald', 'goed_gekeurd'])) {
+            $betaling->berekenVolgendeDeadline($datum->format('Y-m-d'));
+        }
+
         // Bon aanmaken als er nog geen bon bestaat
         if (!$betaling->bon) {
             BonController::genereer(
@@ -282,6 +287,14 @@ $request->validate([
             'jaar'            => $datum->year,
             'betaling_bewijs' => $bewijsPath,
         ]);
+
+        // Bereken volgende deadline bij statuswijziging
+        if (in_array($request->status, ['betaald', 'goed_gekeurd'])) {
+            $betaling->berekenVolgendeDeadline($datum->format('Y-m-d'));
+        } else {
+            // Status is niet meer betaald → deadline verwijderen
+            $betaling->update(['volgende_deadline' => null]);
+        }
 
         // Activiteit loggen
         if (auth()->check()) {
@@ -460,6 +473,9 @@ $request->validate([
     $betaling->status = 'betaald';
     $betaling->methode = 'overmaking';
     $betaling->save();
+
+    // Bereken volgende deadline na goedkeuring
+    $betaling->berekenVolgendeDeadline();
 
     if(!$betaling->bon){
         $gebruiker = $betaling->lid->gebruiker;

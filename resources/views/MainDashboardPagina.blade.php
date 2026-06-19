@@ -134,21 +134,14 @@
                             <div class="space-y-3.5">
                                 @forelse($deadlineLeden as $lid)
                                     @php
-                                        // Haal de eerste openstaande betaling op voor deadline-berekening
-                                        $firstPayment = $lid->betalingen->first();
-                                        if ($firstPayment) {
-                                            // Deadline = laatste dag van de maand waarvoor de betaling geldt
-                                            $deadline = \Carbon\Carbon::createFromDate(
-                                                $firstPayment->jaar,
-                                                $firstPayment->maand,
-                                                1
-                                            )->endOfMonth();
-                                            
+                                        // Gebruik de voorberekende deadline uit de controller
+                                        $deadline = $lid->_deadline;
+
+                                        if ($deadline) {
                                             // Calculate the signed number of days left until the deadline day
                                             $daysLeft = now()->startOfDay()->diffInDays($deadline->startOfDay(), false);
                                             
                                             // Determine urgency label and color coding based on days remaining
-                                            
                                             if ($daysLeft < 0) {
                                                 // Overdue: Show how many days overdue in red
                                                 $daysText = 'Verlopen (' . abs($daysLeft) . ' ' . (abs($daysLeft) == 1 ? 'dag' : 'dagen') . ')';
@@ -177,8 +170,8 @@
                                             
                                             $formattedDeadline = $deadline->format('d-m-Y');
                                         } else {
-                                            // Fallback if no unpaid payments are found for the member
-                                            $daysText = 'Geen openstaande betaling';
+                                            // Fallback if no deadline could be calculated
+                                            $daysText = 'Geen deadline beschikbaar';
                                             $colorClass = 'gray';
                                             $formattedDeadline = '';
                                         }
@@ -228,11 +221,14 @@
                                                 <div class="text-sm font-semibold text-gray-800">{{ $lid->gebruiker->naam }}</div>
                                                 <div class="text-xs {{ $daysTextColor }} font-semibold mt-0.5" title="Deadline: {{ $formattedDeadline }}">
                                                     {{ $daysText }}
+                                                    @if($formattedDeadline)
+                                                        <span class="text-gray-400 font-normal ml-1">· {{ $formattedDeadline }}</span>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="text-sm font-bold text-gray-900">
-                                            Srd {{ number_format($lid->betalingen->sum('bedrag'), 2, ',', '.') }}
+                                            Srd {{ number_format($lid->MaandelijkseBijdrage(), 2, ',', '.') }}
                                         </div>
                                     </div>
                                 @empty
@@ -241,7 +237,7 @@
                                             <i class="fa-regular fa-circle-check text-base"></i>
                                         </div>
                                         <div class="text-sm font-medium text-gray-700">Geen aankomende deadlines</div>
-                                        <div class="text-xs text-gray-500 mt-1">Alle openstaande betalingen zijn up-to-date.
+                                        <div class="text-xs text-gray-500 mt-1">Alle leden zijn up-to-date met hun betalingen.
                                             
                                         </div>
                                     </div>

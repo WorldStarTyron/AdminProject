@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Carbon\Carbon;
 class Betaling extends Model
 {
     use SoftDeletes;
@@ -27,6 +28,11 @@ class Betaling extends Model
         'jaar',
         'betaling_bewijs',
         'ingediend_op',
+        'volgende_deadline',
+    ];
+
+    protected $casts = [
+        'volgende_deadline' => 'date',
     ];
 
     public function lid()
@@ -55,6 +61,23 @@ class Betaling extends Model
     public static function isOnbetaald(?string $status): bool
     {
         return in_array($status, self::ONBETAALDE_STATUSSEN, true);
+    }
+
+    /**
+     * Bereken en sla de volgende deadline op.
+     * Gebruikt Carbon::addMonthNoOverflow() voor correcte maandovergangen.
+     * Bijv. 31 jan + 1 maand = 28 feb (niet 3 maart).
+     *
+     * @param  string|null  $betaaldOp  De datum waarop betaald is (standaard: ingediend_op)
+     * @return \Carbon\Carbon  De berekende volgende deadline
+     */
+    public function berekenVolgendeDeadline(?string $betaaldOp = null): Carbon
+    {
+        $basisDatum = Carbon::parse($betaaldOp ?? $this->ingediend_op);
+        $this->volgende_deadline = $basisDatum->copy()->addMonthNoOverflow();
+        $this->save();
+
+        return $this->volgende_deadline;
     }
 
 // Som van alle goedgekeurde/betaalde betalingen

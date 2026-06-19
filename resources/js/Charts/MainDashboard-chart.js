@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var options = {
         series: [],
         chart: {
-            type: 'area',
+            type: 'bar',
             height: 300,
             stacked: false,
             toolbar: { show: false },
@@ -18,18 +18,18 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         },
         plotOptions: {
-            area: {
+            bar: {
                 horizontal: false,
                 columnWidth: '55%',
                 borderRadius: 4,
+                borderRadiusApplication: 'end',
                 dataLabels: { position: 'top' }
             }
         },
         dataLabels: { enabled: false },
         stroke: {
             show: true,
-            width: 3,
-            curve: 'smooth',
+            width: 1,
             colors: ['#0ea5e9', '#22c55e', '#f59e0b']
         },
         xaxis: {
@@ -54,15 +54,6 @@ document.addEventListener('DOMContentLoaded', function () {
             show: true,
             borderColor: '#e2e8f0',
             strokeDashArray: 4
-        },
-        fill: {
-            type: 'gradient',
-            gradient: {
-                shadeIntensity: 1,
-                opacityFrom: 0.4,
-                opacityTo: 0.1,
-                stops: [0, 100]
-            }
         },
         colors: ['#0ea5e9', '#22c55e', '#f59e0b'],
         legend: {

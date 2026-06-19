@@ -241,7 +241,9 @@
                                             <i class="fa-regular fa-circle-check text-base"></i>
                                         </div>
                                         <div class="text-sm font-medium text-gray-700">Geen aankomende deadlines</div>
-                                        <div class="text-xs text-gray-500 mt-1">Alle openstaande betalingen zijn up-to-date.</div>
+                                        <div class="text-xs text-gray-500 mt-1">Alle openstaande betalingen zijn up-to-date.
+                                            
+                                        </div>
                                     </div>
                                 @endforelse
                             </div>

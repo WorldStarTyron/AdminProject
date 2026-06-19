@@ -73,7 +73,7 @@ class BetalingController extends Controller
             ->orderBy('betalingen.ingediend_op', 'desc')
             ->take(5)->get();
 
-// Totaal betaald deze maand (voor stats card)
+        // Totaal betaald deze maand (voor stats card)
         // Includes both 'betaald' and 'goed_gekeurd' as paid income
         $maandTotaal = Betaling::whereIn('status', ['betaald', 'goed_gekeurd'])
             ->where('maand', $maand)
@@ -239,11 +239,6 @@ $request->validate([
                 'details'     => 'Factuurbon automatisch aangemaakt voor betaling #' . $betaling->betaling_id . '.',
             ]);
         }
-
-
-
-
-
 
         return response()->json(['success' => true, 'message' => 'Betaling succesvol toegevoegd'], 201);
     }
@@ -516,8 +511,8 @@ public function RejectBewijs(Request $request, $betaling_id){
     public function removeduplicateBetalingen()
     {
         // Haal alle betalingen op die:
-        // - Status is Openstaand
-        // - Geen methode hebben (dus nog niet betaald)
+        // Status is Openstaand
+        // Een methode hebben (dus nog niet betaald)
         $allebetalingen = Betaling::with('bonnen')
             ->where('status', 'Openstaand')
             ->whereNull('methode')

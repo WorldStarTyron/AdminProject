@@ -77,30 +77,32 @@ public function ChartData(Request $request)
     $jaar = $request->input('jaar', now()->year);
     $selectedMaand = $request->input('maand'); // null = alle maanden
 
-    // Contributie (som van bedrag) per maand
-    $contributie = Betaling::whereYear('ingediend_op', $jaar)
-        ->selectRaw('MONTH(ingediend_op) as maand, SUM(bedrag) as totaal')
-        ->groupByRaw('MONTH(ingediend_op)')
+    // --- FIX: Groepeer op 'maand' veld (voor welke maand de betaling is),
+    // NIET op 'ingediend_op' (wanneer betaling is ingediend)
+    // Dit zorgt ervoor dat betalingen voor bv. Juli ook bij Juli tonen,
+    // zelfs als ze eerder zijn ingediend.
+
+    // Contributie: som van bedrag per maand waarvoor betaald moet worden
+    // Groepeer op 'maand' veld uit de betalingen tabel
+    $contributie = Betaling::where('jaar', $jaar)
+        ->selectRaw('maand, SUM(bedrag) as totaal')
+        ->groupBy('maand')
         ->pluck('totaal', 'maand');
 
-    // Totaal aantal leden per maand (op basis van aanmaakdatum lid)
-    $leden = Lid::whereYear('lid_sinds', $jaar)
-        ->selectRaw('MONTH(lid_sinds) as maand, COUNT(*) as totaal')
-        ->groupByRaw('MONTH(lid_sinds)')
-        ->pluck('totaal', 'maand');
-
-// Betaald per maand (includes both 'betaald' and 'goed_gekeurd')
-    $betaald = Betaling::whereYear('ingediend_op', $jaar)
+    // Betaald: aantal betaalde betalingen per maand
+    // Status 'betaald' of 'goed_gekeurd' telt als betaald
+    $betaald = Betaling::where('jaar', $jaar)
         ->whereIn('status', ['betaald', 'goed_gekeurd'])
-        ->selectRaw('MONTH(ingediend_op) as maand, COUNT(*) as totaal')
-        ->groupByRaw('MONTH(ingediend_op)')
+        ->selectRaw('maand, COUNT(*) as totaal')
+        ->groupBy('maand')
         ->pluck('totaal', 'maand');
 
-    // Niet betaald per maand (includes all unpaid statuses)
-    $nietBetaald = Betaling::whereYear('ingediend_op', $jaar)
+    // Niet betaald: aantal openstaande betalingen per maand
+    // Status 'niet_betaald', 'Openstaand' of 'in_afwachting' telt als niet betaald
+    $nietBetaald = Betaling::where('jaar', $jaar)
         ->whereIn('status', ['niet_betaald', 'Openstaand', 'in_afwachting'])
-        ->selectRaw('MONTH(ingediend_op) as maand, COUNT(*) as totaal')
-        ->groupByRaw('MONTH(ingediend_op)')
+        ->selectRaw('maand, COUNT(*) as totaal')
+        ->groupBy('maand')
         ->pluck('totaal', 'maand');
 
     // Bepaal welke maanden we tonen (filter op 1 maand of alle 12)
@@ -110,16 +112,16 @@ public function ChartData(Request $request)
         $maanden = range(1, 12);
     }
 
-    // Alle beschikbare jaren voor de dropdown
-    $Totaaljaren = Betaling::selectRaw('YEAR(ingediend_op) as jaar')
+    // Alle beschikbare jaren voor de dropdown (uit de betalingen tabel)
+    $Totaaljaren = Betaling::selectRaw('jaar')
         ->distinct()
         ->orderBy('jaar', 'desc')
         ->pluck('jaar')
         ->toArray();
 
     // Alle beschikbare maanden voor het geselecteerde jaar
-    $Totaalmaanden = Betaling::whereYear('ingediend_op', $jaar)
-        ->selectRaw('MONTH(ingediend_op) as maand')
+    $Totaalmaanden = Betaling::where('jaar', $jaar)
+        ->selectRaw('maand')
         ->distinct()
         ->orderBy('maand', 'asc')
         ->pluck('maand')
@@ -133,8 +135,8 @@ public function ChartData(Request $request)
     ];
 
     return response()->json([
+        // Zet alle data om naar de juiste volgorde per maand
         'contributie'   => array_map(fn($m) => (float)($contributie[$m] ?? 0), $maanden),
-        'leden'         => array_map(fn($m) => (int)($leden[$m] ?? 0), $maanden),
         'betaald'       => array_map(fn($m) => (int)($betaald[$m] ?? 0), $maanden),
         'niet_betaald'  => array_map(fn($m) => (int)($nietBetaald[$m] ?? 0), $maanden),
         'labels'        => array_map(fn($m) => $maandNamen[$m], $maanden),

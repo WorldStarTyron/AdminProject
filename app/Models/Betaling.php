@@ -62,15 +62,10 @@ class Betaling extends Model
     {
         return in_array($status, self::ONBETAALDE_STATUSSEN, true);
     }
-
-    /**
-     * Bereken en sla de volgende deadline op.
-     * Gebruikt Carbon::addMonthNoOverflow() voor correcte maandovergangen.
-     * Bijv. 31 jan + 1 maand = 28 feb (niet 3 maart).
-     *
-     * @param  string|null  $betaaldOp  De datum waarop betaald is (standaard: ingediend_op)
-     * @return \Carbon\Carbon  De berekende volgende deadline
-     */
+ 
+    // Bereken en sla de volgende deadline op.
+    // Gebruikt Carbon::addMonthNoOverflow() voor correcte maandovergangen.
+    // Bijv. 31 jan + 1 maand = 28 feb (niet 3 maart).
     public function berekenVolgendeDeadline(?string $betaaldOp = null): Carbon
     {
         $basisDatum = Carbon::parse($betaaldOp ?? $this->ingediend_op);

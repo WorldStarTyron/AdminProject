@@ -36,11 +36,7 @@ class PostController extends Controller
         return view('Layouts.AddModals.add-lid-modal');
     }
 
-
-
-
-
-    public function store(StoreLidRequest $request)
+public function store(StoreLidRequest $request)
     {
         Gate::authorize('leden-beheren');
 
@@ -253,4 +249,24 @@ class PostController extends Controller
 
         return redirect()->route('ledenpagina')->with('success', 'Lid verwijderd');
     }
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

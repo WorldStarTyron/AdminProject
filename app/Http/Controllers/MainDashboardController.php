@@ -29,31 +29,8 @@ public function Maindashboard()
     $totaalBetaald     = $stats['totaalBetaald'];
     $totaalNietBetaald = $stats['totaalNietBetaald'];
 
-    // Deadline leden: leden met aankomende of verlopen betalingsdeadlines
-    // Gebruikt volgende_deadline uit de meest recente betaalde betaling
-    $vandaag = Carbon::today();
-    $overZevenDagen = $vandaag->copy()->addDays(7);
-
-    // Haal alle actieve leden op met hun meest recente betaalde betaling
-    $alleLeden = Lid::metActieveGebruiker()
-        ->with(['gebruiker', 'laatsteBetaaldeBetaling'])
-        ->get();
-
-    // Filter en sorteer leden op basis van hun actieve deadline
-    $deadlineLeden = $alleLeden->map(function ($lid) {
-        $lid->_deadline = $lid->actieveDeadline();
-        return $lid;
-    })
-    ->filter(function ($lid) use ($vandaag, $overZevenDagen) {
-        // Toon alleen leden met een deadline die verlopen is of binnen 7 dagen valt
-        if (!$lid->_deadline) return false;
-        return $lid->_deadline->lte($overZevenDagen);
-    })
-    ->sortBy(function ($lid) {
-        // Verlopen deadlines eerst, dan op datum
-        return $lid->_deadline->timestamp;
-    })
-    ->values();
+    // Haal aankomende betalingen op via aparte methode
+    $deadlineLeden = $this->aankomendBetalingen();
 
     // Leden voor het dashboard-tabel: alleen actieve leden, met betalingen van de huidige maand
     $dashboardLeden = Lid::metActieveGebruiker()
@@ -152,6 +129,45 @@ public function ChartData(Request $request)
         'huidigJaar'    => (int)$jaar,
     ]);
 }
+
+    public function aankomendBetalingen()
+    {
+        $vandaag = Carbon::today();
+        $overZevenDagen = $vandaag->copy()->addDays(7);
+
+        // Haal alle actieve leden op met hun meest recente betaalde betaling
+        $alleLeden = Lid::metActieveGebruiker()
+            ->with(['gebruiker', 'laatsteBetaaldeBetaling'])
+            ->get();
+
+        // Filter en sorteer leden op basis van hun actieve deadline
+        $deadlineLeden = $alleLeden->map(function ($lid) {
+                $lid->_deadline = $lid->actieveDeadline();
+                return $lid;
+            })
+            ->filter(function ($lid) use ($vandaag, $overZevenDagen) {
+                // Toon alleen leden met een deadline die verlopen is of binnen 7 dagen valt
+                if (!$lid->_deadline) return false;
+                return $lid->_deadline->lte($overZevenDagen);
+            })
+            ->sortBy(function ($lid) {
+                // Verlopen deadlines eerst, dan op datum
+                return $lid->_deadline->timestamp;
+            })
+            ->values();
+
+        // Pagineer de collectie
+        $perPage = 5;
+        $deadlinePage = request()->input('deadline_page', 1);
+
+        return new \Illuminate\Pagination\LengthAwarePaginator(
+            $deadlineLeden->forPage($deadlinePage, $perPage),
+            $deadlineLeden->count(),
+            $perPage,
+            $deadlinePage,
+            ['pageName' => 'deadline_page', 'path' => request()->url()]
+        );
+    }
 
 
 }

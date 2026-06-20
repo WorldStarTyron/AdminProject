@@ -79,7 +79,7 @@ class Lid extends Model
     //elk lid type betaalt SRD 100 per maand (behalve bijzonder lidmaatschap)
     public function MaandelijkseBijdrage(): float
 {
-    return 150.00; 
+    return 150.00;
 }
 
     // Alleen leden met een actieve gebruiker (inactieve gebruikers tellen niet mee)
@@ -105,16 +105,18 @@ class Lid extends Model
             ->first();
     }
 
-    /**
+/**
      * Relatie: de meest recente betaalde betaling voor dit lid.
      * Wordt gebruikt om de volgende_deadline te bepalen.
+     *
+     * IMPORTANT: Order by ingediend_op (submission date), NOT betaling_id.
+     * A higher betaling_id doesn't mean a more recent payment!
      */
     public function laatsteBetaaldeBetaling()
     {
         return $this->hasOne(Betaling::class, 'lid_id', 'lid_id')
             ->whereIn('status', ['betaald', 'goed_gekeurd'])
-            ->orderBy('ingediend_op', 'desc')
-            ->latest('betaling_id');
+            ->orderBy('ingediend_op', 'desc');
     }
 
     /**
@@ -131,15 +133,13 @@ class Lid extends Model
         if ($laatsteBetaling && $laatsteBetaling->volgende_deadline) {
             return \Carbon\Carbon::parse($laatsteBetaling->volgende_deadline);
         }
-
-        // Fallback: lid_sinds + 1 maand als eerste deadline
-        if ($this->lid_sinds) {
-            return \Carbon\Carbon::parse($this->lid_sinds)->addMonth();
-        }
+  
+        
+        // (niet lid_sinds, want dat kan jaren geleden zijn)
+        return \Carbon\Carbon::now()->startOfMonth();
 
         return null;
     }
 
 }
 
- 

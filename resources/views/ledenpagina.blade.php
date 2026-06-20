@@ -26,7 +26,18 @@
                         <h1 class="lp-page-title">Leden</h1>
                         <p class="lp-page-subtitle">Beheer en bekijk alle geregistreerde leden van de organisatie.</p>
                     </div>
+
+                         <!--Searchbar-->
                     <div class="lp-page-header-right">
+                          <div class="w-full max-w-md mx-auto my-4">
+                             <form action="{{ route('ledenpagina')}}" method="GET" class="relative flex items-center">
+                                <input type="text" name="search" value="" placeholder="Zoeken..." class="w-full px-4 py-2 pl-10 rounded-lg border border-gray-300" />
+                                <button type="submit" class="absolute right-1 bg-blue-700 text-white rounded-lg px-3 py-1">Zoeken</button>
+                             </form>
+                             </div>
+
+
+                                 <!-- FIlter-->
                         <form method="GET" action="{{ route('ledenpagina') }}" class="lp-filter-form">
                             <div class="lp-btn-filters" id="filterBtn">
                                 <i class="fa-solid fa-sliders"></i>
@@ -41,7 +52,10 @@
                                 </select>
                             </div>
                         </form>
+
+
                     </div>
+
                 </div>
 
                 <div class="lp-info-banner">

@@ -1,11 +1,6 @@
-<!--            ============================================================
-                     DETAIL PAGE (ViewBewijsFile)
-                     Only shown when $betaling is NOT null (a specific payment is selected).
-                     This is the proof preview + approve/reject page.
-                ============================================================ -->
-                @if($betaling)
+@if($betaling)
 
-                    <!-- ── PAGE HEADER ── -->
+                 
                     <!-- Back button returns to the list page -->
                     <div class="flex items-center gap-4 mb-8">
 

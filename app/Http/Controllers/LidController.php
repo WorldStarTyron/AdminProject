@@ -69,7 +69,21 @@ class LidController extends Controller
             $values[]  = $dataPoint ? $dataPoint->count : 0;
         }
 
-        return view('ledenpagina', compact('leden', 'totaalLeden', 'labels', 'values', 'woonplaatsen'));
+        //Searchbare tabel
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $leden = Lid::where('naam', 'LIKE', "%{$search}%")
+                ->orWhere('telefoonnummer', 'LIKE', "%{$search}%")
+                ->orWhere('email', 'LIKE', "%{$search}%")
+                ->orWhere('adres', 'LIKE', "%{$search}%")
+                ->orWhere('woonplaats', 'LIKE', "%{$search}%")
+                ->paginate(6)->appends($request->query());
+        }
+
+
+
+
+        return view('ledenpagina', compact('leden', 'totaalLeden', 'labels', 'values', 'woonplaatsen', ));
     }
 
 

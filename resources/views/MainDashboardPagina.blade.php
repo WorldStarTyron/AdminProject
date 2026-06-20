@@ -20,7 +20,22 @@
         <div class="flex-1 ml-0 md:ml-64 transition-all duration-300 min-w-0 overflow-x-hidden">
             @include('Layouts.Headers.header')
 
-            <main class="p-6 max-w-[1500px] mx-auto space-y-6">
+<main class="p-6 max-w-[1500px] mx-auto space-y-6">
+                {{-- Session Messages --}}
+                @if(session('success'))
+                    <div class="mb-6 bg-emerald-100 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl flex items-center gap-3 text-sm">
+                        <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                        <span>{{ session('success') }}</span>
+                    </div>
+                @endif
+
+                @if(session('error'))
+                    <div class="mb-6 bg-rose-100 border border-rose-200 text-rose-800 px-4 py-3 rounded-xl flex items-center gap-3 text-sm">
+                        <i class="fa-solid fa-triangle-exclamation text-rose-600"></i>
+                        <span>{{ session('error') }}</span>
+                    </div>
+                @endif
+
                 <!-- Header Title Section -->
                 <div class="mb-6">
                     <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Performance Overview</h1>
@@ -39,7 +54,7 @@
                             </div>
                         </div>
                         <div>
-                            <div class="text-[11px] text-indigo-300/80 font-semibold mb-0.5">Srd</div>
+                            <div class="text-[11px] text-indigo-300/80 font-semibold mb-0.5">SRD</div>
                             <div class="text-3xl font-bold text-white tracking-tight leading-none mb-3">{{ number_format($totaleInkomsten, 2, ',', '.') }}</div>
                             <div class="flex items-center gap-1.5">
                                 <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold font-mono">+12%</span>
@@ -101,20 +116,20 @@
 
                 </div>
 
-                <!-- Chart and Upcoming Payments Section -->
+                <!-- Chart and Upcoming Payments Section-2 -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <!-- Left: Monthly Performance Chart (takes 2 cols) -->
                     <div class="lg:col-span-2 bg-white rounded-xl border border-gray-200/80 p-6 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
 
                         <div class="flex justify-between items-center mb-6">
-                            <h3 class="text-base font-semibold text-slate-800">Maandelijke performance</h3>
+                            <h3 class="text-base font-semibold text-slate-800">Maandelijkse performance</h3>
                             <div class="flex items-center gap-3">
-                                {{-- Jaar dropdown --}}
+                                <!-- Jaar dropdown -->
                                 <select id="filterJaar" class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-gray-50 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-all cursor-pointer">
                                     <option value="">Alle jaren</option>
                                 </select>
 
-                                {{-- Maand dropdown --}}
+                                <!-- Maand dropdown -->
                                 <select id="filterMaand" class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-gray-50 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-all cursor-pointer">
                                     <option value="">Alle maanden</option>
                                 </select>
@@ -126,127 +141,12 @@
 
                     </div>
 
-                    <!-- Right: Upcoming Payments (takes 1 col) -->
-                    <div class="bg-white rounded-xl border border-gray-200/80 p-6 shadow-[0_1px_3px_rgba(0,0,0,0.02)] flex flex-col justify-between">
-                        <div>
-                            <h3 class="text-base font-semibold text-slate-800 mb-5">Aankomende Betalingen</h3>
-                            
-                            <div class="space-y-3.5">
-                                @forelse($deadlineLeden as $lid)
-                                    @php
-                                        // Gebruik de voorberekende deadline uit de controller
-                                        $deadline = $lid->_deadline;
+                    <!-- Right: Aankomende Betalingen-->
+                    @include('Layouts.Shared.AankomendeBetaling')
 
-                                        if ($deadline) {
-                                            // Calculate the signed number of days left until the deadline day
-                                            $daysLeft = now()->startOfDay()->diffInDays($deadline->startOfDay(), false);
-                                            
-                                            // Determine urgency label and color coding based on days remaining
-                                            if ($daysLeft < 0) {
-                                                // Overdue: Show how many days overdue in red
-                                                $daysText = 'Verlopen (' . abs($daysLeft) . ' ' . (abs($daysLeft) == 1 ? 'dag' : 'dagen') . ')';
-                                                $colorClass = 'red';
-                                            } elseif ($daysLeft == 0) {
-                                                // Due today: High urgency in red
-                                                $daysText = 'Vandaag';
-                                                $colorClass = 'red';
-                                            } elseif ($daysLeft == 1) {
-                                                // Due tomorrow: High urgency in amber
-                                                $daysText = 'Morgen';
-                                                $colorClass = 'amber';
-                                            } elseif ($daysLeft <= 3) {
-                                                // Due within 3 days: Medium urgency in amber
-                                                $daysText = 'Binnen ' . $daysLeft . ' dagen';
-                                                $colorClass = 'amber';
-                                            } elseif ($daysLeft <= 5) {
-                                                // Due within 5 days: Moderate urgency in sky blue
-                                                $daysText = 'Binnen ' . $daysLeft . ' dagen';
-                                                $colorClass = 'sky';
-                                            } else {
-                                                // Due in 6 or 7 days: Low urgency in violet
-                                                $daysText = 'Binnen ' . $daysLeft . ' dagen';
-                                                $colorClass = 'violet';
-                                            }
-                                            
-                                            $formattedDeadline = $deadline->format('d-m-Y');
-                                        } else {
-                                            // Fallback if no deadline could be calculated
-                                            $daysText = 'Geen deadline beschikbaar';
-                                            $colorClass = 'gray';
-                                            $formattedDeadline = '';
-                                        }
-
-                                        // Default fallback Tailwind styling classes (gray styling)
-                                        $stripeColor = 'bg-gray-500';
-                                        $iconBg = 'bg-gray-50';
-                                        $iconBorder = 'border-gray-100';
-                                        $iconText = 'text-gray-600';
-                                        $daysTextColor = 'text-gray-600';
-
-                                        // Map the selected urgency color class to specific Tailwind classes
-                                        if ($colorClass === 'red') {
-                                            $stripeColor = 'bg-red-500';
-                                            $iconBg = 'bg-red-50';
-                                            $iconBorder = 'border-red-100';
-                                            $iconText = 'text-red-600';
-                                            $daysTextColor = 'text-red-600';
-                                        } elseif ($colorClass === 'amber') {
-                                            $stripeColor = 'bg-amber-500';
-                                            $iconBg = 'bg-amber-50';
-                                            $iconBorder = 'border-amber-100';
-                                            $iconText = 'text-amber-600';
-                                            $daysTextColor = 'text-amber-600';
-                                        } elseif ($colorClass === 'sky') {
-                                            $stripeColor = 'bg-sky-500';
-                                            $iconBg = 'bg-sky-50';
-                                            $iconBorder = 'border-sky-100';
-                                            $iconText = 'text-sky-600';
-                                            $daysTextColor = 'text-sky-600';
-                                        } elseif ($colorClass === 'violet') {
-                                            $stripeColor = 'bg-violet-500';
-                                            $iconBg = 'bg-violet-50';
-                                            $iconBorder = 'border-violet-100';
-                                            $iconText = 'text-violet-600';
-                                            $daysTextColor = 'text-violet-600';
-                                        }
-                                    @endphp
-
-                                    <div class="flex items-center justify-between p-3.5 bg-gray-50/50 border border-gray-100 rounded-xl relative overflow-hidden pl-5 hover:shadow-sm transition-all duration-200">
-                                        <div class="absolute left-0 top-0 bottom-0 w-1 {{ $stripeColor }}"></div>
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-9 h-9 rounded-full {{ $iconBg }} {{ $iconBorder }} flex items-center justify-center {{ $iconText }} shadow-sm">
-                                                <i class="fa-regular fa-clock text-sm"></i>
-                                            </div>
-                                            <div>
-                                                <div class="text-sm font-semibold text-gray-800">{{ $lid->gebruiker->naam }}</div>
-                                                <div class="text-xs {{ $daysTextColor }} font-semibold mt-0.5" title="Deadline: {{ $formattedDeadline }}">
-                                                    {{ $daysText }}
-                                                    @if($formattedDeadline)
-                                                        <span class="text-gray-400 font-normal ml-1">· {{ $formattedDeadline }}</span>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="text-sm font-bold text-gray-900">
-                                            Srd {{ number_format($lid->MaandelijkseBijdrage(), 2, ',', '.') }}
-                                        </div>
-                                    </div>
-                                @empty
-                                    <div class="flex flex-col items-center justify-center p-6 border border-dashed border-gray-200 rounded-xl bg-gray-50/30 text-center">
-                                        <div class="w-10 h-10 rounded-full bg-green-50 border border-green-100 flex items-center justify-center text-green-600 mb-3 shadow-sm">
-                                            <i class="fa-regular fa-circle-check text-base"></i>
-                                        </div>
-                                        <div class="text-sm font-medium text-gray-700">Geen aankomende deadlines</div>
-                                        <div class="text-xs text-gray-500 mt-1">Alle leden zijn up-to-date met hun betalingen.
-                                            
-                                        </div>
-                                    </div>
-                                @endforelse
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
+                <!--MainDashboard table-->
                 @include('Layouts.Shared.Main_Table')
             </main>
         </div>

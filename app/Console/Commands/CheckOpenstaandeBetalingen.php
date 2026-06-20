@@ -83,8 +83,9 @@ class CheckOpenstaandeBetalingen extends Command
 
             $volgendeMaand = $vandaag->copy()->addMonth();
 
-            // Haal alle betaalde betalingen op van de huidige maand
-            $betaaldeBetalingen = Betaling::where('status', 'betaald')
+// Haal alle betaalde betalingen op van de huidige maand
+            // Let op: ook 'goed_gekeurd' tellen als betaald
+            $betaaldeBetalingen = Betaling::whereIn('status', ['betaald', 'goed_gekeurd'])
                 ->where('maand', $vandaag->month)
                 ->where('jaar', $vandaag->year)
                 ->get();

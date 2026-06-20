@@ -516,7 +516,7 @@ public function RejectBewijs(Request $request, $betaling_id){
         ]);
     }
 
-    return redirect()->back()->with('success', 'Betaling afgekeurd');
+    return redirect()->back()->with('error', 'Betaling afgekeurd');
 
 }
 

@@ -4,16 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Betalingsbewijzen | Administratie Panel</title>
-
-    <!-- Vite: loads compiled CSS and sidebar JavaScript -->
     @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/js/UI/Sidebar.js'])
-
-    <!-- Google Fonts: Inter for consistent typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <!-- Font Awesome 6.5: icons used throughout the admin panel -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 
@@ -35,11 +29,7 @@
             <div class="max-w-5xl mx-auto px-6 py-10">
 
 
-                <!-- ============================================================
-                     FLASH MESSAGES
-                     Show after approve/reject actions or if a file error occurred.
-                ============================================================ -->
-
+               <!--Show after approve/reject actions or if a file error occurred. -->
                 @if(session('success'))
                     <div class="mb-6 bg-emerald-100 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl flex items-center gap-3 text-sm">
                         <i class="fa-solid fa-circle-check text-emerald-600"></i>
@@ -257,6 +247,6 @@
                 <!-- End Section A (list page) -->
 
     @include('layouts.ViewBewijs.ViewbetalingBewijs')
-                
+
 </body>
 </html>

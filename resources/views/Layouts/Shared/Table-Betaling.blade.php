@@ -1,4 +1,4 @@
-{{-- Payments Table Section --}}
+<!-- Payments Table Section -->
 <main class="px-8 pb-8 flex-1">
     <div class="bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.03)] border border-slate-200/60 p-7 animate-[fadeSlideUp_0.5s_ease-out]">
 

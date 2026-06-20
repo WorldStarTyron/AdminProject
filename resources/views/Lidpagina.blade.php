@@ -16,7 +16,7 @@
         @include('Layouts.Sidebars.sidebar')
 
         <div class="flex-1 ml-0 md:ml-64 transition-all duration-300 min-w-0 overflow-x-hidden">
-            @include('Layouts.Headers.header')
+            @include('Layouts.Headers.Lidheader')
 
             <section class="px-8 py-6">
 

@@ -13,9 +13,7 @@ class MainDashboardController extends Controller
         return view('MainDashboardPagina');
     }
 
-
-    
-public function Maindashboard()
+    public function Maindashboard()
 {
     // Huidige maand en jaar voor alle dashboard berekeningen
     $currentMonth = now()->month;

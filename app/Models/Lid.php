@@ -135,10 +135,8 @@ class Lid extends Model
         }
   
         
-        // (niet lid_sinds, want dat kan jaren geleden zijn)
+        // Fallback: begin van huidige maand (niet lid_sinds, want dat kan jaren geleden zijn)
         return \Carbon\Carbon::now()->startOfMonth();
-
-        return null;
     }
 
 }

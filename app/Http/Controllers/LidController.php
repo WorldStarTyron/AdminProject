@@ -40,6 +40,18 @@ class LidController extends Controller
             $query->where('leden.woonplaats', $request->woonplaats);
         }
 
+        // Zoekfilter op naam, e-mail, telefoon, adres of woonplaats
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('gebruikers.naam', 'LIKE', "%{$search}%")
+                  ->orWhere('leden.telefoonnummer', 'LIKE', "%{$search}%")
+                  ->orWhere('gebruikers.email', 'LIKE', "%{$search}%")
+                  ->orWhere('leden.adres', 'LIKE', "%{$search}%")
+                  ->orWhere('leden.woonplaats', 'LIKE', "%{$search}%");
+            });
+        }
+
         // Pagineer resultaten (6 per pagina)
         $leden = $query->paginate(6)->appends($request->query());
 
@@ -69,21 +81,7 @@ class LidController extends Controller
             $values[]  = $dataPoint ? $dataPoint->count : 0;
         }
 
-        //Searchbare tabel
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            $leden = Lid::where('naam', 'LIKE', "%{$search}%")
-                ->orWhere('telefoonnummer', 'LIKE', "%{$search}%")
-                ->orWhere('email', 'LIKE', "%{$search}%")
-                ->orWhere('adres', 'LIKE', "%{$search}%")
-                ->orWhere('woonplaats', 'LIKE', "%{$search}%")
-                ->paginate(6)->appends($request->query());
-        }
-
-
-
-
-        return view('ledenpagina', compact('leden', 'totaalLeden', 'labels', 'values', 'woonplaatsen', ));
+        return view('ledenpagina', compact('leden', 'totaalLeden', 'labels', 'values', 'woonplaatsen'));
     }
 
 

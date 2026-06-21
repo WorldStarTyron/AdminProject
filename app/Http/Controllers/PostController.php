@@ -249,11 +249,6 @@ public function store(StoreLidRequest $request)
 
         return redirect()->route('ledenpagina')->with('success', 'Lid verwijderd');
     }
-      
-
-
-
-
 
 
 

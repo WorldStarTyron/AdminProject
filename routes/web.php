@@ -48,7 +48,6 @@ Route::middleware(['auth'])->group(function () {
     // Leden — lezen
     Route::get('/ledenpagina', [LidController::class, 'index'])->name('ledenpagina')->middleware('can:leden-bekijken');
     Route::get('/ledenpagina/{lidId}', [PostController::class, 'show'])->name('ledenpagina.show')->middleware('can:leden-bekijken');
-    Route::get('/ledenpagin/{lidId}', [PostController::class, 'search'] )->name('ledenpagin.search')->middleware('can:leden-bekijken');
 
     // Leden — schrijven
     Route::post('/ledenpagina/addlid', [PostController::class, 'store'])->name('ledenpagina.addlid.store')->middleware('can:leden-beheren');

@@ -528,7 +528,7 @@ public function RejectBewijs(Request $request, $betaling_id){
     {
         // Haal alle betalingen op die:
         // Status is Openstaand
-        // Een methode hebben (dus nog niet betaald)
+        // Geen methode hebben (dus nog niet betaald)
         $allebetalingen = Betaling::with('bonnen')
             ->where('status', 'Openstaand')
             ->whereNull('methode')

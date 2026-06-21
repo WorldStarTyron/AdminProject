@@ -60,39 +60,15 @@
                         $formattedDeadline = '';
                     }
 
-                    // Standaard grijze kleur (wordt hieronder overschreven)
-                    $stripeColor   = 'bg-gray-500';
-                    $iconBg        = 'bg-gray-50';
-                    $iconBorder    = 'border-gray-100';
-                    $iconText      = 'text-gray-600';
-                    $daysTextColor = 'text-gray-600';
-
-                    // Zet de juiste kleur op basis van de urgentie
-                    if ($colorClass === 'red') {
-                        $stripeColor   = 'bg-red-500';
-                        $iconBg        = 'bg-red-50';
-                        $iconBorder    = 'border-red-100';
-                        $iconText      = 'text-red-600';
-                        $daysTextColor = 'text-red-600';
-                    } elseif ($colorClass === 'amber') {
-                        $stripeColor   = 'bg-amber-500';
-                        $iconBg        = 'bg-amber-50';
-                        $iconBorder    = 'border-amber-100';
-                        $iconText      = 'text-amber-600';
-                        $daysTextColor = 'text-amber-600';
-                    } elseif ($colorClass === 'sky') {
-                        $stripeColor   = 'bg-sky-500';
-                        $iconBg        = 'bg-sky-50';
-                        $iconBorder    = 'border-sky-100';
-                        $iconText      = 'text-sky-600';
-                        $daysTextColor = 'text-sky-600';
-                    } elseif ($colorClass === 'violet') {
-                        $stripeColor   = 'bg-violet-500';
-                        $iconBg        = 'bg-violet-50';
-                        $iconBorder    = 'border-violet-100';
-                        $iconText      = 'text-violet-600';
-                        $daysTextColor = 'text-violet-600';
-                    }
+                    // Kleurmap: urgentieniveau → Tailwind klassen
+                    $colorMap = [
+                        'red'    => ['bg-red-500',    'bg-red-50',    'border-red-100',    'text-red-600',    'text-red-600'],
+                        'amber'  => ['bg-amber-500',  'bg-amber-50',  'border-amber-100',  'text-amber-600',  'text-amber-600'],
+                        'sky'    => ['bg-sky-500',    'bg-sky-50',    'border-sky-100',    'text-sky-600',    'text-sky-600'],
+                        'violet' => ['bg-violet-500', 'bg-violet-50', 'border-violet-100', 'text-violet-600', 'text-violet-600'],
+                        'gray'   => ['bg-gray-500',   'bg-gray-50',   'border-gray-100',   'text-gray-600',   'text-gray-600'],
+                    ];
+                    [$stripeColor, $iconBg, $iconBorder, $iconText, $daysTextColor] = $colorMap[$colorClass] ?? $colorMap['gray'];
                 @endphp
 
                 <!-- Één rij per lid -->

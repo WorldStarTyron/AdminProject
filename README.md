@@ -121,4 +121,4 @@ Op een server zet je hiervoor een cronjob klaar.
 
 ## Over dit project
 
-Deze applicatie is gemaakt als onderdeel van een BPV-stage van de opleiding HBO ICT (Webdevelopment). Het project is uitgevoerd bij Bit Dynamics N.V. in Regeffio Baarn, onder begeleiding van praktijkopleider Simon Noerdjan.
+Deze applicatie is gemaakt als onderdeel van een BPV-stage van de opleiding HBO ICT (Webdevelopment). Het project is uitgevoerd bij Bit Dynamics N.V. door Regeffio Baarn, onder begeleiding van praktijkopleider Simon Noerdjan.

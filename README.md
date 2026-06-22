@@ -1,66 +1,124 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Khilafat Anjuman Administratiesysteem
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Een webapplicatie voor de ledenadministratie en betalingsregistratie van Khilafat Anjuman (Regeffio Baarn). Met deze applicatie beheert de organisatie haar leden, houdt zij de maandelijkse contributies bij en regelt zij wie wat mag zien en doen op basis van zijn rol.
 
-## About Laravel
+De applicatie is gebouwd tijdens een BPV-stage bij Bit Dynamics N.V. in Baarn.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Over de applicatie
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Khilafat Anjuman hield de ledenadministratie en betalingen eerst handmatig bij. Dat kostte veel tijd en er ontstonden snel fouten. Deze applicatie brengt alles op één plek samen:
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- Het beheren van leden (toevoegen, bekijken, bewerken, activeren en deactiveren).
+- Het registreren van de maandelijkse contributie van **SRD 150** per lid.
+- Het bijhouden welke betalingen open staan en welke betaald zijn.
+- Het automatisch deactiveren van leden die 3 maanden achter elkaar niet betaald hebben.
+- Het maken van bonnen (kwitanties) voor betalingen.
+- Een dashboard met grafieken zodat het bestuur in één oogopslag de cijfers ziet.
 
-## Learning Laravel
+## Functionaliteiten
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- **Inloggen met rollen** – Elke gebruiker logt in en komt op de juiste startpagina, afhankelijk van zijn rol.
+- **Ledenbeheer** – Leden toevoegen, zoeken, filteren (op maand en jaar) en de gegevens bewerken.
+- **Betalingen registreren** – Betalingen vastleggen en koppelen aan een lid, met de mogelijkheid om een betalingsbewijs (PDF) te uploaden.
+- **Verwijderen en herstellen** – Verwijderde betalingen worden niet meteen weggegooid (soft delete) en kunnen worden hersteld.
+- **Bonnen genereren** – Per betaling een bon met een uniek nummer in het formaat `BON-KA[jaar]-[volgnummer]`.
+- **Notificaties** – Een belletje in de navigatiebalk laat zien hoeveel ongelezen meldingen er zijn.
+- **Wachtwoord vergeten** – Opnieuw instellen met een code van 6 cijfers die na 10 minuten verloopt.
+- **Dashboard** – Overzicht van leden en betalingen met grafieken.
+- **Automatische controles** – Dagelijkse taken die openstaande betalingen controleren en leden deactiveren na 3 gemiste maanden.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Rollen
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+De applicatie kent vier rollen. Elke rol heeft zijn eigen rechten, geregeld met Laravel Gates.
 
-## Laravel Sponsors
+| Rol | Wat de rol mag |
+|-----|----------------|
+| **Lid** | Eigen gegevens en betalingen bekijken. |
+| **Administratie Medewerker** | Leden en betalingen beheren. |
+| **Voorzitter** | Overzicht en rapportages bekijken. |
+| **Applicatie Beheerder** | Volledig beheer, inclusief gebruikers en rollen. |
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Gebruikte technieken
 
-### Premium Partners
+- **Laravel 10** – het PHP-framework voor de back-end.
+- **MySQL** – de database.
+- **Blade** – voor de pagina's (templates).
+- **Tailwind CSS** – voor de opmaak.
+- **Alpine.js** – voor kleine stukjes interactie (dropdowns, het notificatie-belletje).
+- **Chart.js** – voor de grafieken op het dashboard.
+- **Font Awesome** – voor de iconen.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## Databasestructuur
 
-## Contributing
+De database bestaat uit negen tabellen:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+| Tabel | Inhoud |
+|-------|--------|
+| `gebruikers` | De inloggegevens van gebruikers. |
+| `leden` | De gegevens van de leden. |
+| `rollen` | De beschikbare rollen. |
+| `gebruikers_rollen` | Koppeltabel tussen gebruikers en rollen (veel-op-veel). |
+| `betalingen` | De geregistreerde betalingen. |
+| `bonnen` | De gegenereerde bonnen. |
+| `activiteit` | Het bijhouden van acties in het systeem. |
+| `notificatie` | De meldingen voor gebruikers. |
+| `wachtwoord_reset` | De codes voor het opnieuw instellen van een wachtwoord. |
 
-## Code of Conduct
+De primaire sleutels zijn van het type `INT AUTO_INCREMENT`.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Lokaal opzetten
 
-## Security Vulnerabilities
+Hieronder de stappen om het project op je eigen computer te draaien.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+**1. Project ophalen en pakketten installeren**
 
-## License
+```bash
+git clone <repository-url>
+cd AdminProject
+composer install
+npm install
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+**2. Omgevingsbestand klaarzetten**
+
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+Vul daarna in `.env` je databasegegevens in (naam, gebruiker, wachtwoord).
+
+**3. Database aanmaken**
+
+```bash
+php artisan migrate
+php artisan db:seed
+```
+
+**4. Front-end en server starten**
+
+```bash
+npm run dev
+php artisan serve
+```
+
+De applicatie draait nu op `http://localhost:8000`.
+
+## Geautomatiseerde taken
+
+Het systeem heeft twee Artisan commands die dagelijks via de scheduler draaien:
+
+- `CheckOpenstaandeBetalingen` – controleert welke betalingen open staan.
+- `CheckDeactiveerLeden` – deactiveert leden die 3 maanden niet betaald hebben.
+
+Om de scheduler lokaal te laten draaien:
+
+```bash
+php artisan schedule:work
+```
+
+Op een server zet je hiervoor een cronjob klaar.
+
+## Over dit project
+
+Deze applicatie is gemaakt als onderdeel van een BPV-stage van de opleiding HBO ICT (Webdevelopment). Het project is uitgevoerd bij Bit Dynamics N.V. door Regeffio Baarn, onder begeleiding van praktijkopleider Simon Noerdjan.

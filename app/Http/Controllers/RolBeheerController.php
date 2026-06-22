@@ -4,31 +4,28 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Gebruiker;
-use App\Models\Rol; 
-use App\Models\Activiteit; 
+use App\Models\Rol;
+use App\Models\Activiteit;
 use Illuminate\Support\Facades\Gate;
 
+// Rollen beheer
 class RolBeheerController extends Controller
 {
-
-    
-    /**
-     * Display the role management page with list of users and their roles.
-     */
     public function index(Request $request)
     {
         Gate::authorize('rollenbeheer');
+
         $query = Gebruiker::with('rollen');
 
-        // Search filter (naam or email)
+        // Zoeken op naam of email
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('naam', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%");
-            }); 
+            });
         }
 
-        // Role filter: show users that have a specific role
+        // Filter op rol
         if ($roleId = $request->get('rol_id')) {
             $query->whereHas('rollen', fn ($q) => $q->where('rollen.rol_id', $roleId));
         }
@@ -39,13 +36,12 @@ class RolBeheerController extends Controller
         return view('RollenBeheerPagina', compact('gebruikers', 'alleRollen'));
     }
 
-    /**
-     * AJAX: search users by name/email (autocomplete).
-     */
+    // AJAX zoekfunctie voor autocomplete
     public function searchUsers(Request $request)
     {
         $term = $request->get('q', '');
 
+        // Minimaal 2 tekens
         if (strlen($term) < 2) {
             return response()->json([]);
         }
@@ -58,9 +54,7 @@ class RolBeheerController extends Controller
         return response()->json($users);
     }
 
-    /**
-     * Quick role assignment: attach a role to a user.
-     */
+    // Rol toewijzen
     public function assignRole(Request $request)
     {
         $validated = $request->validate([
@@ -74,15 +68,12 @@ class RolBeheerController extends Controller
         $rol = Rol::find($validated['rol_id']);
         $rolNaam = $rol ? $rol->naam : 'Onbekend';
 
-        // Attach role if not already assigned
+        // Eerst checken om dubbele rollen te voorkomen
         $alreadyHasRole = $gebruiker->rollen->contains('rol_id', $validated['rol_id']);
         if (!$alreadyHasRole) {
             $gebruiker->rollen()->attach($validated['rol_id']);
         }
 
-       
-
-        // Log the activity
         if (auth()->check()) {
             if (!$alreadyHasRole) {
                 Activiteit::log(auth()->id(), 'lid_bijgewerkt', [
@@ -103,10 +94,7 @@ class RolBeheerController extends Controller
                          ->with('success', 'Rol succesvol toegewezen aan ' . $gebruiker->naam);
     }
 
-    /**
-     * GET  JSON: return the role IDs for a user (used by the edit modal).
-     * PUT  form: sync all roles for a user (used by the edit modal submit).
-     */
+    // Rol IDs van een gebruiker ophalen
     public function getUserRoles($userId)
     {
         $gebruiker = Gebruiker::with('rollen')->findOrFail($userId);
@@ -116,6 +104,7 @@ class RolBeheerController extends Controller
         ]);
     }
 
+    // Sync alle rollen in 1 keer
     public function updateUserRoles(Request $request, $userId)
     {
         $validated = $request->validate([
@@ -124,9 +113,9 @@ class RolBeheerController extends Controller
         ]);
 
         $gebruiker = Gebruiker::findOrFail($userId);
+        // ?? [] zorgt dat lege selectie alle rollen verwijdert
         $gebruiker->rollen()->sync($validated['rollen'] ?? []);
 
-        // Log the activity
         if (auth()->check()) {
             Activiteit::log(auth()->id(), 'lid_bijgewerkt', [
                 'gebruiker_id'   => $userId,
@@ -138,18 +127,4 @@ class RolBeheerController extends Controller
         return redirect()->route('rollen-beheer')
                          ->with('success', 'Rollen voor ' . $gebruiker->naam . ' zijn bijgewerkt.');
     }
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
 }

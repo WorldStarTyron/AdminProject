@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+// Houdt alle acties van gebruikers bij
 class Activiteit extends Model
 {
     use HasFactory;
@@ -21,19 +22,12 @@ class Activiteit extends Model
     ];
 
     protected $casts = [
+        // details staat als JSON in de db
         'details' => 'array',
         'aangemaakt_op' => 'datetime',
     ];
 
-    /**
-     * Unified system-wide helper to cleanly log user or administrator actions.
-     *
-     * @param int $gebruikerId The ID of the user performing the action
-     * @param string $actie One of the predefined database enum actions
-     * @param array|null $details Structured contextual metadata surrounding the event
-     * @param string|null $timestamp Optional historical timestamp for seeders
-     * @return self
-     */
+    // Hulpfunctie om vanuit elke controller een log aan te maken
     public static function log(int $gebruikerId, string $actie, ?array $details = null, ?string $timestamp = null)
     {
         return self::create([
@@ -44,7 +38,6 @@ class Activiteit extends Model
         ]);
     }
 
-    // Een activiteit hoort bij een gebruiker
     public function gebruiker()
     {
         return $this->belongsTo(Gebruiker::class, 'gebruiker_id', 'gebruiker_id');

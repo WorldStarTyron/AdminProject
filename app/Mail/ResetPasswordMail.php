@@ -9,6 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
+// Mail met reset code
 class ResetPasswordMail extends Mailable
 {
     use Queueable, SerializesModels;
@@ -16,18 +17,12 @@ class ResetPasswordMail extends Mailable
     public $resetCode;
     public $email;
 
-    /**
-     * Create a new message instance.
-     */
     public function __construct($resetCode, $email)
     {
         $this->resetCode = $resetCode;
-        $this->email = $email;  
+        $this->email = $email;
     }
 
-    /**
-     * Get the message envelope.
-     */
     public function envelope(): Envelope
     {
         return new Envelope(
@@ -35,9 +30,6 @@ class ResetPasswordMail extends Mailable
         );
     }
 
-    /**
-     * Get the message content definition.
-     */
     public function content(): Content
     {
         return new Content(
@@ -45,11 +37,6 @@ class ResetPasswordMail extends Mailable
         );
     }
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
     public function attachments(): array
     {
         return [];

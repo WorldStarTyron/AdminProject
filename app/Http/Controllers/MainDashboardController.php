@@ -7,154 +7,147 @@ use App\Models\Betaling;
 use App\Models\Lid;
 use Carbon\Carbon;
 
+// Hoofd dashboard
 class MainDashboardController extends Controller
 {
-    public function index(){
+    public function index()
+    {
         return view('MainDashboardPagina');
     }
 
     public function Maindashboard()
-{
-    // Huidige maand en jaar voor alle dashboard berekeningen
-    $currentMonth = now()->month;
-    $currentYear = now()->year;
+    {
+        // Huidige maand en jaar
+        $currentMonth = now()->month;
+        $currentYear = now()->year;
 
-    // Alle kaart-statistieken op één plek berekenen (Betaling model)
-    $stats = Betaling::dashboardStatistieken($currentMonth, $currentYear);
-    $totaleInkomsten   = $stats['totaleInkomsten'];
-    $openstaandBedrag  = $stats['openstaandBedrag'];
-    $totaalLeden       = $stats['totaalLeden'];
-    $totaalBetaald     = $stats['totaalBetaald'];
-    $totaalNietBetaald = $stats['totaalNietBetaald'];
+        // Alle kaart statistieken op 1 plek
+        $stats = Betaling::dashboardStatistieken($currentMonth, $currentYear);
+        $totaleInkomsten   = $stats['totaleInkomsten'];
+        $openstaandBedrag  = $stats['openstaandBedrag'];
+        $totaalLeden       = $stats['totaalLeden'];
+        $totaalBetaald     = $stats['totaalBetaald'];
+        $totaalNietBetaald = $stats['totaalNietBetaald'];
 
-    // Haal aankomende betalingen op via aparte methode
-    $deadlineLeden = $this->aankomendBetalingen();
+        // Aankomende deadlines
+        $deadlineLeden = $this->aankomendBetalingen();
 
-    // Leden voor het dashboard-tabel: alleen actieve leden, met betalingen van de huidige maand
-    $dashboardLeden = Lid::metActieveGebruiker()
-        ->with([
-            'gebruiker',
-            'betalingen' => function ($q) use ($currentMonth, $currentYear) {
-                $q->where('maand', $currentMonth)->where('jaar', $currentYear);
-            },
-        ])
-        ->orderBy('lid_id', 'desc')
-        ->paginate(5);
+        // Leden tabel met betalingen van deze maand
+        $dashboardLeden = Lid::metActieveGebruiker()
+            ->with([
+                'gebruiker',
+                'betalingen' => function ($q) use ($currentMonth, $currentYear) {
+                    $q->where('maand', $currentMonth)->where('jaar', $currentYear);
+                },
+            ])
+            ->orderBy('lid_id', 'desc')
+            ->paginate(5);
 
-    return view('MainDashboardPagina', compact(
-        'totaleInkomsten',
-        'openstaandBedrag',
-        'totaalLeden',
-        'totaalBetaald',
-        'totaalNietBetaald',
-        'deadlineLeden',
-        'dashboardLeden',
-        'currentMonth',
-        'currentYear'
-    ));
-}
-
-
-
-public function ChartData(Request $request)
-{
-    // Gebruik het geselecteerde jaar, of het huidige jaar als default
-    $jaar = $request->input('jaar', now()->year);
-    $selectedMaand = $request->input('maand'); // null = alle maanden
-
-
-
-    // Contributie: som van bedrag per maand waarvoor betaald moet worden
-    // Groepeer op 'maand' veld uit de betalingen tabel
-    $contributie = Betaling::where('jaar', $jaar)
-        ->selectRaw('maand, SUM(bedrag) as totaal')
-        ->groupBy('maand')
-        ->pluck('totaal', 'maand');
-
-    // Betaald: aantal betaalde betalingen per maand
-    // Status 'betaald' of 'goed_gekeurd' telt als betaald
-    $betaald = Betaling::where('jaar', $jaar)
-        ->whereIn('status', ['betaald', 'goed_gekeurd'])
-        ->selectRaw('maand, COUNT(*) as totaal')
-        ->groupBy('maand')
-        ->pluck('totaal', 'maand');
-
-    // Niet betaald: aantal openstaande betalingen per maand
-    // Status 'niet_betaald', 'Openstaand' of 'in_afwachting' telt als niet betaald
-    $nietBetaald = Betaling::where('jaar', $jaar)
-        ->whereIn('status', ['niet_betaald', 'Openstaand', 'in_afwachting'])
-        ->selectRaw('maand, COUNT(*) as totaal')
-        ->groupBy('maand')
-        ->pluck('totaal', 'maand');
-
-    // Bepaal welke maanden we tonen (filter op 1 maand of alle 12)
-    if ($selectedMaand) {
-        $maanden = [(int)$selectedMaand];
-    } else {
-        $maanden = range(1, 12);
+        return view('MainDashboardPagina', compact(
+            'totaleInkomsten',
+            'openstaandBedrag',
+            'totaalLeden',
+            'totaalBetaald',
+            'totaalNietBetaald',
+            'deadlineLeden',
+            'dashboardLeden',
+            'currentMonth',
+            'currentYear'
+        ));
     }
 
-    // Alle beschikbare jaren voor de dropdown (uit de betalingen tabel)
-    $Totaaljaren = Betaling::selectRaw('jaar')
-        ->distinct()
-        ->orderBy('jaar', 'desc')
-        ->pluck('jaar')
-        ->toArray();
+    // Data voor de grafiek
+    public function ChartData(Request $request)
+    {
+        $jaar = $request->input('jaar', now()->year);
+        // Lege maand = alle 12 maanden
+        $selectedMaand = $request->input('maand');
 
-    // Alle beschikbare maanden voor het geselecteerde jaar
-    $Totaalmaanden = Betaling::where('jaar', $jaar)
-        ->selectRaw('maand')
-        ->distinct()
-        ->orderBy('maand', 'asc')
-        ->pluck('maand')
-        ->toArray();
+        // Contributie per maand
+        $contributie = Betaling::where('jaar', $jaar)
+            ->selectRaw('maand, SUM(bedrag) as totaal')
+            ->groupBy('maand')
+            ->pluck('totaal', 'maand');
 
-    // Maandnamen voor de x-as labels
-    $maandNamen = [
-        1 => 'Jan', 2 => 'Feb', 3 => 'Mrt', 4 => 'Apr',
-        5 => 'Mei', 6 => 'Jun', 7 => 'Jul', 8 => 'Aug',
-        9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Dec'
-    ];
+        // Aantal betaalde betalingen per maand
+        $betaald = Betaling::where('jaar', $jaar)
+            ->whereIn('status', ['betaald', 'goed_gekeurd'])
+            ->selectRaw('maand, COUNT(*) as totaal')
+            ->groupBy('maand')
+            ->pluck('totaal', 'maand');
 
-    return response()->json([
-        // Zet alle data om naar de juiste volgorde per maand
-        'contributie'   => array_map(fn($m) => (float)($contributie[$m] ?? 0), $maanden),
-        'betaald'       => array_map(fn($m) => (int)($betaald[$m] ?? 0), $maanden),
-        'niet_betaald'  => array_map(fn($m) => (int)($nietBetaald[$m] ?? 0), $maanden),
-        'labels'        => array_map(fn($m) => $maandNamen[$m], $maanden),
-        'Totaaljaren'   => $Totaaljaren,
-        'Totaalmaanden' => $Totaalmaanden,
-        'huidigJaar'    => (int)$jaar,
-    ]);
-}
+        // Aantal openstaande per maand
+        $nietBetaald = Betaling::where('jaar', $jaar)
+            ->whereIn('status', ['niet_betaald', 'Openstaand', 'in_afwachting'])
+            ->selectRaw('maand, COUNT(*) as totaal')
+            ->groupBy('maand')
+            ->pluck('totaal', 'maand');
 
+        if ($selectedMaand) {
+            $maanden = [(int)$selectedMaand];
+        } else {
+            $maanden = range(1, 12);
+        }
+
+        // Jaren dropdown
+        $Totaaljaren = Betaling::selectRaw('jaar')
+            ->distinct()
+            ->orderBy('jaar', 'desc')
+            ->pluck('jaar')
+            ->toArray();
+
+        // Maanden dropdown
+        $Totaalmaanden = Betaling::where('jaar', $jaar)
+            ->selectRaw('maand')
+            ->distinct()
+            ->orderBy('maand', 'asc')
+            ->pluck('maand')
+            ->toArray();
+
+        // Maandnamen voor de labels
+        $maandNamen = [
+            1 => 'Jan', 2 => 'Feb', 3 => 'Mrt', 4 => 'Apr',
+            5 => 'Mei', 6 => 'Jun', 7 => 'Jul', 8 => 'Aug',
+            9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Dec'
+        ];
+
+        return response()->json([
+            'contributie'   => array_map(fn($m) => (float)($contributie[$m] ?? 0), $maanden),
+            'betaald'       => array_map(fn($m) => (int)($betaald[$m] ?? 0), $maanden),
+            'niet_betaald'  => array_map(fn($m) => (int)($nietBetaald[$m] ?? 0), $maanden),
+            'labels'        => array_map(fn($m) => $maandNamen[$m], $maanden),
+            'Totaaljaren'   => $Totaaljaren,
+            'Totaalmaanden' => $Totaalmaanden,
+            'huidigJaar'    => (int)$jaar,
+        ]);
+    }
+
+    // Aankomende deadlines (binnen 7 dagen of verlopen)
     public function aankomendBetalingen()
     {
         $vandaag = Carbon::today();
         $overZevenDagen = $vandaag->copy()->addDays(7);
 
-        // Haal alle actieve leden op met hun meest recente betaalde betaling
         $alleLeden = Lid::metActieveGebruiker()
             ->with(['gebruiker', 'laatsteBetaaldeBetaling'])
             ->get();
 
-        // Filter en sorteer leden op basis van hun actieve deadline
         $deadlineLeden = $alleLeden->map(function ($lid) {
+                // Deadline alvast berekenen zodat de blade hem direct kan gebruiken
                 $lid->_deadline = $lid->actieveDeadline();
                 return $lid;
             })
             ->filter(function ($lid) use ($vandaag, $overZevenDagen) {
-                // Toon alleen leden met een deadline die verlopen is of binnen 7 dagen valt
                 if (!$lid->_deadline) return false;
                 return $lid->_deadline->lte($overZevenDagen);
             })
             ->sortBy(function ($lid) {
-                // Verlopen deadlines eerst, dan op datum
+                // Verlopen eerst, dan op datum
                 return $lid->_deadline->timestamp;
             })
             ->values();
 
-        // Pagineer de collectie
+        // Paginate de collectie
         $perPage = 5;
         $deadlinePage = request()->input('deadline_page', 1);
 
@@ -166,6 +159,4 @@ public function ChartData(Request $request)
             ['pageName' => 'deadline_page', 'path' => request()->url()]
         );
     }
-
-
 }

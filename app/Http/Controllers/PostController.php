@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 
+// Lid CRUD
 class PostController extends Controller
 {
     public function index()
@@ -26,21 +27,21 @@ class PostController extends Controller
             'leden.lid_sinds'
         )->join('gebruikers', 'leden.gebruiker_id', '=', 'gebruikers.gebruiker_id')
         ->get();
+
         return view('ledenpagina', compact('leden'));
     }
-
-    
 
     public function create()
     {
         return view('Layouts.AddModals.add-lid-modal');
     }
 
-public function store(StoreLidRequest $request)
+    // Nieuw lid toevoegen (met gebruiker, rol en eerste betaling)
+    public function store(StoreLidRequest $request)
     {
         Gate::authorize('leden-beheren');
 
-        // Duplicate check: zelfde naam én geboortedatum
+        // Check op zelfde naam + geboortedatum
         $duplicatePerson = Gebruiker::where('naam', $request->name)
             ->whereHas('lid', function ($q) use ($request) {
                 $q->where('geboortedatum', $request->geboortedatum);
@@ -56,9 +57,9 @@ public function store(StoreLidRequest $request)
         }
 
         try {
+            // Alles in 1 transactie zodat er geen halve records overblijven
             DB::transaction(function () use ($request) {
-
-                // 1. Maak gebruiker aan
+                // 1. Gebruiker aanmaken met standaard wachtwoord
                 $gebruiker = \App\Models\Gebruiker::create([
                     'naam'            => $request->name,
                     'email'           => $request->email,
@@ -66,7 +67,7 @@ public function store(StoreLidRequest $request)
                     'status'          => 'Actief',
                 ]);
 
-                // 2. Voeg lid toe
+                // 2. Lid koppelen aan gebruiker
                 Lid::create([
                     'gebruiker_id'  => $gebruiker->gebruiker_id,
                     'lid_type'      => $request->lid_type,
@@ -77,7 +78,7 @@ public function store(StoreLidRequest $request)
                     'lid_sinds'     => $request->lid_sinds,
                 ]);
 
-                // 3. Ken de rol "Lid" toe
+                // 3. Rol "Lid" toekennen, anders aanmaken
                 $lidRol = \App\Models\Rol::where('naam', 'Lid')->first();
                 if (!$lidRol) {
                     $lidRol = \App\Models\Rol::create([
@@ -87,7 +88,7 @@ public function store(StoreLidRequest $request)
                 }
                 $gebruiker->rollen()->attach($lidRol->rol_id);
 
-                // 4. Maak eerste betaling aan — ingediend_op is verplicht in de DB
+                // 4. Eerste openstaande betaling aanmaken
                 $datum    = \Carbon\Carbon::now();
                 $nieuwLid = \App\Models\Lid::where('gebruiker_id', $gebruiker->gebruiker_id)->firstOrFail();
 
@@ -98,10 +99,11 @@ public function store(StoreLidRequest $request)
                     'status'       => 'Openstaand',
                     'maand'        => $datum->month,
                     'jaar'         => $datum->year,
-                    'ingediend_op' => $datum,  // FIX: kolom is NOT NULL zonder default
+                    // ingediend_op mag niet null zijn in de db
+                    'ingediend_op' => $datum,
                 ]);
 
-                // 5. Log activiteit
+                // 5. Activiteit loggen
                 if (auth()->check()) {
                     Activiteit::log(auth()->id(), 'lid_aangemaakt', [
                         'lid_naam'  => $request->name,
@@ -118,10 +120,7 @@ public function store(StoreLidRequest $request)
                     ]);
                 }
             });
-
-        }
-        
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Lid toevoegen mislukt: ' . $e->getMessage(), [
                 'exception' => $e,
                 'request'   => $request->all(),
@@ -136,9 +135,6 @@ public function store(StoreLidRequest $request)
             return redirect()->back()->with('error', 'Er is een serverfout opgetreden. Probeer het opnieuw.');
         }
 
-
-
-
         if ($request->expectsJson()) {
             return response()->json(['success' => true, 'message' => 'Lid toegevoegd'], 201);
         }
@@ -146,6 +142,7 @@ public function store(StoreLidRequest $request)
         return redirect()->route('ledenpagina')->with('success', 'Lid toegevoegd');
     }
 
+    // Lid detailpagina
     public function show(string $id)
     {
         Gate::authorize('leden-bekijken');
@@ -184,6 +181,7 @@ public function store(StoreLidRequest $request)
         return view('EditLidPagina', compact('lid'));
     }
 
+    // Lid bewerken
     public function update(Request $request, string $id)
     {
         Gate::authorize('leden-beheren');
@@ -204,6 +202,7 @@ public function store(StoreLidRequest $request)
             ->select('leden.*', 'gebruikers.naam', 'gebruikers.email')
             ->firstOrFail();
 
+        // Naam en email zitten op gebruikers tabel
         Gebruiker::where('gebruiker_id', $lid->gebruiker_id)->update([
             'naam'  => $validated['naam'],
             'email' => $validated['email'],
@@ -229,12 +228,14 @@ public function store(StoreLidRequest $request)
         return redirect()->route('ledenpagina.show', $lid->lid_id)->with('success', 'Lid bewerkt');
     }
 
+    // Lid verwijderen
     public function destroy(string $lidId)
     {
         Gate::authorize('leden-verwijderen');
 
         $lid = Lid::with('gebruiker')->where('lid_id', $lidId)->first();
         if ($lid) {
+            // Naam onthouden voor de log voordat we deleten
             $naam = $lid->gebruiker ? $lid->gebruiker->naam : 'Onbekend';
             $lid->delete();
 
@@ -249,19 +250,4 @@ public function store(StoreLidRequest $request)
 
         return redirect()->route('ledenpagina')->with('success', 'Lid verwijderd');
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

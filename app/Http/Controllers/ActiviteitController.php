@@ -7,28 +7,27 @@ use App\Models\Activiteit;
 use App\Models\Gebruiker;
 use Illuminate\Support\Facades\Gate;
 
+// Activiteit log pagina
 class ActiviteitController extends Controller
 {
     public function activiteitLogData(Request $request)
     {
-        // Alleen admins mogen de activiteitenlog bekijken
         Gate::authorize('activiteitlog-bekijken');
 
-        // Haal filters op uit de request
         $search = $request->input('search');
         $tab = $request->input('tab', 'Alle');
 
-// Basisquery met de bijbehorende gebruiker en rollen
         $query = Activiteit::with(['gebruiker', 'gebruiker.rollen']);
 
-        // acties die worden ingedeeld in categorieen
+        // Filter per tab
         if ($tab === 'Inloggen') {
             $query->whereIn('actie', ['ingelogd', 'uitgelogd']);
         } elseif ($tab === 'Leden') {
             $query->whereIn('actie', ['lid_aangemaakt', 'lid_bijgewerkt', 'lid_verwijderd', 'lid_gewijzigd']);
         } elseif ($tab === 'Betalingen') {
-$query->whereIn('actie', ['betaling_hersteld', 'betaling_verwijderd', 'betaling_bijgewerkt', 'betaling_goedgekeurd', 'betaling_afgewezen', 'betaling_geregistreerd', 'bewijs_geüpload']);
-        }elseif ($tab === 'Systeem') {
+            $query->whereIn('actie', ['betaling_hersteld', 'betaling_verwijderd', 'betaling_bijgewerkt', 'betaling_goedgekeurd', 'betaling_afgewezen', 'betaling_geregistreerd', 'bewijs_geüpload']);
+        } elseif ($tab === 'Systeem') {
+            // Alles wat niet in de andere tabs valt
             $query->whereNotIn('actie', [
                 'ingelogd', 'uitgelogd',
                 'lid_aangemaakt', 'lid_bijgewerkt', 'lid_verwijderd', 'lid_gewijzigd',
@@ -36,71 +35,61 @@ $query->whereIn('actie', ['betaling_hersteld', 'betaling_verwijderd', 'betaling_
             ]);
         }
 
-         $actiemap = [
-                 // AUTH
-                 'login' => ['ingelogd'],
-                 'logout' => ['uitgelogd'],
+        // Mapping voor zoeken op Nederlandse labels
+        $actiemap = [
+            'login' => ['ingelogd'],
+            'logout' => ['uitgelogd'],
 
-                 // LEDEN
-                 'lid toegevoegd' => ['lid_aangemaakt'],
-                 'lid bijgewerkt' => ['lid_bijgewerkt', 'lid_gewijzigd'],
-                 'lid verwijderd' => ['lid_verwijderd'],
+            'lid toegevoegd' => ['lid_aangemaakt'],
+            'lid bijgewerkt' => ['lid_bijgewerkt', 'lid_gewijzigd'],
+            'lid verwijderd' => ['lid_verwijderd'],
 
-                 // BETALINGEN
-                 'betaling geregistreerd' => ['betaling_geregistreerd'],
-                 'betaling hersteld' => ['betaling_hersteld'],
-                 'betaling verwijderd' => ['betaling_verwijderd'],
-                 'betaling gewijzigd' => ['betaling_bijgewerkt', 'betaling_goedgekeurd', 'betaling_afgewezen'],
-                 'bewijs geüpload' => ['bewijs_geüpload'],
+            'betaling geregistreerd' => ['betaling_geregistreerd'],
+            'betaling hersteld' => ['betaling_hersteld'],
+            'betaling verwijderd' => ['betaling_verwijderd'],
+            'betaling gewijzigd' => ['betaling_bijgewerkt', 'betaling_goedgekeurd', 'betaling_afgewezen'],
+            'bewijs geüpload' => ['bewijs_geüpload'],
 
-                 // GEBRUIKERS
-                 'gebruiker toegevoegd' => ['gebruiker_toegevoegd'],
-                 'gebruiker verwijderd' => ['gebruiker_verwijderd'],
-                 'gebruiker_gewijzigd' => ['gebruiker_gewijzigd'],
+            'gebruiker toegevoegd' => ['gebruiker_toegevoegd'],
+            'gebruiker verwijderd' => ['gebruiker_verwijderd'],
+            'gebruiker_gewijzigd' => ['gebruiker_gewijzigd'],
 
-                 //Wachtwoord gewijzigd
-                 'wachtwoord_gewijzigd' => ['wachtwoord_gewijzigd'],
+            'wachtwoord_gewijzigd' => ['wachtwoord_gewijzigd'],
 
-                 //BONNEN
-                  'bon gegenereerd' => ['bon_aangemaakt'],
-                  'bon gedownload' => ['bon_gedownload'],
+            'bon gegenereerd' => ['bon_aangemaakt'],
+            'bon gedownload' => ['bon_gedownload'],
+        ];
 
-               ];
-
-        // Filter op zoekterm (actie, details of gebruikersnaam)
+        // Zoeken op actie, details of naam
         if (!empty($search)) {
-             $zoekActies = [];
+            $zoekActies = [];
 
-             foreach ($actiemap as $label => $acties){
-                if(str_contains(strtolower($label), strtolower($search))){
+            foreach ($actiemap as $label => $acties) {
+                if (str_contains(strtolower($label), strtolower($search))) {
                     $zoekActies = array_merge($zoekActies, $acties);
                 }
-             }
+            }
 
-
-            $query->where(function ($q) use ($search, $zoekActies){
+            $query->where(function ($q) use ($search, $zoekActies) {
                 $q->where('actie', 'like', "%$search%")
-                ->orWhere('details', 'like', "%$search%")
-                ->orWhereHas('gebruiker', function($query) use ($search){
-                    $query->where('naam', 'like', "%$search%");
-                });
+                  ->orWhere('details', 'like', "%$search%")
+                  ->orWhereHas('gebruiker', function ($query) use ($search) {
+                      $query->where('naam', 'like', "%$search%");
+                  });
 
-                if(!empty($zoekActies)){
+                if (!empty($zoekActies)) {
                     $q->orWhereIn('actie', $zoekActies);
                 }
-             });
+            });
         }
 
-        // Nieuwste activiteiten eerst
         $query->orderBy('aangemaakt_op', 'desc')->orderBy('log_id', 'desc');
 
-        // Pagineer resultaten (5 per pagina)
         $activiteiten = $query->paginate(5)->appends($request->query());
 
-        // Totaal aantal activiteiten voor de KPI-kaart
         $totalCount = Activiteit::count();
 
-        // Bereken de weektrend (deze week vs vorige week)
+        // Weektrend voor de KPI kaart
         $oneWeekAgo  = now()->subDays(7);
         $twoWeeksAgo = now()->subDays(14);
 
@@ -114,11 +103,9 @@ $query->whereIn('actie', ['betaling_hersteld', 'betaling_verwijderd', 'betaling_
             $trendPercent = round(($diff / $lastWeekCount) * 100);
             $weeklyTrend  = ($trendPercent >= 0 ? '+' : '') . $trendPercent . '% deze week';
         } else {
-            // Standaard waarde als er niet genoeg data is
             $weeklyTrend = '+12% deze week';
         }
 
-        // Stuur data naar de view
         return view('ActiviteitLog', compact('activiteiten', 'search', 'tab', 'totalCount', 'weeklyTrend'));
     }
 }

@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 
+// Betalingen beheer
 class BetalingController extends Controller
 {
     // Betalingen overzichtspagina
@@ -21,17 +22,15 @@ class BetalingController extends Controller
     {
         Gate::authorize('betalingen-bekijken');
 
-        // Huidige maand/jaar als standaard
+        // Huidige maand/jaar als default
         $maand = (int) $request->input('maand', now()->month);
         $jaar  = (int) $request->input('jaar', now()->year);
 
-        // Haal alle leden op met hun gebruiker
         $leden = Lid::with('gebruiker')->get();
 
         $ledenStatus = [];
         foreach ($leden as $lid) {
-
-// Vind of maak een betalingsrecord aan voor deze maand/jaar
+            // Maakt automatisch een Openstaande betaling als er nog geen is
             $betaling = Betaling::firstOrCreate(
                 [
                     'lid_id' => $lid->lid_id,
@@ -47,13 +46,12 @@ class BetalingController extends Controller
                 ]
             );
 
-            // Update bedrag als het nog 0 is (oude situatie)
+            // Bedrag aanvullen als het 0 was (oude records)
             if ($betaling->bedrag == 0 && $lid->MaandelijkseBijdrage() > 0) {
                 $betaling->bedrag = $lid->MaandelijkseBijdrage();
                 $betaling->save();
             }
 
-            // Voeg lid toe aan de statuslijst
             $ledenStatus[] = (object) [
                 'naam'                => $lid->gebruiker->naam ?? 'Onbekend',
                 'status'              => $betaling->status,
@@ -64,7 +62,7 @@ class BetalingController extends Controller
             ];
         }
 
-        // Recente betaalde betalingen (laatste 30 dagen)
+        // Laatste 5 betalingen van de afgelopen 30 dagen
         $recenteBetalingen = Betaling::select('betalingen.*', 'gebruikers.naam')
             ->join('leden',      'leden.lid_id',           '=', 'betalingen.lid_id')
             ->join('gebruikers', 'gebruikers.gebruiker_id', '=', 'leden.gebruiker_id')
@@ -73,14 +71,13 @@ class BetalingController extends Controller
             ->orderBy('betalingen.ingediend_op', 'desc')
             ->take(5)->get();
 
-        // Totaal betaald deze maand (voor stats card)
-        // Includes both 'betaald' and 'goed_gekeurd' as paid income
+        // Totaal betaald deze maand
         $maandTotaal = Betaling::whereIn('status', ['betaald', 'goed_gekeurd'])
             ->where('maand', $maand)
             ->where('jaar', $jaar)
             ->sum('bedrag');
 
-        // Totaal onbetaald deze maand (voor stats card)
+        // Totaal onbetaald deze maand
         $onbetaaldTotaal = Betaling::where('status', 'niet_betaald')
             ->where('maand', $maand)
             ->where('jaar', $jaar)
@@ -96,68 +93,63 @@ class BetalingController extends Controller
         ));
     }
 
+    // Bedrag per dag voor de grafiek
+    public function chartData(Request $request)
+    {
+        $maand = (int) $request->input('maand', now()->month);
+        $jaar  = (int) $request->input('jaar',  now()->year);
 
-    // Bedrag per weekdag grafiek
-   public function chartData(Request $request)
-{
-    $maand = (int) $request->input('maand', now()->month);
-    $jaar  = (int) $request->input('jaar',  now()->year);
+        $startDatum = Carbon::createFromDate($jaar, $maand, 1)->startOfMonth();
+        $eindDatum  = $startDatum->copy()->endOfMonth();
 
-    $startDatum = Carbon::createFromDate($jaar, $maand, 1)->startOfMonth();
-    $eindDatum  = $startDatum->copy()->endOfMonth();
+        // Groep per dag
+        $betalingen = Betaling::select(
+            DB::raw('DAY(ingediend_op) as dag'),
+            DB::raw('SUM(bedrag) as totaal_bedrag')
+        )
+        ->where('status', 'betaald')
+        ->whereBetween('ingediend_op', [$startDatum->toDateString(), $eindDatum->toDateString()])
+        ->groupBy('dag')
+        ->get()
+        ->keyBy('dag');
 
-    // Groepeer op kalenderdag
-    $betalingen = Betaling::select(
-        DB::raw('DAY(ingediend_op) as dag'),
-        DB::raw('SUM(bedrag) as totaal_bedrag')
-    )
-    ->where('status', 'betaald')
-    ->whereBetween('ingediend_op', [$startDatum->toDateString(), $eindDatum->toDateString()])
-    ->groupBy('dag')
-    ->get()
-    ->keyBy('dag');
+        $aantalDagen = $eindDatum->day;
 
-    $aantalDagen = $eindDatum->day;
+        $labels = [];
+        $data   = [];
 
-    $labels = [];
-    $data   = [];
+        // Vul alle dagen, ook lege
+        for ($dag = 1; $dag <= $aantalDagen; $dag++) {
+            $labels[] = (string) $dag;
+            $data[]   = (float) ($betalingen->get($dag)->totaal_bedrag ?? 0);
+        }
 
-    for ($dag = 1; $dag <= $aantalDagen; $dag++) {
-        $labels[] = (string) $dag;
-        $data[]   = (float) ($betalingen->get($dag)->totaal_bedrag ?? 0);
+        return response()->json([
+            'labels' => $labels,
+            'series' => [
+                ['name' => 'Totaal Bedrag', 'data' => $data]
+            ],
+        ]);
     }
-
-    return response()->json([
-        'labels' => $labels,
-        'series' => [
-            [
-                'name' => 'Totaal Bedrag',
-                'data' => $data,  // was $bedragen
-            ]
-        ],
-    ]);
-}
-
-
 
     // Nieuwe betaling opslaan
     public function store(Request $request)
     {
         Gate::authorize('betalingen-beheren');
 
-$request->validate([
+        $request->validate([
             'naam'            => 'required|string',
             'datum'           => 'required|date',
             'methode'         => 'required|in:fysiek,overmaking',
             'status'          => 'required|in:Openstaand,in_afwachting,afgewezen,betaald,niet_betaald',
-            'bedrag'          => 'required|numeric|min:150', //alleen betaling van 150
+            // Minimaal 150 (vaste contributie)
+            'bedrag'          => 'required|numeric|min:150',
             'betaling_bewijs' => 'nullable|file|max:5120',
-        ],[
+        ], [
             'bedrag.min' => 'Het bedrag moet minimaal SRD150 zijn',
         ]);
 
-
-        // Zoek gebruiker op naam
+        // Lid zoeken op naam
         $gebruiker = Gebruiker::where('naam', $request->naam)->first();
 
         if (!$gebruiker || !$gebruiker->lid) {
@@ -173,16 +165,15 @@ $request->validate([
         $maand = $datum->month;
         $jaar  = $datum->year;
 
-        // Gebruik het ingevoerde bedrag (minimaal 150, gevalideerd hierboven)
         $bedrag = $request->bedrag;
 
-        // Bewijs opslaan als geüpload
+        // Bewijs opslaan als geupload
         $bewijsPath = null;
         if ($request->hasFile('betaling_bewijs')) {
             $bewijsPath = $request->file('betaling_bewijs')->store('bewijzen', 'public');
         }
 
-        // Maak of update betaling voor deze maand (voorkomt dubbele betalingen)
+        // updateOrCreate voorkomt dubbele betalingen
         $betaling = Betaling::updateOrCreate(
             [
                 'lid_id' => $lid->lid_id,
@@ -198,12 +189,12 @@ $request->validate([
             ]
         );
 
-        // Bereken volgende deadline als de betaling als betaald is geregistreerd
+        // Volgende deadline berekenen als status betaald is
         if (in_array($request->status, ['betaald', 'goed_gekeurd'])) {
             $betaling->berekenVolgendeDeadline($datum->format('Y-m-d'));
         }
 
-        // Bon aanmaken als er nog geen bon bestaat
+        // Bon aanmaken als er nog geen is
         if (!$betaling->bon) {
             BonController::genereer(
                 $betaling,
@@ -212,22 +203,22 @@ $request->validate([
             );
         }
 
-        $admins = Gebruiker::whereHas('rollen', function($q) {
+        // Admins op de hoogte brengen
+        $admins = Gebruiker::whereHas('rollen', function ($q) {
             $q->whereIn('naam', ['Administratie Medewerker', 'Applicatie Beheerder']);
         })->get();
 
         foreach ($admins as $admin) {
             Notificatie::create([
-             'gebruiker_id' => $admin->gebruiker_id,
-             'lid_id' => $lid->lid_id,
-             'Notif_type' => 'Betaling_ingediend',
-             'titel' => 'Een nieuwe betaling is geregistreerd voor lid ' . $gebruiker->naam . ' op ' . $datum->format('Y-m-d') . '.',
-             'gelezen' => false,
-             'gestuurd_op' => now(),
+                'gebruiker_id' => $admin->gebruiker_id,
+                'lid_id'       => $lid->lid_id,
+                'Notif_type'   => 'Betaling_ingediend',
+                'titel'        => 'Een nieuwe betaling is geregistreerd voor lid ' . $gebruiker->naam . ' op ' . $datum->format('Y-m-d') . '.',
+                'gelezen'      => false,
+                'gestuurd_op'  => now(),
             ]);
         }
 
-        // Activiteit loggen
         if (auth()->check()) {
             Activiteit::log(auth()->id(), 'betaling_geregistreerd', [
                 'betaling_id' => $betaling->betaling_id,
@@ -248,28 +239,25 @@ $request->validate([
         return response()->json(['success' => true, 'message' => 'Betaling succesvol toegevoegd'], 201);
     }
 
-
-
-
-    // Bestaande betaling bijwerken
+    // Betaling bijwerken
     public function update(Request $request, Betaling $betaling)
     {
         Gate::authorize('betalingen-beheren');
 
-$request->validate([
-            'bedrag'          => 'required|numeric|min:150', //alleen betaling van 100
+        $request->validate([
+            'bedrag'          => 'required|numeric|min:150',
             'methode'         => 'required|in:fysiek,overmaking',
             'status'          => 'required|in:Openstaand,in_wachting,afgewezen,betaald,niet_betaald',
             'datum'           => 'required|date',
             'betaling_bewijs' => 'nullable|file|max:5120',
         ]);
 
-        // Oud bewijs verwijderen als er een nieuw bestand is geüpload
+        // Oud bewijs weggooien bij nieuwe upload
         if ($request->hasFile('betaling_bewijs') && $betaling->betaling_bewijs) {
             Storage::disk('public')->delete($betaling->betaling_bewijs);
         }
 
-        // Nieuw bewijs opslaan, anders oud pad behouden
+        // Bestaand pad behouden als er geen nieuwe upload is
         $bewijsPath = $betaling->betaling_bewijs;
         if ($request->hasFile('betaling_bewijs')) {
             $bewijsPath = $request->file('betaling_bewijs')->store('bewijzen', 'public');
@@ -277,7 +265,6 @@ $request->validate([
 
         $datum = Carbon::parse($request->datum);
 
-        // Betaling bijwerken
         $betaling->update([
             'bedrag'          => $request->bedrag,
             'methode'         => $request->methode,
@@ -288,15 +275,14 @@ $request->validate([
             'betaling_bewijs' => $bewijsPath,
         ]);
 
-        // Bereken volgende deadline bij statuswijziging
+        // Deadline updaten
         if (in_array($request->status, ['betaald', 'goed_gekeurd'])) {
             $betaling->berekenVolgendeDeadline($datum->format('Y-m-d'));
         } else {
-            // Status is niet meer betaald → deadline verwijderen
+            // Status niet meer betaald = deadline weghalen
             $betaling->update(['volgende_deadline' => null]);
         }
 
-        // Activiteit loggen
         if (auth()->check()) {
             Activiteit::log(auth()->id(), 'betaling_bijgewerkt', [
                 'betaling_id' => $betaling->betaling_id,
@@ -306,11 +292,6 @@ $request->validate([
 
         return response()->json(['success' => true, 'message' => 'Betaling succesvol bijgewerkt']);
     }
-
-
-
-
-
 
     // Soft delete
     public function destroy($betaling_id)
@@ -325,7 +306,6 @@ $request->validate([
 
         $betaling->delete();
 
-        // Activiteit loggen
         if (auth()->check()) {
             Activiteit::log(auth()->id(), 'betaling_verwijderd', [
                 'betaling_id' => $betaling->betaling_id,
@@ -333,228 +313,182 @@ $request->validate([
             ]);
         }
 
-        return redirect()->back()->with('success','Betaling verwijderd');
+        return redirect()->back()->with('success', 'Betaling verwijderd');
     }
 
-
-
-
+    // Prullenbak pagina
     public function trashed()
     {
         Gate::authorize('betalingen-verwijderen');
 
+        // onlyTrashed = alleen verwijderde
         $verwijderdeBetalingen = Betaling::onlyTrashed()
-        ->Select('betalingen.*','gebruikers.naam')
-        ->join('leden','leden.lid_id', '=','betalingen.lid_id')
-        ->join('gebruikers','gebruikers.gebruiker_id', '=','leden.gebruiker_id')
-        ->orderBy('betalingen.deleted_at', 'desc')
-        ->get();
-
-
-
+            ->Select('betalingen.*', 'gebruikers.naam')
+            ->join('leden', 'leden.lid_id', '=', 'betalingen.lid_id')
+            ->join('gebruikers', 'gebruikers.gebruiker_id', '=', 'leden.gebruiker_id')
+            ->orderBy('betalingen.deleted_at', 'desc')
+            ->get();
 
         return view('DeletedRecords', compact('verwijderdeBetalingen'));
     }
 
-
-
-
-
+    // Betaling terughalen uit prullenbak
     public function restore($betaling_id)
     {
         Gate::authorize('betalingen-verwijderen');
 
-        //WithTrashed() zoekt ook in verwijderde rijen
-        //zonder dit vindt laravel de betaling niet want die is weg
-
+        // withTrashed nodig, anders vindt Laravel hem niet
         $betaling = Betaling::withTrashed()->find($betaling_id);
 
-        if(!$betaling){
+        if (!$betaling) {
             return response()->json(['success' => false, 'message' => 'Betaling niet gevonden']);
         }
 
-        //restore() haalt de betaling terug uit de trash
         $betaling->restore();
 
-        // Activiteit loggen
         if (auth()->check()) {
             Activiteit::log(auth()->id(), 'betaling_hersteld', [
                 'betaling_id' => $betaling->betaling_id,
-                'details'     => 'Betaling #' . $betaling->betaling_id . '('. $betaling->ingediend_op .') van lid: ' . $betaling->lid->gebruiker->naam . ' hersteld door '. auth()->user()->naam ,
+                'details'     => 'Betaling #' . $betaling->betaling_id . '('. $betaling->ingediend_op .') van lid: ' . $betaling->lid->gebruiker->naam . ' hersteld door '. auth()->user()->naam,
             ]);
         }
 
         return response()->json(['success' => true, 'message' => 'Betaling succesvol hersteld']);
     }
 
+    // Bewijs overzicht pagina
+    public function showBewijsReceived(Request $request)
+    {
+        Gate::authorize('betalingen-beheren');
 
+        // In afwachting van beoordeling
+        $pendingPayments = Betaling::where('status', 'in_afwachting')
+            ->with(['lid.gebruiker'])
+            ->orderBy('ingediend_op', 'desc')
+            ->paginate(5);
 
+        // Recent beoordeeld
+        $recentReviews = Betaling::whereIn('status', ['betaald', 'goed_gekeurd', 'niet_goedgekeurd', 'Openstaand'])
+            ->whereNotNull('betaling_bewijs')
+            ->with(['lid.gebruiker'])
+            ->orderBy('ingediend_op', 'desc')
+            ->take(5)
+            ->get();
 
+        $pendingCount = Betaling::where('status', 'in_afwachting')->count();
 
+        $totalReviewedToday = Betaling::whereIn('status', ['betaald', 'goed_gekeurd', 'niet_goedgekeurd', 'Openstaand'])
+            ->whereNotNull('betaling_bewijs')
+            ->whereDate('ingediend_op', today())
+            ->count();
 
-        // Betaal Bewijs Overzicht
-  public function showBewijsReceived(Request $request)
-  {
-      Gate::authorize('betalingen-beheren'); // Administratie Medewerker + Applicatie Beheerder
+        // Lege placeholders zodat de preview niet laadt bij opstarten
+        $betaling = null;
+        $bewijsUrl = null;
+        $isPdf = false;
 
-      // Get actual pending payments (in afwachting)
-      $pendingPayments = Betaling::where('status', 'in_afwachting')
-          ->with(['lid.gebruiker'])
-          ->orderBy('ingediend_op', 'desc')
-          ->paginate(5);
-
-      // Get recent reviews (status = betaald, goed_gekeurd, niet_goedgekeurd, or Openstaand which was rejected)
-      $recentReviews = Betaling::whereIn('status', ['betaald', 'goed_gekeurd', 'niet_goedgekeurd', 'Openstaand'])
-          ->whereNotNull('betaling_bewijs')
-          ->with(['lid.gebruiker'])
-          ->orderBy('ingediend_op', 'desc')
-          ->take(5)
-          ->get();
-
-      // Stats
-      $pendingCount = Betaling::where('status', 'in_afwachting')->count();
-
-      $totalReviewedToday = Betaling::whereIn('status', ['betaald', 'goed_gekeurd', 'niet_goedgekeurd', 'Openstaand'])
-          ->whereNotNull('betaling_bewijs')
-          ->whereDate('ingediend_op', today())
-          ->count();
-
-          // Dit zijn de variabelen voor de pdf/afbeelding weergave. Zorgen ervoor dat de afbeelding niet wordt geladen bij opstarten
-          $betaling = null;
-          $bewijsUrl = null;
-          $isPdf = false;
-
-      return view('BewijsReceived', compact('pendingPayments', 'recentReviews', 'pendingCount', 'totalReviewedToday', 'betaling', 'bewijsUrl', 'isPdf'));
-  }
-
-
-
-// Betaal Bewijs Bekijken
-  public function ViewBewijsFile($betaling_id)
-{
-    Gate::authorize('betalingen-beheren');
-
-    // Find the payment or show a 404 page if it doesn't exist
-    $betaling = Betaling::findOrFail($betaling_id);
-
-    // Check 1: does this payment even have a proof file attached?
-    if (!$betaling->betaling_bewijs) {
-        return redirect()->back()->with('error', 'Geen betalingsbewijs gevonden voor deze betaling.');
+        return view('BewijsReceived', compact('pendingPayments', 'recentReviews', 'pendingCount', 'totalReviewedToday', 'betaling', 'bewijsUrl', 'isPdf'));
     }
 
-    // Check 2: does the file physically exist on disk?
-    if (!\Storage::disk('public')->exists($betaling->betaling_bewijs)) {
-        return redirect()->back()->with('error', 'Bestand niet gevonden op de server.');
+    // Bewijs bekijken (PDF of afbeelding)
+    public function ViewBewijsFile($betaling_id)
+    {
+        Gate::authorize('betalingen-beheren');
+
+        $betaling = Betaling::findOrFail($betaling_id);
+
+        // Check 1: is er een bewijs?
+        if (!$betaling->betaling_bewijs) {
+            return redirect()->back()->with('error', 'Geen betalingsbewijs gevonden voor deze betaling.');
+        }
+
+        // Check 2: bestaat het bestand nog op disk?
+        if (!\Storage::disk('public')->exists($betaling->betaling_bewijs)) {
+            return redirect()->back()->with('error', 'Bestand niet gevonden op de server.');
+        }
+
+        $bewijsUrl = \Storage::url($betaling->betaling_bewijs);
+
+        // PDF of afbeelding bepalen
+        $extensie = strtolower(pathinfo($betaling->betaling_bewijs, PATHINFO_EXTENSION));
+        $isPdf    = $extensie === 'pdf';
+
+        $bewijsUrl = \Storage::url($betaling->betaling_bewijs);
+
+        return view('BewijsReceived', compact('betaling', 'bewijsUrl', 'isPdf'));
     }
 
-    // Build a public URL so the browser can display the file directly
-    $bewijsUrl = \Storage::url($betaling->betaling_bewijs);
+    // Bewijs goedkeuren
+    public function ApproveBewijs(Request $request, $betaling_id)
+    {
+        $betaling = Betaling::findOrFail($betaling_id);
+        $betaling->status = 'betaald';
+        $betaling->methode = 'overmaking';
+        $betaling->save();
 
-    // Detect whether the file is a PDF or an image so the view
-    $extensie   = strtolower(pathinfo($betaling->betaling_bewijs, PATHINFO_EXTENSION));
-    $isPdf      = $extensie === 'pdf';
+        // Volgende deadline berekenen
+        $betaling->berekenVolgendeDeadline();
 
+        if (!$betaling->bon) {
+            $gebruiker = $betaling->lid->gebruiker;
+            $datum     = \Carbon\Carbon::parse($betaling->ingediend_op);
 
+            BonController::genereer(
+                $betaling,
+                $gebruiker->naam,
+                $datum->translatedFormat('F Y')
+            );
+        }
 
+        if (auth()->check()) {
+            Activiteit::log(auth()->id(), 'betaling_goedgekeurd', [
+                'betaling_id' => $betaling->betaling_id,
+                'details'     => 'Betaling #' . $betaling->betaling_id . ' goedgekeurd door '. auth()->user()->naam,
+            ]);
+        }
 
-
-
-
-    // PDF of Afbeelding weergeven
-    $bewijsUrl = \Storage::url($betaling->betaling_bewijs);
-    // Pass everything the view needs to the preview page
-    return view('BewijsReceived', compact('betaling', 'bewijsUrl', 'isPdf'));
-}
-
-
-     // Betaal Bewijs Goed Keuren
-    public function ApproveBewijs(Request $request, $betaling_id){
-    $betaling = Betaling::findOrFail($betaling_id);
-    $betaling->status = 'betaald';
-    $betaling->methode = 'overmaking';
-    $betaling->save();
-
-    // Bereken volgende deadline na goedkeuring
-    $betaling->berekenVolgendeDeadline();
-
-    if(!$betaling->bon){
-        $gebruiker = $betaling->lid->gebruiker;
-        $datum  = \Carbon\Carbon::parse($betaling->ingediend_op);
-
-        BonController::genereer(
-            $betaling,
-            $gebruiker->naam,
-            $datum->translatedFormat('F Y')
-
-        );
+        return redirect()->back()->with('success', 'Betaling goedgekeurd');
     }
 
-    if(auth()->check()){
-        Activiteit::log(auth()->id(), 'betaling_goedgekeurd', [
-            'betaling_id' => $betaling->betaling_id,
-            'details'     => 'Betaling #' . $betaling->betaling_id . ' goedgekeurd door '. auth()->user()->naam,
-        ]);
+    // Bewijs afkeuren
+    public function RejectBewijs(Request $request, $betaling_id)
+    {
+        $betaling = Betaling::findOrFail($betaling_id);
+        $betaling->status = 'Openstaand';
+        $betaling->save();
+
+        if (auth()->check()) {
+            Activiteit::log(auth()->id(), 'betaling_afgewezen', [
+                'betaling_id' => $betaling->betaling_id,
+                'details'     => 'Betaling #' . $betaling->betaling_id . ' afgewezen door '. auth()->user()->naam,
+            ]);
+        }
+
+        return redirect()->back()->with('error', 'Betaling afgekeurd');
     }
 
-
-    return redirect()->back()->with('success', 'Betaling goedgekeurd');
-}
-
-
-
-public function RejectBewijs(Request $request, $betaling_id){
-    $betaling = Betaling::findOrFail($betaling_id);
-    $betaling->status = 'Openstaand';
-    $betaling->save();
-
-    // Log de activiteit (audit trail)
-    if(auth()->check()){
-        Activiteit::log(auth()->id(), 'betaling_afgewezen', [
-            'betaling_id' => $betaling->betaling_id,
-            
-            'details'     => 'Betaling #' . $betaling->betaling_id . ' afgewezen door '. auth()->user()->naam,
-        ]);
-    }
-
-    return redirect()->back()->with('error', 'Betaling afgekeurd');
-
-}
-
-
-// Verwijder dubbele betalingen
-    // Dit zorgt ervoor dat als een lid al heeft betaald voor deze maand,
-    // er geen nieuwe openstaande betaling wordt aangemaakt
+    // Dubbele openstaande betalingen opruimen
     public function removeduplicateBetalingen()
     {
-        // Haal alle betalingen op die:
-        // Status is Openstaand
-        // Geen methode hebben (dus nog niet betaald)
+        // Alleen openstaande zonder methode
         $allebetalingen = Betaling::with('bonnen')
             ->where('status', 'Openstaand')
             ->whereNull('methode')
             ->get();
 
-        // Groepeer op lid_id + maand + jaar
-        // Dan weten we welke betalingen voor dezelfde persoon en maand zijn
+        // Groep per lid + maand + jaar
         $gegroepeerd = $allebetalingen->groupBy(function ($betaling) {
             return $betaling->lid_id . '-' . $betaling->maand . '-' . $betaling->jaar;
         });
 
         $verwijderd = 0;
 
-        // Loop door elke groep
         foreach ($gegroepeerd as $groep) {
-            // Als er meer dan 1 betaling is voor dezelfde maand
             if ($groep->count() > 1) {
-                // Houd de eerste (oudste) betaling
-                // Verwijder de rest
-                $tehouden = $groep->first();
-
+                // Eerste behouden, rest weg
                 foreach ($groep as $index => $betaling) {
-                    // Skip de eerste, die houden we
                     if ($index === 0) continue;
 
-                    // Verwijder de dubbele betaling
                     $betaling->delete();
                     $verwijderd++;
                 }

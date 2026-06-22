@@ -9,14 +9,15 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use App\Mail\ResetPasswordMail;
 
+// Wachtwoord vergeten flow (3 stappen)
 class PasswordResetController extends Controller
 {
-    // Show Recover Password form
     public function show()
     {
         return view('ForgetPassword.Recover-password');
     }
 
+    // Stap 1: stuur reset code
     public function sendResetCode(Request $request)
     {
         $request->validate([
@@ -25,38 +26,35 @@ class PasswordResetController extends Controller
 
         $email = $request->email;
 
-        // Check if logged-in user is attempting to reset another user's password
+        // Ingelogde gebruikers mogen alleen voor zichzelf een code aanvragen
         if (auth()->check() && strtolower($email) !== strtolower(auth()->user()->email)) {
             return back()
                 ->withInput()
                 ->with('error', 'U kunt alleen een verificatiecode sturen naar uw eigen e-mailadres.');
         }
 
-        // Rate limiting: max 3 reset requests per email per 15 minutes
+        // Max 3 aanvragen per 10 min
         $rateLimitKey = 'password-reset:' . strtolower($email);
         if (RateLimiter::tooManyAttempts($rateLimitKey, 3)) {
             $seconds = RateLimiter::availableIn($rateLimitKey);
             return back()
                 ->withInput()
-                ->with('error', 'Te veel pogingen. Probeer het opnieuw over ' . ceil($seconds / 60) . ' minuten.');
+                ->with('error', 'Te veel verification codes verstuurd. Probeer het opnieuw over ' . ceil($seconds / 60) . ' minuten.');
         }
-        RateLimiter::hit($rateLimitKey, 900); // 15 minutes decay
+        RateLimiter::hit($rateLimitKey, 900);
 
-        // Get the gebruiker_id for this email
         $gebruiker = DB::table('gebruikers')->where('email', $email)->first();
 
-
-
-        // Generate a cryptographically secure 6-digit code
+        // 6 cijferige random code
         $code = str_pad(random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
 
-        // Delete any existing unused reset codes for this user
+        // Oude codes weggooien
         DB::table('wachtwoord_reset')
             ->where('gebruiker_id', $gebruiker->gebruiker_id)
             ->where('gebruikt', 0)
             ->delete();
 
-        // Store the code as a hash so it cannot be read from the database
+        // Code gehasht opslaan
         DB::table('wachtwoord_reset')->insert([
             'gebruiker_id' => $gebruiker->gebruiker_id,
             'token' => Hash::make($code),
@@ -64,18 +62,17 @@ class PasswordResetController extends Controller
             'gebruikt' => 0,
         ]);
 
-        // Always send to the registered email address from the database, never from user input
+        // Mailen naar adres uit db, niet uit input
         $registeredEmail = $gebruiker->email;
         Mail::to($registeredEmail)->send(new ResetPasswordMail($code, $registeredEmail));
 
-        // Store the gebruiker_id in session (NOT the email) to prevent tampering
+        // ID in sessie (niet email) zodat het niet te wijzigen is
         session([
             'reset_gebruiker_id' => $gebruiker->gebruiker_id,
             'reset_email' => $registeredEmail,
             'reset_attempts' => 0,
         ]);
 
-        // Mask the email in the success message to prevent information leakage
         $maskedEmail = $this->maskEmail($registeredEmail);
 
         return redirect()->route('verify-code')
@@ -87,17 +84,15 @@ class PasswordResetController extends Controller
         return view('ForgetPassword.Verifycode');
     }
 
+    // Stap 2: code controleren
     public function postVerifyCode(Request $request)
     {
         $request->validate([
-            'code' => 'required|array|size:6',
-            'code.*' => 'required|numeric|digits:1',
+            'code' => 'required|numeric|digits:6',
         ]);
 
-        // Combine the 6 individual digits into a single code
-        $code = implode('', $request->code);
+       $code = $request->code;
 
-        // Get the gebruiker_id from session (not email, to prevent tampering)
         $gebruikerId = session('reset_gebruiker_id');
         $email = session('reset_email');
 
@@ -106,23 +101,20 @@ class PasswordResetController extends Controller
                 ->with('error', 'Sessie verlopen. Vraag een nieuwe code aan.');
         }
 
-        // Check failed attempt count — max 5 attempts
+        // Max 5 pogingen
         $attempts = session('reset_attempts', 0);
         if ($attempts >= 5) {
-            // Invalidate all unused tokens for this user
             DB::table('wachtwoord_reset')
                 ->where('gebruiker_id', $gebruikerId)
                 ->where('gebruikt', 0)
                 ->delete();
 
-            // Clear session data
             session()->forget(['reset_gebruiker_id', 'reset_email', 'reset_attempts', 'reset_verified']);
 
             return redirect()->route('recover-password')
-                ->with('error', 'Te veel mislukte pogingen. Vraag een nieuwe code aan.');
+                ->with('error', 'Te veel onjuiste verificatie codes ingevoerd. Vraag een nieuwe code aan.');
         }
 
-        // Get the gebruiker record to verify it still exists
         $gebruiker = DB::table('gebruikers')->where('gebruiker_id', $gebruikerId)->first();
 
         if (!$gebruiker) {
@@ -130,14 +122,14 @@ class PasswordResetController extends Controller
                 ->with('error', 'Gebruiker niet gevonden.');
         }
 
-        // Find all valid, unused, non-expired reset tokens for this user
+        // Alle geldige codes ophalen
         $resetRecords = DB::table('wachtwoord_reset')
             ->where('gebruiker_id', $gebruiker->gebruiker_id)
             ->where('gebruikt', 0)
             ->where('verlopen_op', '>', now())
             ->get();
 
-        // Check the submitted code against hashed tokens
+        // Vergelijken met Hash::check
         $matchedRecord = null;
         foreach ($resetRecords as $record) {
             if (Hash::check($code, $record->token)) {
@@ -147,7 +139,6 @@ class PasswordResetController extends Controller
         }
 
         if (!$matchedRecord) {
-            // Increment failed attempts
             session(['reset_attempts' => $attempts + 1]);
 
             $remainingAttempts = 5 - ($attempts + 1);
@@ -160,12 +151,11 @@ class PasswordResetController extends Controller
                 ->with('error', $message);
         }
 
-        // Mark the token as used
+        // Code als gebruikt markeren
         DB::table('wachtwoord_reset')
             ->where('reset_id', $matchedRecord->reset_id)
             ->update(['gebruikt' => 1]);
 
-        // Store verification flag in session, bound to the specific gebruiker_id
         session([
             'reset_verified' => true,
             'reset_verified_gebruiker_id' => $gebruiker->gebruiker_id,
@@ -181,19 +171,19 @@ class PasswordResetController extends Controller
         return view('ForgetPassword.NewPassword');
     }
 
+    // Stap 3: nieuw wachtwoord opslaan
     public function postNewPassword(Request $request)
     {
         $request->validate([
             'password' => 'required|min:8|confirmed',
         ]);
 
-        // Check if the user has verified their code
         if (!session('reset_verified')) {
             return redirect()->route('recover-password')
                 ->with('error', 'Verificatie niet voltooid. Begin opnieuw.');
         }
 
-        // Use the verified gebruiker_id from session — this cannot be tampered with
+        // ID uit sessie gebruiken, niet uit form
         $gebruikerId = session('reset_verified_gebruiker_id');
 
         if (!$gebruikerId) {
@@ -201,7 +191,6 @@ class PasswordResetController extends Controller
                 ->with('error', 'Sessie verlopen. Begin opnieuw.');
         }
 
-        // Get the gebruiker record using the verified ID (not user-supplied email)
         $gebruiker = DB::table('gebruikers')->where('gebruiker_id', $gebruikerId)->first();
 
         if (!$gebruiker) {
@@ -209,7 +198,6 @@ class PasswordResetController extends Controller
                 ->with('error', 'Gebruiker niet gevonden. Begin opnieuw.');
         }
 
-        // Update the password using gebruiker_id (not email) to prevent any tampering
         DB::table('gebruikers')
             ->where('gebruiker_id', $gebruikerId)
             ->update(['wachtwoord_hash' => Hash::make($request->password)]);
@@ -221,7 +209,7 @@ class PasswordResetController extends Controller
             ]);
         }
 
-        // Clear all reset session data
+        // Sessie helemaal opschonen
         session()->forget([
             'reset_email',
             'reset_gebruiker_id',
@@ -234,10 +222,7 @@ class PasswordResetController extends Controller
             ->with('success', 'Wachtwoord succesvol gewijzigd. Je kunt nu inloggen.');
     }
 
-    /**
-     * Mask an email address for display purposes.
-     * e.g., "john.doe@example.com" becomes "j*****e@e****e.com"
-     */
+    // Email maskeren bv. j*****e@e*****e.com
     private function maskEmail(string $email): string
     {
         $parts = explode('@', $email);

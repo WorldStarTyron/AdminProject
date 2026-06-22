@@ -4,21 +4,14 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+// Validatie voor nieuwe betaling
 class StoreBetalingRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return false;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
@@ -27,7 +20,7 @@ class StoreBetalingRequest extends FormRequest
             'bedrag'            => 'required|numeric|min:0',
             'methode'           => 'required|string',
             'status'            => 'required|string',
-            'lid_type'          => 'required|in:Actief,Passief,Bijzonder', 
+            'lid_type'          => 'required|in:Actief,Passief,Bijzonder',
             'omschrijving'      => 'nullable|string|max:255',
             'bonnummer'         => 'nullable|string|max:50',
         ];
@@ -40,7 +33,7 @@ class StoreBetalingRequest extends FormRequest
             'lid_id.exists'         => 'Geselecteerd lid bestaat niet.',
             'datum.required'        => 'Datum is verplicht.',
             'bedrag.required'       => 'Bedrag is verplicht.',
-            'bedrag.min'          => 'Bedrag kan niet negatief zijn.',
+            'bedrag.min'            => 'Bedrag kan niet negatief zijn.',
             'methode.required'      => 'Betalingsmethode is verplicht.',
             'status.required'       => 'Status is verplicht.',
             'lid_type.required'     => 'Lid type is verplicht.',

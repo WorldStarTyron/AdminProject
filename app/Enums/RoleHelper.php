@@ -2,6 +2,8 @@
 
 use App\Enums\Role;
 
+// Hulp functies voor rolcheck in blade
+
 if (!function_exists('hasRole')) {
     function hasRole($roleId)
     {
@@ -37,8 +39,7 @@ if (!function_exists('isApplicatieBeheerder')) {
     }
 }
 
-
-
+// Lid gaat naar eigen pagina, rest naar dashboard
 function redirectBasedOnRole($user)
 {
     return match($user->rol) {
@@ -46,6 +47,3 @@ function redirectBasedOnRole($user)
         default   => redirect()->route('MainDashboardPagina'),
     };
 }
-
-
-

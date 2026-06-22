@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Admin Channel</title>
-    @vite(['resources/css/app.css', 'resources/js/UI/Sidebar.js', 'resources/css/login.css', 'resources/js/Auth/Login.js'])
+    @vite(['resources/css/app.css', 'resources/js/UI/Sidebar.js', 'resources/css/login.css', 'resources/js/Auth/Login.js', 'resources/js/UI/ShowPassword.js'])
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -117,7 +117,13 @@
                                     type="button"
                                     id="togglePassword"
                                     class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 focus:outline-none transition-colors"
-                                    title="Toggle Password Visibility"></button>
+                                    title="Toggle Password Visibility"
+                                    @click="ShowPassword()">
+                                    <!--Open eyes-->
+                                    <i id="openEyes" class="fa-solid fa-eye text-base"></i>
+                                    <!--Close eyes-->
+                                    <i id="closeEyes" class="fa-solid fa-eye-slash text-base"></i>
+                                </button>
                             </div>
                             @error('password')
                                 <p class="text-red-600 text-xs mt-1.5 flex items-center gap-1.5 font-medium">

@@ -10,7 +10,7 @@ use App\Models\Activiteit;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\DB;
 
-
+// Gebruikers beheer pagina
 class GebruikerController extends Controller
 {
     public function index(Request $request)
@@ -21,6 +21,7 @@ class GebruikerController extends Controller
         $status = $request->input('status');
         $rol    = $request->input('rol');
 
+        // when() = filter alleen toepassen als de waarde gevuld is
         $gebruikers = Gebruiker::with('rollen')
             ->when($zoek, function ($query) use ($zoek) {
                 $query->where('naam', 'like', "%{$zoek}%")
@@ -37,13 +38,14 @@ class GebruikerController extends Controller
             ->paginate(5)
             ->appends($request->query());
 
+        // Tellers voor KPI kaarten
         $totaalGebruikers  = Gebruiker::count();
         $totaalAdmins      = Gebruiker::whereHas('rollen', fn($q) => $q->where('naam', 'Administratie Medewerker'))->count();
         $totaalVoorzitters = Gebruiker::whereHas('rollen', fn($q) => $q->where('naam', 'Voorzitter'))->count();
 
         $rollen = Rol::all();
 
-        // Controleer of er een zoekterm of filter actief is maar geen resultaten zijn gevonden.
+        // Voor "geen resultaten" melding
         $geenResultaten = $gebruikers->isEmpty() && ($zoek || $status || $rol);
 
         return view('GebruikersBeheerPagina', compact(
@@ -53,46 +55,36 @@ class GebruikerController extends Controller
 
     public function create()
     {
-        // Dit is niet strikt nodig omdat je de formulierknop alleen toont bij de juiste rechten,
-        // maar voor de zekerheid mag alleen een beheerder een pagina openen om te maken.
         Gate::authorize('Layouts.AddModals.AddGebruikerModal');
     }
 
-    public function store(Request $request){
-
+    // Nieuwe gebruiker aanmaken
+    public function store(Request $request)
+    {
         $validated = $request->validate([
-              'naam' => 'required|string|max:255',
-              'email' => 'required|email|unique:gebruikers,email',
-              'wachtwoord' => 'required|string|min:8|confirmed',
-
-
+            'naam' => 'required|string|max:255',
+            'email' => 'required|email|unique:gebruikers,email',
+            'wachtwoord' => 'required|string|min:8|confirmed',
         ]);
 
-         $gebruiker = Gebruiker::create([
-        'naam' => $validated['naam'],
-        'email' => $validated['email'],
-        'wachtwoord_hash' => bcrypt($validated['wachtwoord']),
-        'status' => 'Actief',
-        'aangemaakt_op' => now(),
-        'bijgewerkt_op' => now(),
-    ]);
-
-
-
-
-    //Activiteit
-      if (auth()->check()) {
-        Activiteit::log(auth()->id(), 'gebruiker_toegevoegd', [
-            'gebruiker_id'  => $gebruiker->gebruiker_id,
-            'details' => 'Account ' . $gebruiker->naam . ' succesvol aangemaakt.',
+        $gebruiker = Gebruiker::create([
+            'naam' => $validated['naam'],
+            'email' => $validated['email'],
+            'wachtwoord_hash' => bcrypt($validated['wachtwoord']),
+            'status' => 'Actief',
+            'aangemaakt_op' => now(),
+            'bijgewerkt_op' => now(),
         ]);
+
+        if (auth()->check()) {
+            Activiteit::log(auth()->id(), 'gebruiker_toegevoegd', [
+                'gebruiker_id'  => $gebruiker->gebruiker_id,
+                'details' => 'Account ' . $gebruiker->naam . ' succesvol aangemaakt.',
+            ]);
+        }
+
+        return redirect()->route('GebruikersBeheer')->with('success', 'Gebruiker succesvol toegevoegd');
     }
-
-    return redirect()->route('GebruikersBeheer')->with('success', 'Gebruiker succesvol toegevoegd');
-    }
-
-
-
 
     public function show(Request $request, $id)
     {
@@ -102,79 +94,58 @@ class GebruikerController extends Controller
         return view('gebruikers.show', compact('gebruiker'));
     }
 
-
-    /**
-     * Gebruiker updaten (naam, email, status).
-     *
-     * Geeft JSON terug zodat de modal de tabelrij live kan bijwerken
-     * zonder de pagina te herladen.
-     */
+    // Gebruiker bijwerken
     public function update(Request $request, $id)
-{
-    Gate::authorize('gebruikersbeheer');
+    {
+        Gate::authorize('gebruikersbeheer');
 
-    // Stap 1: Valideer de invoer
-    $validated = $request->validate([
-        'naam'          => 'required|string|max:100',
-        'email'         => 'required|email|max:150|unique:gebruikers,email,' . $id . ',gebruiker_id',
-        'status'        => 'required|in:Actief,Inactief',
-        'aangemaakt_op' => 'required|date',
-    ]);
-
-    // Stap 2: Gebruiker ophalen & bijwerken
-    $gebruiker = Gebruiker::findOrFail($id);
-    $gebruiker->update($validated);
-
-return redirect()->back()->with('success', 'Account is geupdate');
-
-}
-
-
-  // Gebruiker deactiveren
-public function deactiveer($gebruiker_id)
-{
-    // Check of de ingelogde gebruiker dit mag (zelfde check als andere acties)
-    Gate::authorize('gebruikersbeheer');
-
-    $gebruiker = Gebruiker::findOrFail($gebruiker_id);
-    $gebruiker->status = 'Inactief';
-    $gebruiker->save();
-
-return redirect()->back()->with('success', 'Account is gedeactiveerd');
-}
-
-// Gebruiker heractiveren
-public function heractiveer($gebruiker_id)
-{
-    // Check of de ingelogde gebruiker dit mag
-    Gate::authorize('gebruikersbeheer');
-
-    // Zoek de gebruiker op
-    $gebruiker = Gebruiker::findOrFail($gebruiker_id);
-    $gebruiker->status = 'Actief';
-    $gebruiker->save();
-
-    // Activiteit loggen (bestaande functionaliteit, ongewijzigd)
-    if (auth()->check()) {
-        \App\Models\Activiteit::log(auth()->id(), 'lid_gewijzigd', [
-            'lid_id'  => $gebruiker->gebruiker_id,
-            'details' => 'Gebruiker ' . $gebruiker->naam . ' is succesvol hergeactiveerd.',
+        // Eigen record uitsluiten van unique check
+        $validated = $request->validate([
+            'naam'          => 'required|string|max:100',
+            'email'         => 'required|email|max:150|unique:gebruikers,email,' . $id . ',gebruiker_id',
+            'status'        => 'required|in:Actief,Inactief',
+            'aangemaakt_op' => 'required|date',
         ]);
+
+        $gebruiker = Gebruiker::findOrFail($id);
+        $gebruiker->update($validated);
+
+        return redirect()->back()->with('success', 'Account is geupdate');
     }
 
-return redirect()->route('GebruikersBeheer')->with('success', 'Account is succesvol hergeactiveerd.');
-}
+    // Gebruiker deactiveren
+    public function deactiveer($gebruiker_id)
+    {
+        Gate::authorize('gebruikersbeheer');
 
-    /**
-     * Gebruiker en bijbehorende gegevens verwijderen.
-     */
+        $gebruiker = Gebruiker::findOrFail($gebruiker_id);
+        $gebruiker->status = 'Inactief';
+        $gebruiker->save();
+
+        return redirect()->back()->with('success', 'Account is gedeactiveerd');
+    }
+
+    // Gebruiker heractiveren
+    public function heractiveer($gebruiker_id)
+    {
+        Gate::authorize('gebruikersbeheer');
+
+        $gebruiker = Gebruiker::findOrFail($gebruiker_id);
+        $gebruiker->status = 'Actief';
+        $gebruiker->save();
+
+        if (auth()->check()) {
+            \App\Models\Activiteit::log(auth()->id(), 'lid_gewijzigd', [
+                'lid_id'  => $gebruiker->gebruiker_id,
+                'details' => 'Gebruiker ' . $gebruiker->naam . ' is succesvol hergeactiveerd.',
+            ]);
+        }
+
+        return redirect()->route('GebruikersBeheer')->with('success', 'Account is succesvol hergeactiveerd.');
+    }
+
     public function destroy($id)
     {
-      //
+        //
     }
-
-
-
-
-
 }

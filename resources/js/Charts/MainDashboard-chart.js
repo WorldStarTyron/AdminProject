@@ -3,24 +3,27 @@
 
 document.addEventListener('DOMContentLoaded', function () {
 
-// Basis instellingen voor de grafiek
+// Basis instellingen voor de grafiek 
     var options = {
+        // hier komen later de gegevens van de grafiek.
         series: [],
+       //  Chart instellingen.
         chart: {
             type: 'bar',
             height: 300,
             stacked: false,
-            toolbar: { show: false },
+            toolbar: { show: true },  // Diagram te downloaden in een SVG, PNG en CSV.
             fontFamily: 'Inter, sans-serif',
             animations: {
                 enabled: true,
                 speed: 600
             }
         },
+        // 
         plotOptions: {
             bar: {
                 horizontal: false,
-                columnWidth: '55%',
+                columnWidth: '60%',
                 borderRadius: 4,
                 borderRadiusApplication: 'end',
                 dataLabels: { position: 'top' }
@@ -70,6 +73,7 @@ document.addEventListener('DOMContentLoaded', function () {
         tooltip: {
             y: {
                 formatter: function(val) {
+                    //Nederlands taal formatteren
                     return val.toLocaleString('nl-NL');
                 }
             }
@@ -94,8 +98,9 @@ document.addEventListener('DOMContentLoaded', function () {
         if (maandSelect && maandSelect.value) {
             params.append('maand', maandSelect.value);
         }
-
+        // De url waar de gegevens worden opgehaald met eventuele filters.
         var url = '/dashboard/chart-data';
+
         if (params.toString()) {
             url += '?' + params.toString();
         }
@@ -106,18 +111,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 'Accept': 'application/json'
             }
         })
+          // alle de data in een JSON vorm.
         .then(response => response.json())
         .then(data => {
+
             // Labels updaten
             chart.updateOptions({
                 xaxis: {
-                    categories: data.labels
+                    categories: data.labels // De maanden. M
                 }
             });
 
-// Gegevens in de grafiek zetten
+           // Gegevens in de grafiek zetten
             chart.updateSeries([
-                { name: 'Inkomen (SRD)', data: data.contributie },
+                { name: 'Contributie (SRD)', data: data.contributie },
                 { name: 'Betaald',         data: data.betaald },
                 { name: 'Niet betaald',   data: data.niet_betaald }
             ]);

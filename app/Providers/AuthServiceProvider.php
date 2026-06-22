@@ -6,78 +6,69 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use App\Enums\Role;
 
+// Hier staan alle Gates (permissies)
 class AuthServiceProvider extends ServiceProvider
 {
     protected $policies = [];
 
     public function boot(): void
     {
-       // app/Providers/AuthServiceProvider.php
+        // Dashboard
+        Gate::define('dashboard', fn ($user) =>
+            $user->hasAnyRole(['Administratie Medewerker', 'Voorzitter', 'Applicatie Beheerder'])
+        );
 
-//
-Gate::define('dashboard', fn ($user) =>
-$user->hasAnyRole(['Administratie Medewerker', 'Voorzitter', 'Applicatie Beheerder'])
-);
+        // Alleen leden
+        Gate::define('eigen-profiel', fn ($user) =>
+            $user->isLid()
+        );
 
-Gate::define('eigen-profiel', fn ($user) =>
-$user->isLid()
-);
+        // Leden
+        Gate::define('leden-bekijken', fn ($user) =>
+            $user->hasAnyRole(['Administratie Medewerker', 'Voorzitter', 'Applicatie Beheerder'])
+        );
 
-// LEDEN
-Gate::define('leden-bekijken', fn ($user) =>
-$user->hasAnyRole(['Administratie Medewerker', 'Voorzitter', 'Applicatie Beheerder'])
-);
+        Gate::define('leden-beheren', fn ($user) =>
+            $user->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder'])
+        );
 
-Gate::define('leden-beheren', fn ($user) =>
-$user->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder'])
-);
+        // Betalingen
+        Gate::define('betalingen-bekijken', fn ($user) =>
+            $user->hasAnyRole(['Administratie Medewerker', 'Voorzitter', 'Applicatie Beheerder'])
+        );
 
+        Gate::define('betalingen-beheren', fn ($user) =>
+            $user->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder'])
+        );
 
+        // Verwijderen alleen voor app beheerder
+        Gate::define('leden-verwijderen', fn ($user) =>
+            $user->hasAnyRole(['Applicatie Beheerder'])
+        );
 
-// BETALINGEN
-Gate::define('betalingen-bekijken', fn ($user) =>
-$user->hasAnyRole(['Administratie Medewerker', 'Voorzitter', 'Applicatie Beheerder'])
-);
+        Gate::define('betalingen-verwijderen', fn ($user) =>
+            $user->isApplicatieBeheerder()
+        );
 
-Gate::define('betalingen-beheren', fn ($user) =>
-$user->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder'])
-);
+        // Rapport en log
+        Gate::define('rapport-bekijken', fn ($user) =>
+            $user->hasAnyRole(['Applicatie Beheerder', 'Voorzitter'])
+        );
 
-// SOFT DELETE    betalingen-verwijderen
-Gate::define('leden-verwijderen', fn ($user) =>
-$user->hasAnyRole(['Applicatie Beheerder'])
-);
+        Gate::define('activiteitlog-bekijken', fn ($user) =>
+            $user->hasAnyRole(['Applicatie Beheerder'])
+        );
 
-Gate::define('betalingen-verwijderen', fn ($user) =>
-$user->isApplicatieBeheerder()
-);
+        // Beheer pagina's
+        Gate::define('rollenbeheer', fn ($user) => $user->isApplicatieBeheerder());
+        Gate::define('gebruikersbeheer', fn ($user) => $user->isApplicatieBeheerder());
 
+        Gate::define('leden-heractiveren', fn ($user) =>
+            $user->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder'])
+        );
 
-
-// RAPPORT & LOG
-Gate::define('rapport-bekijken', fn ($user) =>
-$user->hasAnyRole(['Applicatie Beheerder', 'Voorzitter'])
-);
-
-Gate::define('activiteitlog-bekijken', fn ($user) =>
-$user->hasAnyRole(['Applicatie Beheerder'])
-);
-
-// BEHEER
-Gate::define('rollenbeheer', fn ($user) => $user->isApplicatieBeheerder());
-Gate::define('gebruikersbeheer', fn ($user) => $user->isApplicatieBeheerder());
-
-
-
-// HOUD alleen deze onderaan:
-Gate::define('leden-heractiveren', fn ($user) =>
-    $user->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder'])
-);
-
-// Leden deactiveren
-Gate::define('leden-Deactiveren', fn($user) =>
-    $user->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder'])
-);
-
+        Gate::define('leden-Deactiveren', fn($user) =>
+            $user->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder'])
+        );
     }
 }

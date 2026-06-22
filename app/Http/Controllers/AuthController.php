@@ -7,81 +7,77 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Gebruiker;
 use App\Models\Activiteit;
 
+// Login en logout
 class AuthController extends Controller
 {
- 
-// show login form
-public function showLogin()
-{
-    return view('login');
-}
+    public function showLogin()
+    {
+        return view('login');
+    }
 
-
-    //login
+    // Inloggen
     public function login(Request $request)
-     {
-        $credentials =[
+    {
+        $credentials = [
             'email' => $request->email,
             'password' => $request->password,
         ];
 
-       if (Auth::attempt($credentials)) {
-    $user = Auth::user();
+        if (Auth::attempt($credentials)) {
+            $user = Auth::user();
 
-    // Eerst checken of account actief is
-    if ($user->status === 'Inactief') {
-        Auth::logout();
-        return redirect()->route('login')
-            ->with('error', 'Je account is gedeactiveerd.');
+            // Inactieve accounts mogen niet inloggen
+            if ($user->status === 'Inactief') {
+                Auth::logout();
+                return redirect()->route('login')
+                    ->with('error', 'Je account is gedeactiveerd.');
+            }
+
+            // Loggen nadat login is gelukt
+            Activiteit::log($user->gebruiker_id, 'ingelogd', [
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'details' => 'Gebruiker ' . $user->naam . ' heeft ingelogd.'
+            ]);
+
+            return $this->redirectBasedOnRole();
+        }
+
+        // Niet zeggen of email of wachtwoord fout was
+        return redirect()->route('login')->with('error', 'Ongeldige inloggegevens');
     }
 
-    // Log the successful login event
-    Activiteit::log($user->gebruiker_id, 'ingelogd', [
-        'ip' => $request->ip(),
-        'user_agent' => $request->userAgent(),
-        'details' => 'Gebruiker ' . $user->naam . ' heeft ingelogd.'
-    ]);
-
-    // De rol checken en de juiste pagina teruggeven
-    return $this->redirectBasedOnRole();
-
-    }   
-    return redirect()->route('login')->with('error', 'Ongeldige inloggegevens');
-    }  
+    // Naar de juiste pagina op basis van rol
     public function redirectBasedOnRole()
     {
         $user = Auth::user();
-        
-        // Zorg dat de rollen van de gebruiker geladen zijn
         $user->load('rollen');
 
-        // Check of de gebruiker de rol 'Lid' heeft
         if ($user->rollen->contains('naam', 'Lid')) {
             return redirect()->route('GegevensPagina')
-                ->with('success', 'Welkom ' . $user->naam); 
+                ->with('success', 'Welkom ' . $user->naam);
         }
 
-        // Alle andere rollen (Beheerders, Voorzitter, etc.) gaan naar het dashboard
         return redirect()->route('MainDashboardPagina');
     }
 
-// ----------------------Logout----------------------
-  public function logout (Request $request)
-  {
-    $user = Auth::user();
-    if ($user) {
-        // Log the logout event before clearing session
-        Activiteit::log($user->gebruiker_id, 'uitgelogd', [
-            'ip' => $request->ip(),
-            'details' => 'Gebruiker ' . $user->naam . ' heeft uitgelogd.'
-        ]);
+    // Uitloggen
+    public function logout(Request $request)
+    {
+        $user = Auth::user();
+
+        // Loggen VOOR Auth::logout(), anders is user null
+        if ($user) {
+            Activiteit::log($user->gebruiker_id, 'uitgelogd', [
+                'ip' => $request->ip(),
+                'details' => 'Gebruiker ' . $user->naam . ' heeft uitgelogd.'
+            ]);
+        }
+
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login');
     }
-
-    Auth::logout();
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
-    return redirect()->route('login');
-  } 
-
-  
 }

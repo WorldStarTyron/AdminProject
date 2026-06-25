@@ -32,7 +32,7 @@
                           <div class="w-full max-w-md mx-auto my-4">
                              <form action="{{ route('ledenpagina')}}" method="GET" class="relative flex items-center">
                                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Zoeken..." class="w-full px-4 py-2 pl-10 rounded-lg border border-gray-300" />
-                                <button type="submit" class="absolute right-1 bg-blue-700 text-white rounded-lg px-3 py-1">Zoeken</button>
+                                <button type="submit" class="absolute right-1 bg-[#2A374A] text-white rounded-lg px-3 py-1">Zoeken</button>
                              </form>
                              </div>
 

@@ -29,7 +29,9 @@ class CheckOpenstaandeBetalingen extends Command
 
         foreach ($openstaandeBetalingen as $betaling) {
             // Deadline = einde van de maand
-            $deadline = Carbon::createFromDate($betaling->jaar, $betaling->maand, 1)->endOfMonth();
+           $deadline = $betaling->volgende_deadline
+    ? Carbon::parse($betaling->volgende_deadline)
+    : Carbon::createFromDate($betaling->jaar, $betaling->maand, 1)->endOfMonth();
 
             if ($vandaag->greaterThan($deadline)) {
                 $betaling->status = 'niet_betaald';

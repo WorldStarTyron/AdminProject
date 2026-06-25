@@ -1,5 +1,5 @@
 <header class="main-header bg-white border-b border-gray-100 py-4 px-6 shadow-sm">
-    <div class="header-container flex items-center justify-between max-w-7xl mx-auto">
+    <div class="header-container flex items-center justify-between w-full">
         
         <div class="header-left">
             <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Leden Overzicht</h1>

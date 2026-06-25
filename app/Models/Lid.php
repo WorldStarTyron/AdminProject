@@ -101,11 +101,12 @@ class Lid extends Model
     {
         $laatsteBetaling = $this->laatsteBetaaldeBetaling;
 
+        // Pak volgende_deadline uit de laatste betaalde betaling (ingediend_op + 1 maand)
         if ($laatsteBetaling && $laatsteBetaling->volgende_deadline) {
             return \Carbon\Carbon::parse($laatsteBetaling->volgende_deadline);
         }
 
-        // Geen betaalde betaling, neem begin huidige maand
-        return \Carbon\Carbon::now()->startOfMonth();
+        // Nog nooit betaald, neem einde huidige maand als deadline
+        return \Carbon\Carbon::now()->endOfMonth();
     }
 }

@@ -67,7 +67,7 @@ class Betaling extends Model
         // addMonthNoOverflow: 31 jan + 1 maand wordt 28 feb, geen 3 maart
         $this->volgende_deadline = $basisDatum->copy()->addMonthNoOverflow();
         $this->save();
-
+ 
         return $this->volgende_deadline;
     }
 

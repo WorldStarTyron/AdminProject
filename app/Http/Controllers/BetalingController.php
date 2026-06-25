@@ -27,8 +27,8 @@ class BetalingController extends Controller
         $jaar  = (int) $request->input('jaar', now()->year);
 
         $leden = Lid::with('gebruiker')->get();
-
         $ledenStatus = [];
+        
         foreach ($leden as $lid) {
             // Maakt automatisch een Openstaande betaling als er nog geen is
             $betaling = Betaling::firstOrCreate(

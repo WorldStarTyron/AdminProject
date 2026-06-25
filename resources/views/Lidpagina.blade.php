@@ -12,7 +12,7 @@
     @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/js/UI/Sidebar.js'])
 </head>
 <body>
-    <div class="flex justify-center min-h-screen">
+    <div class="flex min-h-screen">
         @include('Layouts.Sidebars.sidebar')
 
         <div class="flex-1 ml-0 md:ml-64 transition-all duration-300 min-w-0 overflow-x-hidden">
@@ -304,8 +304,8 @@
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-50 text-red-600">Niet betaald</span>
                             @elseif($betaling->status === 'Openstaand')
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-cyan-50 text-cyan-600">Openstaand</span>
-                            @elseif($betaling->status === 'in_behandeling')
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-600">In behandeling</span>
+                            @elseif($betaling->status === 'in_afwachting')
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-600">In afwachting</span>
                             @else
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-500">Afgewezen</span>
                             @endif

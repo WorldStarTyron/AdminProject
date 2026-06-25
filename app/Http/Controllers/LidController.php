@@ -126,27 +126,20 @@ class LidController extends Controller
             ->first();
 
         if ($UpcomingBetaling) {
-            // Deadline = einde maand
-            $deadline = \Carbon\Carbon::createFromDate(
-                $UpcomingBetaling->jaar,
-                $UpcomingBetaling->maand, 1
-            )->endOfMonth();
+            // Openstaande betaling gevonden: deadline = laatste betaalde + 1 maand (uit db)
+            // Anders fallback naar einde van de maand
+            $deadline = $laatsteBetaling && $laatsteBetaling->volgende_deadline
+                ? \Carbon\Carbon::parse($laatsteBetaling->volgende_deadline)
+                : \Carbon\Carbon::createFromDate($UpcomingBetaling->jaar, $UpcomingBetaling->maand, 1)->endOfMonth();
 
             $UpcomingKost = $UpcomingBetaling->bedrag;
         } else {
-            // Geen openstaande, gebruik laatste betaalde
-            $UpcomingBetaling = \App\Models\Betaling::where('lid_id', $lid->lid_id)
-                ->where('status', 'betaald')
-                ->orderBy('jaar', 'desc')
-                ->orderBy('maand', 'desc')
-                ->first();
+            // Geen openstaande, gebruik laatste betaalde betaling
+            $UpcomingBetaling = $laatsteBetaling;
 
-            // Volgende deadline = einde van de volgende maand
-            $deadline = $UpcomingBetaling
-                ? \Carbon\Carbon::createFromDate(
-                    $UpcomingBetaling->jaar,
-                    $UpcomingBetaling->maand, 1
-                  )->addMonth()->endOfMonth()
+            // Pak de opgeslagen volgende_deadline uit de db
+            $deadline = $UpcomingBetaling && $UpcomingBetaling->volgende_deadline
+                ? \Carbon\Carbon::parse($UpcomingBetaling->volgende_deadline)
                 : null;
 
             $UpcomingKost = $UpcomingBetaling

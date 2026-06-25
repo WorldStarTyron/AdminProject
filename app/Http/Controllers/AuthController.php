@@ -39,7 +39,7 @@ class AuthController extends Controller
                 'user_agent' => $request->userAgent(),
                 'details' => 'Gebruiker ' . $user->naam . ' heeft ingelogd.'
             ]);
-
+             // redirect gebruikers naar hun pagina gebaseerd op hun rollen.
             return $this->redirectBasedOnRole();
         }
 

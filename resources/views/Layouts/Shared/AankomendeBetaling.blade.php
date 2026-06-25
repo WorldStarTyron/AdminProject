@@ -29,7 +29,7 @@
                         if ($daysLeft < 0) {
                             // Deadline is al verlopen
                             $daysText = 'Verlopen (' . abs($daysLeft) . ' ' . (abs($daysLeft) == 1 ? 'dag' : 'dagen') . ')';
-                            $colorClass = 'red';
+                            $colorClass = 'orange';
                         } elseif ($daysLeft == 0) {
                             // Deadline is vandaag
                             $daysText = 'Vandaag';
@@ -62,7 +62,7 @@
 
                     // Kleurmap: urgentieniveau → Tailwind klassen
                     $colorMap = [
-                        'red'    => ['bg-red-500',    'bg-red-50',    'border-red-100',    'text-red-600',    'text-red-600'],
+                        'orange'    => ['bg-red-500',    'bg-red-50',    'border-red-100',    'text-red-600',    'text-red-600'],
                         'amber'  => ['bg-amber-500',  'bg-amber-50',  'border-amber-100',  'text-amber-600',  'text-amber-600'],
                         'sky'    => ['bg-sky-500',    'bg-sky-50',    'border-sky-100',    'text-sky-600',    'text-sky-600'],
                         'violet' => ['bg-violet-500', 'bg-violet-50', 'border-violet-100', 'text-violet-600', 'text-violet-600'],
@@ -92,14 +92,19 @@
                         <div>
                             <!-- Naam van het lid -->
                             <div class="text-sm font-semibold text-gray-800">{{ $lid->gebruiker->naam }}</div>
+                             <!-- Deadline datum -->
+                            @if($formattedDeadline)
+                                <div class="text-xs text-gray-500 mt-0.5">
+                                    <i class="fa-regular fa-calendar mr-1"></i>{{ $formattedDeadline }}
+                                </div>
+                            @endif
+
                             <!-- Hoeveel dagen er nog over zijn -->
-                            <div class="text-xs {{ $daysTextColor }} font-semibold mt-0.5" title="Deadline: {{ $formattedDeadline }}">
+                            <div class="text-xs {{ $daysTextColor }} font-semibold mt-0.5">
                                 {{ $daysText }}
-                                @if($formattedDeadline)
-                                    <span class="text-gray-400 font-normal ml-1">· {{ $formattedDeadline }}</span>
-                                @endif
                             </div>
                         </div>
+                        
                     </div>
 
                     <!-- Bedrag dat het lid moet betalen -->

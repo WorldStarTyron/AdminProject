@@ -21,7 +21,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        View::composer('Layouts.Shared.leden-overzicht', function ($view) {
+        View::composer('Layouts.Tables.leden-overzicht', function ($view) {
 
             $totaalLeden = DB::table('leden')->count(); //totaal aantal leden
 

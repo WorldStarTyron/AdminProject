@@ -1,4 +1,4 @@
-{{-- ===== Betaling toevoegen Modal ===== --}}
+<!-- ===== Betaling toevoegen Modal ===== -->
 <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-[1000] opacity-0 invisible transition-all duration-300 [&.active]:opacity-100 [&.active]:visible" id="addBetalingModal">
     <div class="transform translate-y-5 scale-[0.97] opacity-0 transition-all duration-[350ms] [.active_&]:translate-y-0 [.active_&]:scale-100 [.active_&]:opacity-100 w-full max-w-[640px] max-h-[90vh] overflow-y-auto m-4 scrollbar-thin">
         <div class="bg-white rounded-2xl p-8 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.2),0_0_0_1px_rgba(226,232,240,0.5)]">

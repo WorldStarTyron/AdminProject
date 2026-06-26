@@ -134,7 +134,7 @@
                 </div>
 
                 <!--MainDashboard table-->
-                @include('Layouts.Shared.Main_Table')
+                @include('Layouts.Tables.Main_Table')
             </main>
         </div>
     </div>

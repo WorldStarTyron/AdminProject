@@ -7,7 +7,7 @@
             <div>
                 <h2 class="text-xl font-extrabold text-slate-800 tracking-tight">Betaling Table</h2>
             </div>
-            {{-- Month/year filter (merged from Leden Betalingsstatus) --}}
+            <!-- Month/year filter (merged from Leden Betalingsstatus) -->
             <form method="GET" action="{{ route('betalingPagina') }}" class="flex items-center gap-2">
                 <select name="maand" class="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]/20">
                     @for($m = 1; $m <= 12; $m++)
@@ -25,7 +25,9 @@
             </form>
             <div class="flex items-center gap-3">
 
-                <!-- Filter dropdown (Alpine.js) -->
+
+
+                <!-- Filter dropdown -->
                 <div x-data="{ open: false }" class="relative">
                     <button
                         @click="open = !open"
@@ -101,7 +103,7 @@
 
 
 
-        <!-- Leden Betalingsstatus block -->
+        <!-- Leden Betalingsstatus -->
         <div class="bg-slate-50/60 rounded-xl border border-slate-100 p-5 mb-7">
             <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Leden Betalingsstatus</h3>
             <div class="overflow-x-auto rounded-[10px] border border-slate-100">

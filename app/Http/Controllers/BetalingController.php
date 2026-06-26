@@ -59,7 +59,7 @@ class BetalingController extends Controller
                 'maandelijks_bijdrage'=> $lid->MaandelijkseBijdrage(),
                 'bedrag'              => $lid->MaandelijkseBijdrage(),
                 'betaling_id'         => $betaling->betaling_id,
-            ];
+            ]; 
         }
 
         // Laatste 5 betalingen van de afgelopen 30 dagen
@@ -91,6 +91,20 @@ class BetalingController extends Controller
             'maand',
             'jaar'
         ));
+
+
+         // Zoeken op 5 velden tegelijk
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('gebruikers.naam', 'LIKE', "%{$search}%")
+                  ->orWhere('leden.telefoonnummer', 'LIKE', "%{$search}%")
+                  ->orWhere('gebruikers.email', 'LIKE', "%{$search}%")
+                  ->orWhere('leden.adres', 'LIKE', "%{$search}%")
+                  ->orWhere('leden.woonplaats', 'LIKE', "%{$search}%");
+            });
+        }
+
     }
 
     // Bedrag per dag voor de grafiek

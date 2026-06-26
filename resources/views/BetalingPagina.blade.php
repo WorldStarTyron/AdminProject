@@ -49,8 +49,8 @@
 
 
                    <!--Tables-->
-                    @include('Layouts.Shared.recente-transacties-tabel')
-                    @include('Layouts.Shared.leden-betalingsstatus-tabel')
+                    @include('Layouts.Tables.recente-transacties-tabel')
+                    @include('Layouts.Tables.leden-betalingsstatus-tabel')
 
 
             </div>

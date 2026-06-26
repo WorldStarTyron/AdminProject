@@ -13,6 +13,18 @@
         @can('betalingen-beheren')
         <div class="flex gap-2">
 
+
+          <!--Search Bar-->
+          <div class="flex items-center gap-2">
+            <input type="text" placeholder="Zoeken..." class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <button type="submit" class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold px-3.5 py-1.5 rounded-lg transition-all duration-150 cursor-pointer whitespace-nowrap">Zoeken</button>
+          </div>
+
+
+
+
+
+
             <!-- Knop om een nieuwe betaling toe te voegen -->
             <button id="openBetalingModal" class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold px-3.5 py-1.5 rounded-lg transition-all duration-150 cursor-pointer whitespace-nowrap">
                 <i class="fa-solid fa-plus text-[0.625rem]"></i>

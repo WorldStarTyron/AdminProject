@@ -15,7 +15,7 @@
     <!-- Navigation -->
     <p class="px-4 pt-4 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">Algemeen</p>
     <nav class="flex-1 overflow-y-auto px-3 pb-2">
-        <ul class="space-y-1">
+        <ul class="space-y-1 mt-4">
 
             <!-- Dashboard — zichtbaar voor iedereen behalve Lid -->
             @can('dashboard')
@@ -74,7 +74,7 @@
                     </span>
                 </button>
 
-                {{-- Dropdown items --}}
+                <!-- Dropdown items -->
                 <ul class="mt-1 ml-5 space-y-1 border-l border-gray-200 pl-3 hidden" id="betalingDropdownMenu">
 
                     <li class="rounded-lg {{ request()->routeIs('betalingPagina') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">

@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         dataLabels: { enabled: false },
         stroke: {
-            show: true,
+            show: false,
             width: 1,
             colors: ['#0ea5e9', '#22c55e', '#f59e0b']
         },

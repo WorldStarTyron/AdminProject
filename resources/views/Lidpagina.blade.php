@@ -138,7 +138,7 @@
                                 <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white">
                                     <i class="fa-solid fa-wallet text-base"></i>
                                 </div>
-                                <h2 class="text-lg font-bold text-white m-0">Lidmaatschapskosten</h2>
+                                <h2 class="text-lg font-bold text-white m-0">Contributie Betalingen</h2>
                             </div>
 
                             <div class="text-center py-6 relative z-10">

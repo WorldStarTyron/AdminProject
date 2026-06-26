@@ -115,4 +115,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/gebruikers-beheer', [GebruikerController::class, 'store'])->name('GebruikersBeheer.store')->middleware('can:gebruikersbeheer');
     Route::get('/leden/{gebruiker_id}/koppel', [LidController::class, 'KoppelOfEdit'])->name('ledenpagina.koppel')->middleware('can:leden-beheren');
     Route::post('/leden/store', [LidController::class, 'store'])->name('ledenpagina.store')->middleware('can:leden-beheren');
+
+    // Profiel
+    Route::get('/profiel', [GebruikerController::class, 'profiel'])->name('profiel');
+
 });

@@ -166,16 +166,9 @@
         </ul>
     </nav>
 
+    <!--Bottom navigation-->
     <div class="px-3 pb-4 pt-2 border-t border-gray-200 mt-auto">
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors w-full" data-tooltip="Uitloggen">
-                <span class="shrink-0 w-5 text-center">
-                    <i class="fa-solid fa-right-from-bracket text-base"></i>
-                </span>
-                <span class="nav-text text-sm font-medium">Uitloggen</span>
-            </button>
-        </form>
+       <!--Coming soon-->
     </div>
 
 </aside>

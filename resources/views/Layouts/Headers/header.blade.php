@@ -1,16 +1,23 @@
-
 <header class="main-header">
     <div class="header-container">
+
         <div class="header-left">
             <h1 class="header-title">Administratie Panel</h1>
         </div>
+
         <div class="header-right flex items-center gap-4">
 
             <!-- Notificaties -->
             @if(Auth::user()->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder']))
                 @include('Layouts.Shared.Notificatie')
             @endif
-           
+
+       <div class="flex items-center gap-4" x-data="{ open: false }">
+
+    <!-- Avatar + Naam + Rollen -->
+    <div class="relative">
+        <button @click="open = !open" @click.outside="open = false"
+                class="flex items-center gap-2 cursor-pointer focus:outline-none">
 
             <!-- Naam + Rollen -->
             <div class="flex flex-col text-right">
@@ -35,14 +42,32 @@
                 </div>
             </div>
 
-           
-             
-            
-
-            {{-- Avatar --}}
+            <!-- Avatar -->
             <div class="w-9 h-9 rounded-full bg-gray-800 flex items-center justify-center">
                 <i class="fa-regular fa-circle-user text-white text-lg"></i>
             </div>
+
+        </button>
+
+        <!-- Dropdown -->
+        <div x-show="open" x-transition
+             class="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-100 z-50">
+            <ul class="py-1">
+               
+                <li>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit"
+                                class="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                            <i class="fa-solid fa-right-from-bracket"></i> Uitloggen
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+</div>
 
         </div>
     </div>

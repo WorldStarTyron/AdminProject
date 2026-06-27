@@ -117,12 +117,11 @@
                                     type="button"
                                     id="togglePassword"
                                     class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 focus:outline-none transition-colors"
-                                    title="Toggle Password Visibility"
-                                    @click="ShowPassword()">
+                                    title="Toggle Password Visibility">
                                     <!--Open eyes-->
-                                    <i id="openEyes" class="fa-solid fa-eye text-base"></i>
+                                    <i class="fa-solid fa-eye text-base"></i>
                                     <!--Close eyes-->
-                                    <i id="closeEyes" class="fa-solid fa-eye-slash text-base"></i>
+                                    <i class="fa-solid fa-eye-slash text-base" style="display: none;"></i>
                                 </button>
                             </div>
                             @error('password')

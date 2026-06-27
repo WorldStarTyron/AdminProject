@@ -14,13 +14,23 @@
         <div class="flex gap-2">
 
 
-              <form action="{{ route('BetalingPagina') }}" method="GET" class="mb-4">
-                 <input type="text"
-                   name="search"
-                   value="{{ $search ?? '' }}"
-                   placeholder="Zoek lid op naam, email of telefoon..."
-                   class="w-full px-4 py-2 border border-gray-300 rounded-lg">
-                   </form>
+            <!-- Zoekbalk: filtert ledenstatus tabel op naam, email of telefoon -->
+            <form action="{{ route('betalingPagina') }}" method="GET" class="flex items-center gap-2">
+                <!-- maand/jaar mee in de URL houden zodat de huidige periode behouden blijft -->
+                <input type="hidden" name="maand" value="{{ $maand ?? now()->month }}">
+                <input type="hidden" name="jaar"  value="{{ $jaar ?? now()->year }}">
+
+                <input type="text"
+                       name="search"
+                       value="{{ $search ?? '' }}"
+                       placeholder="Zoek lid..."
+                       class="px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-300">
+
+                <button type="submit"
+                        class="bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors">
+                    <i class="fa-solid fa-magnifying-glass text-[10px] mr-1"></i>Zoek
+                </button>
+            </form>
 
 
 
@@ -137,7 +147,7 @@
                             @endcan
 
 
-                            @can('leden-verwijderen')
+                            @can('betalingen-beheren')
                             <!-- Verwijderknop -->
                             <form action="{{ route('betalingen.destroy', $betaling->betaling_id) }}" method="POST" class="inline-block">
                                 @csrf

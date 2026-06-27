@@ -71,7 +71,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/betalingPagina/addBetaling', [BetalingController::class, 'store'])->name('betalingPagina.addBetaling.store')->middleware('can:betalingen-beheren');
     Route::put('/betalingen/{betaling}', [BetalingController::class, 'update'])->name('betalingen.update')->middleware('can:betalingen-beheren');
     Route::get('/betalingen/chart-data', [BetalingController::class, 'chartData'])->name('betalingen.chartData')->middleware('can:betalingen-bekijken');
-    Route::get('/betalingPagina', [BetalingController::class, 'index'])->name('betalingPagina')->middleware('can:betalingen-bekijken');
 
 // Verwijder dubbele betalingen (voor betalingenpagina)
     Route::post('/betalingen/remove-duplicates', [BetalingController::class, 'removeduplicateBetalingen'])->name('betalingen.removeDuplicates');

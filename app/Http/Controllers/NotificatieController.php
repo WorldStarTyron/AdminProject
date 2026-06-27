@@ -11,11 +11,6 @@ class NotificatieController extends Controller
 {
     public function index()
     {
-        // Alleen admins zien meldingen
-        if (!Auth::user()->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder'])) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-
         $notificatie = Notificatie::where('gebruiker_id', Auth::id())
             ->orderBy('gestuurd_op', 'desc')
             ->take(10)
@@ -23,9 +18,10 @@ class NotificatieController extends Controller
 
         $ongelezen = Notificatie::where('gebruiker_id', Auth::id())
             ->where('gelezen', false)
-            ->count();
+            ->count(); 
 
-        return response()->json([
+
+ return response()->json([
             'notificaties' => $notificatie,
             'ongelezen' => $ongelezen
         ]);
@@ -34,9 +30,7 @@ class NotificatieController extends Controller
     // Zet alle meldingen op gelezen
     public function markeerGelezen()
     {
-        if (!Auth::user()->hasAnyRole(['Administratie Medewerker', 'Applicatie Beheerder'])) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
+       
 
         Notificatie::where('gebruiker_id', Auth::id())
             ->where('gelezen', false)

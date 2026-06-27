@@ -77,14 +77,31 @@ class BetalingController extends Controller
             ];
         }
 
-        // Laatste 5 betaalde betalingen van de afgelopen 30 dagen
-        $recenteBetalingen = Betaling::select('betalingen.*', 'gebruikers.naam')
+        // Recente betaalde transacties met optionele zoekfilter
+        $recenteQuery = Betaling::select('betalingen.*', 'gebruikers.naam')
             ->join('leden',      'leden.lid_id',           '=', 'betalingen.lid_id')
             ->join('gebruikers', 'gebruikers.gebruiker_id', '=', 'leden.gebruiker_id')
-            ->where('betalingen.status', 'betaald')
-            ->where('betalingen.ingediend_op', '>=', now()->subDays(30))
+            ->leftJoin('bonnen', 'bonnen.betaling_id', '=', 'betalingen.betaling_id')
+            ->where('betalingen.status', 'betaald');
+
+        if (!empty($search)) {
+            // Bij zoekopdracht: zoek door alle betaalde transacties (geen 30 dagen limiet)
+            $recenteQuery->where(function ($q) use ($search) {
+                $q->where('gebruikers.naam', 'LIKE', "%{$search}%")
+                  ->orWhere('betalingen.methode', 'LIKE', "%{$search}%")
+                  ->orWhere('bonnen.bon_nummer', 'LIKE', "%{$search}%");
+            });
+            $limit = 20;
+        } else {
+            // Standaard: laatste 30 dagen, max 5
+            $recenteQuery->where('betalingen.ingediend_op', '>=', now()->subDays(30));
+            $limit = 5;
+        }
+
+        $recenteBetalingen = $recenteQuery
             ->orderBy('betalingen.ingediend_op', 'desc')
-            ->take(5)->get();
+            ->take($limit)
+            ->get();
 
         // Totalen voor de stats kaarten
         $maandTotaal = Betaling::whereIn('status', ['betaald', 'goed_gekeurd'])
@@ -107,6 +124,12 @@ class BetalingController extends Controller
             'search'
         ));
     }
+
+
+
+
+
+
 
     // Bedrag per dag voor de grafiek
     public function chartData(Request $request)
@@ -462,6 +485,21 @@ class BetalingController extends Controller
             ]);
         }
 
+        // Notificatie naar het lid (alleen als hij een gekoppelde gebruiker heeft)
+        if ($betaling->lid && $betaling->lid->gebruiker_id) {
+            Notificatie::create([
+                'gebruiker_id' => $betaling->lid->gebruiker_id,
+                'lid_id'       => $betaling->lid_id,
+                'Notif_type'   => 'betaling_goedgekeurd',
+                'titel'        => 'Uw betaling voor ' . $betaling->maand . '-' . $betaling->jaar . ' is goedgekeurd',
+                'gelezen'      => 0,
+                'gestuurd_op'  => now(),
+            ]);
+        }
+      
+
+
+
         return redirect()->back()->with('success', 'Betaling goedgekeurd');
     }
 
@@ -472,12 +510,31 @@ class BetalingController extends Controller
         $betaling->status = 'Openstaand';
         $betaling->save();
 
+     
         if (auth()->check()) {
             Activiteit::log(auth()->id(), 'betaling_afgewezen', [
                 'betaling_id' => $betaling->betaling_id,
                 'details'     => 'Betaling #' . $betaling->betaling_id . ' afgewezen door '. auth()->user()->naam,
             ]);
         }
+          
+        // Notificatie naar het lid (alleen als hij een gekoppelde gebruiker heeft)
+        if ($betaling->lid && $betaling->lid->gebruiker_id) {
+            Notificatie::create([
+                'gebruiker_id' => $betaling->lid->gebruiker_id,
+                'lid_id'       => $betaling->lid_id,
+                'Notif_type'   => 'betaling_afgewezen',
+                'titel'        => 'Uw betaling voor ' . $betaling->maand . '-' . $betaling->jaar . ' is afgekeurd',
+                'gelezen'      => 0,
+                'gestuurd_op'  => now(),
+            ]);
+        }
+
+
+
+
+
+
 
         return redirect()->back()->with('error', 'Betaling afgekeurd');
     }

@@ -9,7 +9,7 @@
     {{-- Font Awesome 6 --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    @vite(['resources/css/app.css', 'resources/js/UI/Sidebar.js', 'resources/js/Auth/ShowPassword.js'])
+    @vite(['resources/css/app.css', 'resources/js/UI/Sidebar.js', 'resources/js/UI/ShowPassword.js']) 
 </head>
 
 <!-- Pagina achtergrond: lichtgrijs -->
@@ -94,11 +94,11 @@
                     <!-- Oog-icoon voor bevestigingsveld -->
                    <button
         type="button"
-        id="togglePassword"
+        id="togglePasswordConfirm"
         class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition"
         aria-label="Wachtwoord tonen of verbergen">
-        <i id="openEyes" class="fa-regular fa-eye text-base"></i>
-        <i id="closeEyes" class="fa-regular fa-eye-slash text-base" style="display: none;"></i>
+        <i class="fa-regular fa-eye text-base"></i>
+        <i class="fa-regular fa-eye-slash text-base" style="display: none;"></i>
     </button>
                 </div>
             </div>

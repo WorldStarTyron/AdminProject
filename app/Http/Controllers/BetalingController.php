@@ -22,15 +22,30 @@ class BetalingController extends Controller
     {
         Gate::authorize('betalingen-bekijken');
 
-        // Huidige maand/jaar als default
-        $maand = (int) $request->input('maand', now()->month);
-        $jaar  = (int) $request->input('jaar', now()->year);
+        // Huidige maand/jaar en zoekterm uit de URL
+        $maand  = (int) $request->input('maand', now()->month);
+        $jaar   = (int) $request->input('jaar', now()->year);
+        $search = $request->input('search');
 
-        $leden = Lid::with('gebruiker')->get();
+        // Query met optionele zoekfilter (op naam, email of telefoon)
+        $ledenQuery = Lid::with('gebruiker')
+            ->join('gebruikers', 'leden.gebruiker_id', '=', 'gebruikers.gebruiker_id')
+            ->select('leden.*');
+
+        if (!empty($search)) {
+            $ledenQuery->where(function ($q) use ($search) {
+                $q->where('gebruikers.naam', 'LIKE', "%{$search}%")
+                  ->orWhere('gebruikers.email', 'LIKE', "%{$search}%")
+                  ->orWhere('leden.telefoonnummer', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $leden = $ledenQuery->get();
+
+        // Maak per lid een statusrij voor de tabel
         $ledenStatus = [];
-        
         foreach ($leden as $lid) {
-            // Maakt automatisch een Openstaande betaling als er nog geen is
+            // firstOrCreate: maakt automatisch een Openstaande betaling als er nog geen is
             $betaling = Betaling::firstOrCreate(
                 [
                     'lid_id' => $lid->lid_id,
@@ -59,10 +74,10 @@ class BetalingController extends Controller
                 'maandelijks_bijdrage'=> $lid->MaandelijkseBijdrage(),
                 'bedrag'              => $lid->MaandelijkseBijdrage(),
                 'betaling_id'         => $betaling->betaling_id,
-            ]; 
+            ];
         }
 
-        // Laatste 5 betalingen van de afgelopen 30 dagen
+        // Laatste 5 betaalde betalingen van de afgelopen 30 dagen
         $recenteBetalingen = Betaling::select('betalingen.*', 'gebruikers.naam')
             ->join('leden',      'leden.lid_id',           '=', 'betalingen.lid_id')
             ->join('gebruikers', 'gebruikers.gebruiker_id', '=', 'leden.gebruiker_id')
@@ -71,13 +86,12 @@ class BetalingController extends Controller
             ->orderBy('betalingen.ingediend_op', 'desc')
             ->take(5)->get();
 
-        // Totaal betaald deze maand
+        // Totalen voor de stats kaarten
         $maandTotaal = Betaling::whereIn('status', ['betaald', 'goed_gekeurd'])
             ->where('maand', $maand)
             ->where('jaar', $jaar)
             ->sum('bedrag');
 
-        // Totaal onbetaald deze maand
         $onbetaaldTotaal = Betaling::where('status', 'niet_betaald')
             ->where('maand', $maand)
             ->where('jaar', $jaar)
@@ -89,22 +103,9 @@ class BetalingController extends Controller
             'maandTotaal',
             'onbetaaldTotaal',
             'maand',
-            'jaar'
+            'jaar',
+            'search'
         ));
-
-
-         // Zoeken op 5 velden tegelijk
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('gebruikers.naam', 'LIKE', "%{$search}%")
-                  ->orWhere('leden.telefoonnummer', 'LIKE', "%{$search}%")
-                  ->orWhere('gebruikers.email', 'LIKE', "%{$search}%")
-                  ->orWhere('leden.adres', 'LIKE', "%{$search}%")
-                  ->orWhere('leden.woonplaats', 'LIKE', "%{$search}%");
-            });
-        }
-
     }
 
     // Bedrag per dag voor de grafiek

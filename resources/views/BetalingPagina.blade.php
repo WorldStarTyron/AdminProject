@@ -23,10 +23,11 @@
             <div class="bp-page-content">
                 @include('Layouts.Shared.flash-messages')
 
-                {{-- Stats & Chart Row --}}
+                <!-- Stats & Chart Row -->
                 <div class="bp-stats-row">
-
-                    {{-- Total Income Card --}}
+                         
+             
+                    <!-- Total Income Card -->
                     <div class="bp-stat-card">
                         <div class="bp-stat-card-header">
                             <span class="bp-stat-label">Total Income</span>
@@ -49,6 +50,7 @@
 
 
                    <!--Tables-->
+                   
                     @include('Layouts.Tables.recente-transacties-tabel')
                     @include('Layouts.Tables.leden-betalingsstatus-tabel')
 

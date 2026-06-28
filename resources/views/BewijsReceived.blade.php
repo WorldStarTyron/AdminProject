@@ -246,7 +246,7 @@
                 @endif
                 <!-- End Section A (list page) -->
 
-    @include('layouts.ViewBewijs.ViewbetalingBewijs')
+    @include('Layouts.ViewBewijs.ViewbetalingBewijs')
 
 </body>
 </html>

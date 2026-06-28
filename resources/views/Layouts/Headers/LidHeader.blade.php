@@ -8,14 +8,15 @@
         <div class="header-right flex items-center gap-4">
 
             <!-- Notificaties -->
-                 <div class="flex items-center gap-4" 
-                 x-data="{ open: false }
-                 typeStyles:{
+                 <div class="flex items-center gap-4"
+                 x-data="{
+                 open: false,
+                 typeStyles: {
                  'Betaling_ingediend':    { icon: 'fa-file-invoice-dollar', color: 'blue' },
                  'betaling_goedgekeurd':  { icon: 'fa-circle-check',         color: 'emerald' },
                  'betaling_herinnering':  { icon: 'fa-clock',                color: 'amber' },
                  'default':               { icon: 'fa-bell',                 color: 'slate' }
-                    
+                 }
                  }">
                      @include('Layouts.Shared.Notificatie')
                  </div>

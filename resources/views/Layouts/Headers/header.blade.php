@@ -1,3 +1,14 @@
+{{-- Zorg dat Alpine.js geladen is, ook voor rollen zonder notificatieblok (bijv. Voorzitter) --}}
+<script>
+    if (typeof window.Alpine === 'undefined' && !document.getElementById('alpine-cdn')) {
+        var alpineScript = document.createElement('script');
+        alpineScript.id = 'alpine-cdn';
+        alpineScript.defer = true;
+        alpineScript.src = 'https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js';
+        document.head.appendChild(alpineScript);
+    }
+</script>
+
 <header class="main-header">
     <div class="header-container">
 

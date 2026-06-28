@@ -17,7 +17,7 @@ use App\Http\Controllers\MainDashboardController;
 use App\Http\Controllers\NotificatieController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 // Login routes (geen auth vereist)
@@ -89,6 +89,7 @@ Route::middleware(['auth'])->group(function () {
     // Bewijs
     Route::get('/BewijsReceived',                [BetalingController::class, 'showBewijsReceived'])->name('BewijsReceived')->middleware('can:betalingen-beheren');
     Route::get('/bewijs/{betaling_id}',          [BetalingController::class, 'ViewBewijsFile'])->name('ViewBewijsFile')->middleware('can:betalingen-beheren');
+    Route::get('/bewijs/{betaling_id}/file',     [BetalingController::class, 'StreamBewijsFile'])->name('StreamBewijsFile')->middleware('can:betalingen-beheren');
     Route::patch('/bewijs/{betaling_id}/approve',[BetalingController::class, 'ApproveBewijs'])->name('BewijsReceived.Approve')->middleware('can:betalingen-beheren');
     Route::patch('/bewijs/{betaling_id}/reject', [BetalingController::class, 'RejectBewijs'])->name('BewijsReceived.Reject')->middleware('can:betalingen-beheren');
 

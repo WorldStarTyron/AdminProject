@@ -445,15 +445,33 @@ class BetalingController extends Controller
             return redirect()->back()->with('error', 'Bestand niet gevonden op de server.');
         }
 
-        $bewijsUrl = \Storage::url($betaling->betaling_bewijs);
-
         // PDF of afbeelding bepalen
         $extensie = strtolower(pathinfo($betaling->betaling_bewijs, PATHINFO_EXTENSION));
         $isPdf    = $extensie === 'pdf';
 
-        $bewijsUrl = \Storage::url($betaling->betaling_bewijs);
+        // Gebruik een streaming-route i.p.v. Storage::url():
+        // Storage::url() geeft een pad-relatieve /storage/... URL terug en negeert
+        // de /public subfolder op de live server (404). route() respecteert de
+        // base path van het verzoek, dus dit werkt ook onder /public en heeft
+        // geen storage:link symlink nodig.
+        $bewijsUrl = route('StreamBewijsFile', $betaling->betaling_id);
 
         return view('BewijsReceived', compact('betaling', 'bewijsUrl', 'isPdf'));
+    }
+
+    // Stuurt het ruwe bewijsbestand (PDF/afbeelding) inline naar de browser
+    public function StreamBewijsFile($betaling_id)
+    {
+        Gate::authorize('betalingen-beheren');
+
+        $betaling = Betaling::findOrFail($betaling_id);
+
+        if (!$betaling->betaling_bewijs || !\Storage::disk('public')->exists($betaling->betaling_bewijs)) {
+            abort(404, 'Bestand niet gevonden op de server.');
+        }
+
+        // Inline tonen (niet downloaden) zodat de iframe/img het kan weergeven
+        return response()->file(\Storage::disk('public')->path($betaling->betaling_bewijs));
     }
 
     // Bewijs goedkeuren

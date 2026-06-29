@@ -242,13 +242,15 @@ class LidController extends Controller
         return redirect()->back()->with('success', 'Account is succesvol gedeactiveerd.');
     }
 
-    // Betalingsbewijs uploaden (PDF, max 5MB) voor de gekozen maand(en)
+    // Betalingsbewijs uploaden (PDF of afbeelding, max 5MB) voor de gekozen maand(en)
     public function UploadBewijs(Request $request)
     {
         $request->validate([
-            'betaling_bewijs' => 'required|file|mimes:pdf|max:5120',
+            'betaling_bewijs' => 'required|file|mimes:pdf,jpg,jpeg,png,webp|max:5120',
             'betaling_ids'    => 'nullable|array',
             'betaling_ids.*'  => 'integer',
+        ], [
+            'betaling_bewijs.mimes' => 'Het betalingsbewijs moet een PDF of afbeelding (JPG, PNG, WEBP) zijn.',
         ]);
 
         $lid = Lid::where('gebruiker_id', Auth::id())->firstOrFail();

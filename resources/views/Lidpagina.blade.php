@@ -104,7 +104,7 @@
                             <form action="{{ route('UploadBewijs') }}" method="POST" enctype="multipart/form-data" id="bewijsForm">
                                 @csrf
                                 {{-- Gekozen maanden worden hier als hidden inputs ingevuld door submitBewijs() --}}
-                                <input type="file" name="betaling_bewijs" id="bewijsInput" accept="application/pdf" class="hidden"
+                                <input type="file" name="betaling_bewijs" id="bewijsInput" accept="application/pdf,image/jpeg,image/png,image/webp" class="hidden"
                                        onchange="submitBewijs()">
                                 <button type="button" onclick="kiesBestand()"
                                         class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-white text-slate-900 hover:bg-slate-100 font-bold text-sm rounded-xl transition">
@@ -113,8 +113,12 @@
                                 </button>
                             </form>
 
+                            @error('betaling_bewijs')
+                                <p class="text-[11px] text-rose-300 text-center mt-3 font-medium">{{ $message }}</p>
+                            @enderror
+
                             <p class="text-[10px] text-slate-400 text-center mt-3 leading-relaxed">
-                                Door op 'Upload Betaalbewijs' te klikken wordt u doorverwezen naar de beveiligde betaalomgeving voor de geselecteerde periodes.
+                                U kunt een PDF of een foto (JPG, PNG, WEBP) van uw betaalbewijs uploaden, max. 5 MB.
                             </p>
                         </div>
 

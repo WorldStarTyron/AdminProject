@@ -1,6 +1,4 @@
 @if($betaling)
-
-                 
                     <!-- Back button returns to the list page -->
                     <div class="flex items-center gap-4 mb-8">
 
@@ -22,7 +20,7 @@
 
                     </div>
 
-                    <!-- ── MAIN TWO-COLUMN LAYOUT ── -->
+                    <!-- MAIN TWO-COLUMN LAYOUT -->
                     <!-- Left (wider): the file preview (image or PDF)  -->
                     <!-- Right (narrower): payment details + action buttons -->
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -110,6 +108,14 @@
                                             SRD {{ number_format($betaling->bedrag, 2, ',', '.') }}
                                         </dd>
                                     </div>
+
+                                    <!-- Maand/Jaar-->
+                                     <div class="flex justify-between gap-2">
+                                        <dt class="text-gray-400">Maand/Jaar</dt>
+                                        <dd class="font-semibold text-gray-900">
+                                          {{ \Carbon\Carbon::createFromDate($betaling->jaar, $betaling->maand, 1)->translatedFormat('F Y') }}
+                                        </dd>
+                                     </div>
 
                                     <!-- Date the proof was submitted -->
                                     <div class="flex justify-between gap-2">

@@ -21,6 +21,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Maandnamen e.d. in het Nederlands tonen (translatedFormat)
+        \Carbon\Carbon::setLocale('nl');
+
         // Auto-fix: delete Vite 'hot' file if uploaded to online production environment
         if (config('app.env') === 'production' || (!app()->runningInConsole() && !in_array(request()->getHost(), ['localhost', '127.0.0.1', '::1']))) {
             $hotPath = public_path('hot');

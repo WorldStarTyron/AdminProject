@@ -3,8 +3,11 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use App\Models\Gebruiker;
+use App\Models\Betaling;
+use Carbon\Carbon;
 
-// Cron: deactiveer leden die 3 maanden niet betaald hebben
+// Cron: deactiveer leden die 3 maanden achter elkaar niet hebben betaald
 class CheckDeactiveerLeden extends Command
 {
     protected $signature = 'app:check-deactiveer-leden';
@@ -20,14 +23,30 @@ class CheckDeactiveerLeden extends Command
         foreach ($gebruikers as $gebruiker) {
             $lid = $gebruiker->lid;
 
-            // Tellen hoeveel maanden niet betaald
+            // Skip 1: nieuwe leden die nog geen 3 maanden lid zijn
+            if ($lid->lid_sinds && Carbon::parse($lid->lid_sinds)->diffInMonths(now()) < 3) {
+                continue;
+            }
+
+            // Skip 2: heeft deze maand al betaald → niet deactiveren
+            $betaaldDezeMaand = Betaling::where('lid_id', $lid->lid_id)
+                ->where('maand', now()->month)
+                ->where('jaar', now()->year)
+                ->whereIn('status', ['betaald', 'goed_gekeurd'])
+                ->exists();
+
+            if ($betaaldDezeMaand) {
+                continue;
+            }
+
+            // Tel hoeveel van de vorige 3 maanden niet betaald zijn
             $nietBetaaldAantal = 0;
 
-            for ($i = 1; $i <= 2; $i++) {
-                $HeeftBetaald = Betaling::where('lid_id', $lid->lid_id)
+            for ($i = 1; $i <= 3; $i++) {
+                $heeftBetaald = Betaling::where('lid_id', $lid->lid_id)
                     ->where('maand', now()->subMonths($i)->month)
                     ->where('jaar', now()->subMonths($i)->year)
-                    ->where('status', 'betaald')
+                    ->whereIn('status', ['betaald', 'goed_gekeurd'])
                     ->exists();
 
                 if (!$heeftBetaald) {
@@ -44,6 +63,6 @@ class CheckDeactiveerLeden extends Command
             }
         }
 
-        this->info('Klaar met controleren');
+        $this->info('Klaar met controleren');
     }
 }

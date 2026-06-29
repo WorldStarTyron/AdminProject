@@ -405,27 +405,56 @@ class BetalingController extends Controller
             ->orderBy('ingediend_op', 'desc')
             ->paginate(5);
 
-        // Recent beoordeeld
-        $recentReviews = Betaling::whereIn('status', ['betaald', 'goed_gekeurd', 'niet_goedgekeurd', 'Openstaand'])
-            ->whereNotNull('betaling_bewijs')
-            ->with(['lid.gebruiker'])
-            ->orderBy('ingediend_op', 'desc')
-            ->take(5)
-            ->get();
+        // Recent beoordeeld: per upload (lid + bewijs) samengevoegd, zodat meerdere
+        // maanden uit 1 betaalbewijs als 1 rij verschijnen. Eigen paginanaam zodat
+        // deze tabel los van de andere tabel pagineert.
+        $recentReviews = Betaling::select(
+                'gebruikers.naam',
+                'betalingen.lid_id',
+                'betalingen.jaar',
+                DB::raw('COUNT(*) as aantal'),
+                DB::raw('SUM(betalingen.bedrag) as totaal'),
+                DB::raw('MIN(betalingen.maand) as eerste_maand'),
+                DB::raw('MAX(betalingen.maand) as laatste_maand'),
+                DB::raw('MAX(betalingen.ingediend_op) as ingediend_op'),
+                DB::raw('MAX(betalingen.betaling_id) as betaling_id'),
+                DB::raw('MAX(betalingen.status) as status')
+            )
+            ->join('leden', 'leden.lid_id', '=', 'betalingen.lid_id')
+            ->join('gebruikers', 'gebruikers.gebruiker_id', '=', 'leden.gebruiker_id')
+            ->whereIn('betalingen.status', ['betaald', 'goed_gekeurd', 'niet_goedgekeurd', 'Openstaand'])
+            ->whereNotNull('betalingen.betaling_bewijs')
+            ->groupBy('betalingen.betaling_bewijs', 'betalingen.lid_id', 'gebruikers.naam', 'betalingen.jaar')
+            ->orderByDesc('ingediend_op')
+            ->paginate(5, ['*'], 'recent_page');
 
         $pendingCount = Betaling::where('status', 'in_afwachting')->count();
 
-        $totalReviewedToday = Betaling::whereIn('status', ['betaald', 'goed_gekeurd', 'niet_goedgekeurd', 'Openstaand'])
-            ->whereNotNull('betaling_bewijs')
-            ->whereDate('ingediend_op', today())
+        // Beoordeeld vandaag = aantal goedkeur/afwijs-acties van vandaag (uit de activiteitenlog)
+        $totalReviewedToday = Activiteit::whereIn('actie', ['betaling_goedgekeurd', 'betaling_afgewezen'])
+            ->whereDate('aangemaakt_op', today())
             ->count();
+
+        //maanden uit 1 upload delen hetzelfde bewijs-bestand
+        $batchInfo = [];
+        Betaling::where('status', 'in_afwachting')
+            ->whereNotNull('betaling_bewijs')
+            ->orderBy('jaar')->orderBy('maand')
+            ->get(['betaling_id', 'betaling_bewijs'])
+            ->groupBy('betaling_bewijs')
+            ->each(function ($groep) use (&$batchInfo) {
+                $totaal = $groep->count();
+                foreach ($groep->values() as $i => $b) {
+                    $batchInfo[$b->betaling_id] = ['index' => $i + 1, 'totaal' => $totaal];
+                }
+            });
 
         // Lege placeholders zodat de preview niet laadt bij opstarten
         $betaling = null;
         $bewijsUrl = null;
         $isPdf = false;
 
-        return view('BewijsReceived', compact('pendingPayments', 'recentReviews', 'pendingCount', 'totalReviewedToday', 'betaling', 'bewijsUrl', 'isPdf'));
+        return view('BewijsReceived', compact('pendingPayments', 'recentReviews', 'pendingCount', 'totalReviewedToday', 'betaling', 'bewijsUrl', 'isPdf', 'batchInfo'));
     }
 
     // Bewijs bekijken (PDF of afbeelding)
@@ -474,32 +503,31 @@ class BetalingController extends Controller
         return response()->file(\Storage::disk('public')->path($betaling->betaling_bewijs));
     }
 
-    // Bewijs goedkeuren
+    // Bewijs goedkeuren (alle maanden uit dezelfde upload in 1 keer)
     public function ApproveBewijs(Request $request, $betaling_id)
     {
         $betaling = Betaling::findOrFail($betaling_id);
-        $betaling->status = 'betaald';
-        $betaling->methode = 'overmaking';
-        $betaling->save();
+        $batch = $this->batchVanBewijs($betaling);
 
-        // Volgende deadline berekenen
-        $betaling->berekenVolgendeDeadline();
+        foreach ($batch as $b) {
+            $b->status  = 'betaald';
+            $b->methode = 'overmaking';
+            $b->save();
+            $b->berekenVolgendeDeadline();
 
-        if (!$betaling->bon) {
-            $gebruiker = $betaling->lid->gebruiker;
-            $datum     = \Carbon\Carbon::parse($betaling->ingediend_op);
-
-            BonController::genereer(
-                $betaling,
-                $gebruiker->naam,
-                $datum->translatedFormat('F Y')
-            );
+            // Bon per maand met de juiste periode (maand/jaar van de betaling zelf)
+            if (!$b->bon) {
+                $periode = \Carbon\Carbon::createFromDate($b->jaar, $b->maand, 1)->translatedFormat('F Y');
+                BonController::genereer($b, $b->lid->gebruiker->naam, $periode);
+            }
         }
+
+        $aantal = $batch->count();
 
         if (auth()->check()) {
             Activiteit::log(auth()->id(), 'betaling_goedgekeurd', [
                 'betaling_id' => $betaling->betaling_id,
-                'details'     => 'Betaling #' . $betaling->betaling_id . ' goedgekeurd door '. auth()->user()->naam,
+                'details'     => $aantal . ' betaling(en) goedgekeurd door '. auth()->user()->naam,
             ]);
         }
 
@@ -509,52 +537,62 @@ class BetalingController extends Controller
                 'gebruiker_id' => $betaling->lid->gebruiker_id,
                 'lid_id'       => $betaling->lid_id,
                 'Notif_type'   => 'betaling_goedgekeurd',
-                'titel'        => 'Uw betaling voor ' . $betaling->maand . '-' . $betaling->jaar . ' is goedgekeurd',
+                'titel'        => 'Uw betaling voor ' . $aantal . ' maand(en) is goedgekeurd',
                 'gelezen'      => 0,
                 'gestuurd_op'  => now(),
             ]);
         }
-      
 
-
-
-        return redirect()->back()->with('success', 'Betaling goedgekeurd');
+        return redirect()->route('BewijsReceived')->with('success', $aantal . ' betaling(en) goedgekeurd');
     }
 
-    // Bewijs afkeuren
+    // Bewijs afkeuren (alle maanden uit dezelfde upload in 1 keer)
     public function RejectBewijs(Request $request, $betaling_id)
     {
         $betaling = Betaling::findOrFail($betaling_id);
-        $betaling->status = 'Openstaand';
-        $betaling->save();
+        $batch = $this->batchVanBewijs($betaling);
 
-     
+        foreach ($batch as $b) {
+            $b->status = 'Openstaand';
+            $b->betaling_bewijs = null;
+            $b->save();
+        }
+
+        $aantal = $batch->count();
+
         if (auth()->check()) {
             Activiteit::log(auth()->id(), 'betaling_afgewezen', [
                 'betaling_id' => $betaling->betaling_id,
-                'details'     => 'Betaling #' . $betaling->betaling_id . ' afgewezen door '. auth()->user()->naam,
+                'details'     => $aantal . ' betaling(en) afgewezen door '. auth()->user()->naam,
             ]);
         }
-          
+
         // Notificatie naar het lid (alleen als hij een gekoppelde gebruiker heeft)
         if ($betaling->lid && $betaling->lid->gebruiker_id) {
             Notificatie::create([
                 'gebruiker_id' => $betaling->lid->gebruiker_id,
                 'lid_id'       => $betaling->lid_id,
                 'Notif_type'   => 'betaling_afgewezen',
-                'titel'        => 'Uw betaling voor ' . $betaling->maand . '-' . $betaling->jaar . ' is afgekeurd',
+                'titel'        => 'Uw betaling voor ' . $aantal . ' maand(en) is afgekeurd',
                 'gelezen'      => 0,
                 'gestuurd_op'  => now(),
             ]);
         }
 
+        return redirect()->route('BewijsReceived')->with('error', $aantal . ' betaling(en) afgekeurd');
+    }
 
+    // Alle maanden in afwachting die hetzelfde bewijs-bestand delen (1 upload)
+    private function batchVanBewijs(Betaling $betaling)
+    {
+        if (!$betaling->betaling_bewijs) {
+            return collect([$betaling]);
+        }
 
-
-
-
-
-        return redirect()->back()->with('error', 'Betaling afgekeurd');
+        return Betaling::where('lid_id', $betaling->lid_id)
+            ->where('betaling_bewijs', $betaling->betaling_bewijs)
+            ->where('status', 'in_afwachting')
+            ->get();
     }
 
     // Dubbele openstaande betalingen opruimen

@@ -12,11 +12,12 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // Elke 1e van de maand om 00:00 -> check of leden betaald hebben
-        $schedule->command('subscriptie:check')->monthlyOn(1, '00:00');
-        $schedule->command('check:deactiveer-leden')->daily();
+        // Dagelijks om 00:30 -> deactiveer leden die 3 maanden niet betaald hebben
+        $schedule->command('app:check-deactiveer-leden')->dailyAt('00:30');
+
+        // Dagelijks om 00:00 -> verlopen openstaande betalingen + nieuwe maand voorbereiden
         $schedule->command('betalingen:check-openstaand')->daily();
-        
+
     }
 
     /**

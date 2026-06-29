@@ -20,7 +20,7 @@
         @include('Layouts.Sidebars.sidebar')
 
         <!-- Main content: offset to the right of the sidebar on desktop -->
-        <div class="flex-1 ml-0 md:ml-64 pt-20 transition-all duration-300 min-w-0 overflow-x-hidden">
+        <div class="flex-1 ml-0 md:ml-64 transition-all duration-300 min-w-0 overflow-x-hidden">
 
             <!-- Shared top header bar -->
             @include('Layouts.Headers.header')
@@ -45,8 +45,7 @@
                 @endif
 
 
-                <!--
-                     SECTION A — LIST PAGE (showBewijsReceived)
+                <!-- (showBewijsReceived)
                      Only shown when $betaling is null (no specific payment selected).
                      This is the overview of all pending and reviewed payments. -->
                 @if(!$betaling)
@@ -105,6 +104,7 @@
                                         <th class="px-6 py-3 text-left font-semibold">Lid</th>
                                         <th class="px-6 py-3 text-left font-semibold">Bedrag</th>
                                         <th class="px-6 py-3 text-left font-semibold">Ingediend op</th>
+                                        <th class="px-6 py-3 text-left font-semibold">Maand/Jaar</th>
                                         <th class="px-6 py-3 text-left font-semibold">Status</th>
                                         <th class="px-6 py-3 text-right font-semibold">Actie</th>
                                     </tr>
@@ -131,11 +131,22 @@
                                                     : '—' }}
                                             </td>
 
-                                            <!-- Status badge -->
+                                            <!-- Maand/Jaar van de betaling zelf -->
+                                            <td class="px-6 py-4 text-gray-500">
+                                                {{ \Carbon\Carbon::createFromDate($pending->jaar, $pending->maand, 1)->translatedFormat('F Y') }}
+                                            </td>
+
+                                            <!-- Status badge (+ batch-label bij meerdere maanden uit één upload) -->
                                             <td class="px-6 py-4">
                                                 <span class="bg-blue-100 text-blue-600 text-xs font-semibold px-3 py-1 rounded-full">
                                                     In afwachting
                                                 </span>
+                                                @if(($batchInfo[$pending->betaling_id]['totaal'] ?? 1) > 1)
+                                                    <span class="ml-1 inline-block bg-violet-100 text-violet-600 text-xs font-semibold px-2 py-1 rounded-full"
+                                                          title="Deze maand hoort bij één upload van meerdere maanden">
+                                                        Batch {{ $batchInfo[$pending->betaling_id]['index'] }}/{{ $batchInfo[$pending->betaling_id]['totaal'] }}
+                                                    </span>
+                                                @endif
                                             </td>
 
                                             <!-- View proof link -->
@@ -156,6 +167,7 @@
                                 {{ $pendingPayments->links() }}
                             </div>
                         @endif
+                      
 
                     </div>
 
@@ -173,6 +185,8 @@
                                 <i class="fa-solid fa-inbox text-3xl mb-3 block"></i>
                                 Nog geen beoordelingen.
                             </div>
+
+                            <!--Recente Beoordelingen-->
                         @else
                             <table class="w-full text-sm">
                                 <thead class="bg-gray-50 text-gray-400 text-xs uppercase tracking-wider">
@@ -180,6 +194,7 @@
                                         <th class="px-6 py-3 text-left font-semibold">Lid</th>
                                         <th class="px-6 py-3 text-left font-semibold">Bedrag</th>
                                         <th class="px-6 py-3 text-left font-semibold">Datum</th>
+                                        <th class="px-6 py-3 text-left font-semibold">Maand/Jaar</th>
                                         <th class="px-6 py-3 text-left font-semibold">Status</th>
                                         <th class="px-6 py-3 text-right font-semibold">Actie</th>
                                     </tr>
@@ -190,13 +205,13 @@
 
                                             <!-- Member name -->
                                             <td class="px-6 py-4 font-medium text-gray-900">
-                                                {{ $review->lid->gebruiker->naam ?? 'Onbekend' }}
-                                                <span class="block text-xs text-gray-400 font-normal">Lid #{{ $review->lid->lid_id ?? '—' }}</span>
+                                                {{ $review->naam ?? 'Onbekend' }}
+                                                <span class="block text-xs text-gray-400 font-normal">Lid #{{ $review->lid_id ?? '—' }}</span>
                                             </td>
 
-                                            <!-- Amount -->
+                                            <!-- Totaalbedrag van alle maanden in deze upload -->
                                             <td class="px-6 py-4 text-gray-700">
-                                                SRD {{ number_format($review->bedrag, 2, ',', '.') }}
+                                                SRD {{ number_format($review->totaal, 2, ',', '.') }}
                                             </td>
 
                                             <!-- Date -->
@@ -204,6 +219,18 @@
                                                 {{ $review->ingediend_op
                                                     ? \Carbon\Carbon::parse($review->ingediend_op)->translatedFormat('d M Y')
                                                     : '—' }}
+                                            </td>
+
+                                            <!-- Maand/Jaar: 1 maand of een reeks maanden uit dezelfde upload -->
+                                            <td class="px-6 py-4 text-gray-500">
+                                                @if($review->aantal > 1)
+                                                    {{ $review->aantal }} maanden
+                                                    ({{ \Carbon\Carbon::createFromDate($review->jaar, $review->eerste_maand, 1)->translatedFormat('F') }}
+                                                    t/m {{ \Carbon\Carbon::createFromDate($review->jaar, $review->laatste_maand, 1)->translatedFormat('F') }}
+                                                    {{ $review->jaar }})
+                                                @else
+                                                    {{ \Carbon\Carbon::createFromDate($review->jaar, $review->eerste_maand, 1)->translatedFormat('F Y') }}
+                                                @endif
                                             </td>
 
                                             <!-- Status badge: colour matches the current status -->
@@ -223,16 +250,12 @@
                                                 @endif
                                             </td>
 
-                                            <!-- View proof link (only if file exists) -->
+                                            <!-- View proof link -->
                                             <td class="px-6 py-4 text-right">
-                                                @if($review->betaling_bewijs)
-                                                    <a href="{{ route('ViewBewijsFile', $review->betaling_id) }}"
-                                                       class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors">
-                                                        Bekijken
-                                                    </a>
-                                                @else
-                                                    <span class="text-xs text-gray-400">Geen bestand</span>
-                                                @endif
+                                                <a href="{{ route('ViewBewijsFile', $review->betaling_id) }}"
+                                                   class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors">
+                                                    Bekijken
+                                                </a>
                                             </td>
 
                                         </tr>
@@ -240,6 +263,10 @@
                                 </tbody>
                             </table>
                         @endif
+
+
+                        <!--Paginate-->
+                        {{ $recentReviews->links() }}
 
                     </div>
 

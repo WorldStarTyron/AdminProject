@@ -101,7 +101,7 @@ class LidController extends Controller
         return redirect()->back()->with('success', $verwijderd . ' dubbele betaling(en) verwijderd');
     }
 
-    // Eigen lidpagina (mijn gegevens)
+ 
     public function show(Request $request, $id = null)
     {
         // $id wordt genegeerd, alleen eigen lid via Auth::id()
@@ -181,6 +181,17 @@ class LidController extends Controller
             ->whereIn('status', ['betaald', 'goed_gekeurd'])
             ->exists();
 
+        // Alle openstaande maanden voor de selecteerbare tabel
+        $openstaandeMaanden = \App\Models\Betaling::where('lid_id', $lid->lid_id)
+            ->whereIn('status', ['niet_betaald', 'Openstaand', 'in_afwachting'])
+            ->orderBy('jaar', 'asc')
+            ->orderBy('maand', 'asc')
+            ->paginate(3);
+
+          
+
+        
+
         return view('Lidpagina', compact(
             'lid',
             'betalingen',
@@ -190,7 +201,8 @@ class LidController extends Controller
             'deadline',
             'UpcomingKost',
             'beschikbareJaren',
-            'hasPaidThisMonth'
+            'hasPaidThisMonth',
+            'openstaandeMaanden'
         ));
     }
 
@@ -230,42 +242,47 @@ class LidController extends Controller
         return redirect()->back()->with('success', 'Account is succesvol gedeactiveerd.');
     }
 
-    // Betalingsbewijs uploaden (PDF, max 5MB)
+    // Betalingsbewijs uploaden (PDF, max 5MB) voor de gekozen maand(en)
     public function UploadBewijs(Request $request)
     {
         $request->validate([
             'betaling_bewijs' => 'required|file|mimes:pdf|max:5120',
+            'betaling_ids'    => 'nullable|array',
+            'betaling_ids.*'  => 'integer',
         ]);
 
         $lid = Lid::where('gebruiker_id', Auth::id())->firstOrFail();
+        $pad = $request->file('betaling_bewijs')->store('bewijzen', 'public');
 
-        $bewijs = $request->file('betaling_bewijs');
-        $pad = $bewijs->store('bewijzen', 'public');
+        // Pak de gekozen maanden; zonder selectie de oudste openstaande maand
+        $query = Betaling::where('lid_id', $lid->lid_id)
+            ->whereIn('status', ['Openstaand', 'niet_betaald']);
 
-        // Oudste openstaande maand pakken
-        $betaling = Betaling::where('lid_id', $lid->lid_id)
-            ->whereIn('status', ['Openstaand', 'niet_betaald'])
-            ->orderBy('jaar', 'asc')
-            ->orderBy('maand', 'asc')
-            ->first();
-
-        if ($betaling) {
-            // Status wordt in_afwachting tot admin het beoordeelt
-            $betaling->update([
-                'betaling_bewijs' => $pad,
-                'status' => 'in_afwachting',
-                'ingediend_op' => now(),
-            ]);
+        if ($request->filled('betaling_ids')) {
+            $query->whereIn('betaling_id', $request->betaling_ids);
         } else {
-            // Geen openstaande, maak nieuwe betaling
-            Betaling::create([
+            $query->orderBy('jaar')->orderBy('maand')->limit(1);
+        }
+
+        $betalingen = $query->get();
+
+        // Geen openstaande maand gevonden: maak er een voor de huidige maand
+        if ($betalingen->isEmpty()) {
+            $betalingen = collect([Betaling::create([
                 'lid_id' => $lid->lid_id,
                 'bedrag' => $lid->MaandelijkseBijdrage(),
-                'status' => 'in_afwachting',
-                'maand' => now()->month,
-                'jaar' => now()->year,
+                'status' => 'Openstaand',
+                'maand'  => now()->month,
+                'jaar'   => now()->year,
+            ])]);
+        }
+
+        // Zelfde bewijs koppelen aan elke gekozen maand; status -> in_afwachting
+        foreach ($betalingen as $betaling) {
+            $betaling->update([
                 'betaling_bewijs' => $pad,
-                'ingediend_op' => now(),
+                'status'          => 'in_afwachting',
+                'ingediend_op'    => now(),
             ]);
         }
 
@@ -274,12 +291,13 @@ class LidController extends Controller
             $q->whereIn('naam', ['Administratie Medewerker', 'Applicatie Beheerder']);
         })->get();
 
+        $aantal = $betalingen->count();
         foreach ($admins as $admin) {
             Notificatie::create([
                 'gebruiker_id' => $admin->gebruiker_id,
                 'lid_id'       => $lid->lid_id,
                 'Notif_type'   => 'Betaling_ingediend',
-                'titel'        => 'Lid ' . $lid->gebruiker->naam . ' heeft een betalingsbewijs geüpload.',
+                'titel'        => 'Lid ' . $lid->gebruiker->naam . ' heeft een betalingsbewijs voor ' . $aantal . ' maand(en) geüpload.',
                 'gelezen'      => false,
                 'gestuurd_op'  => now(),
             ]);
@@ -288,7 +306,7 @@ class LidController extends Controller
         \App\Models\Activiteit::log(Auth::id(), 'bewijs_geüpload', [
             'lid_id'  => $lid->lid_id,
             'pad'     => $pad,
-            'details' => 'Lid ' . $lid->gebruiker->naam . ' heeft betalingsbewijs geüpload: ' . basename($pad),
+            'details' => 'Lid ' . $lid->gebruiker->naam . ' heeft betalingsbewijs geüpload voor ' . $aantal . ' maand(en): ' . basename($pad),
         ]);
 
         return redirect()->back()->with('success', 'Uw betalingsbewijs is succesvol verzonden naar de beheerder ter beoordeling. U ontvangt bericht zodra het is verwerkt.');

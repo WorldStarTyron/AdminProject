@@ -20,7 +20,7 @@
         @include('Layouts.Sidebars.sidebar')
 
         <!-- Main content: offset to the right of the sidebar on desktop -->
-        <div class="flex-1 ml-0 md:ml-64 transition-all duration-300 min-w-0 overflow-x-hidden">
+        <div class="flex-1 ml-0 md:ml-64 pt-20 transition-all duration-300 min-w-0 overflow-x-hidden">
 
             <!-- Shared top header bar -->
             @include('Layouts.Headers.header')

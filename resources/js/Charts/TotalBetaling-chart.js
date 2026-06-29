@@ -14,7 +14,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const maand = maandSelect ? maandSelect.value : '';
         const jaar  = jaarSelect ? jaarSelect.value : '';
 
-        fetch(`/betalingen/chart-data?maand=${maand}&jaar=${jaar}`, {
+        const basePath = window.location.pathname.startsWith('/public') ? '/public' : '';
+        fetch(`${basePath}/betalingen/chart-data?maand=${maand}&jaar=${jaar}`, {
             headers: {
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',

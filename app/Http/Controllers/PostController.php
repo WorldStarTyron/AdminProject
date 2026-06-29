@@ -33,7 +33,7 @@ class PostController extends Controller
 
     public function create()
     {
-        return view('Layouts.AddModals.add-lid-modal');
+        return view('layouts.AddModals.add-lid-modal');
     }
 
     // Nieuw lid toevoegen (met gebruiker, rol en eerste betaling)
@@ -178,7 +178,7 @@ class PostController extends Controller
             ->select('leden.*', 'gebruikers.naam', 'gebruikers.email')
             ->firstOrFail();
 
-        return view('EditLidPagina', compact('lid'));
+        return view('editLidPagina', compact('lid'));
     }
 
     // Lid bewerken

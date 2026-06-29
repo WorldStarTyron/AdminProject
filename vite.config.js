@@ -26,7 +26,12 @@ export default defineConfig({
                 'resources/js/EditModals/EditBetalingModal.js',
                 'resources/js/EditModals/EditGebruikerModal.js',
                 'resources/js/Charts/TotalBetaling-chart.js',
-                'resources/js/Utils/OptieDisable.js'
+                'resources/js/Utils/OptieDisable.js',
+                'resources/js/UI/ShowPassword.js',
+                'resources/js/Pages/BewijsMessage.js',
+                'resources/js/UI/Notificatie.js',
+                'resources/js/AddModals/AddGebruikerModal.js',
+                'resources/js/Pages/Herstel.js'
             ],
             refresh: true,
         }),

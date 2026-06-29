@@ -181,7 +181,7 @@ class LidController extends Controller
             ->whereIn('status', ['betaald', 'goed_gekeurd'])
             ->exists();
 
-        return view('lidpagina', compact(
+        return view('Lidpagina', compact(
             'lid',
             'betalingen',
             'openstaandeBalans',

@@ -21,6 +21,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Auto-fix: delete Vite 'hot' file if uploaded to online production environment
+        if (config('app.env') === 'production' || (!app()->runningInConsole() && !in_array(request()->getHost(), ['localhost', '127.0.0.1', '::1']))) {
+            $hotPath = public_path('hot');
+            if (file_exists($hotPath)) {
+                @unlink($hotPath);
+            }
+        }
         View::composer('Layouts.Tables.leden-overzicht', function ($view) {
 
             $totaalLeden = DB::table('leden')->count(); //totaal aantal leden

@@ -99,7 +99,8 @@ document.addEventListener('DOMContentLoaded', function () {
             params.append('maand', maandSelect.value);
         }
         // De url waar de gegevens worden opgehaald met eventuele filters.
-        var url = '/dashboard/chart-data';
+        var basePath = window.location.pathname.startsWith('/public') ? '/public' : '';
+        var url = basePath + '/dashboard/chart-data';
 
         if (params.toString()) {
             url += '?' + params.toString();

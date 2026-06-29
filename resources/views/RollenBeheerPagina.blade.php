@@ -245,7 +245,7 @@
                             </tbody>
                         </table>
 
-                        {{-- Pagination --}}
+                        <!-- Pagination -->
                         <div class="flex items-center justify-between px-5 py-3 border-t border-gray-100">
                             <span class="text-xs text-gray-400 flex items-center gap-1">
                                 <i class="fa-solid fa-list-ol"></i>
@@ -257,7 +257,7 @@
                         </div>
                     </div>
 
-                    {{-- Beveiligingstips --}}
+                    <!-- Beveiligingstips -->
                     <div class="w-56 bg-white border border-gray-200 rounded-xl p-4 shrink-0">
                         <div class="flex items-center gap-2 mb-3">
                             <i class="fa-solid fa-shield text-gray-500"></i>
@@ -279,7 +279,7 @@
         </div>
     </div>
 
-    {{-- Modal for editing user roles --}}
+    <!-- Modal for editing user roles -->
     <div id="roleModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
         <div class="bg-white rounded-xl w-full max-w-md p-6">
             <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
@@ -295,7 +295,7 @@
                         Rollen
                     </label>
                     <div id="roleCheckboxes" class="space-y-2">
-                        {{-- Dynamic checkboxes will be injected here --}}
+                        <!-- Dynamic checkboxes will be injected here -->
                     </div>
                 </div>
                 <div class="flex justify-end gap-2">

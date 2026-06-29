@@ -115,7 +115,8 @@ document.addEventListener('DOMContentLoaded', function () {
             formData.append('_method', 'PUT');
 
             // Versturen
-            var updateUrl = '/betalingen/' + id;
+            var basePath = window.location.pathname.startsWith('/public') ? '/public' : '';
+            var updateUrl = basePath + '/betalingen/' + id;
 
             fetch(updateUrl, {
                 method: 'POST',

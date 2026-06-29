@@ -124,7 +124,8 @@ bevestigBtn.addEventListener('click', function() {
     bevestigBtn.textContent = 'Bezig...';
     bevestigBtn.disabled    = true;
 
-    fetch('/betalingen/' + id + '/restore', {
+    var basePath = window.location.pathname.startsWith('/public') ? '/public' : '';
+    fetch(basePath + '/betalingen/' + id + '/restore', {
         method: 'PATCH',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,

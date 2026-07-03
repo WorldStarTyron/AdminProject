@@ -72,13 +72,50 @@
                 <!-- Hoofdgrid: Openstaande Maanden (2/3) + rechter kolom (1/3) -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
+
+                
                     <!-- Linker kolom: Openstaande Maanden tabel -->
-                    <div class="lg:col-span-2">
+                    <div class="lg:col-span-2 space-y-6">
                         @include('Layouts.Tables.openstaande-maanden-tabel')
+
+                
+                        <div class="bg-white rounded-2xl border border-slate-200/60 shadow-sm min-h-[140px] p-6">
+                            <div class="flex gap-4">
+                            <!--Time icon-->
+                         <div class="flex flex-row items-center justify-center shrink-0">
+                            <div class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center">
+                                <i class="fa-solid fa-clock text-2xl text-slate-500"></i>
+                            </div>
+                         </div>
+
+                              <div class="flex-1 min-w-0">
+                                <h1 class="text-base font-bold text-slate-900 m-0">Aankomende Deadline </h1>
+                                 <p class="text-sm text-slate-500 mt-0.5">Uw volgende contributie betaling staat gepland voor volgende maand</p>
+                                  <div class="flex flex-row flex-wrap items-center gap-x-5 gap-y-2 mt-4">
+                                    
+                                      <!-- Deadline info -->
+                                       <label class="font-medium bg-slate-300 w-24 text-center rounded-xl text-sm">Gepland</label>
+                                       <p class="text-sm text-slate-600">Deadline:
+                                          <span class="font-semibold text-slate-900">
+                                              {{ $deadline ? \Carbon\Carbon::parse($deadline)->translatedFormat('d F Y') : 'Geen openstaande betaling' }}
+                                          </span>
+                                       </p>
+                                       <p class="text-sm text-slate-600">Bedrag:
+                                          <span class="font-semibold text-slate-900">SRD {{ number_format($UpcomingKost ?? 0, 2, ',', '.') }}</span>
+                                       </p>
+                                  </div>
+                              </div>
+
+
+                             </div>
+                        </div>
+
                     </div>
 
-                    <!-- Rechter kolom: Contributie kaart + Contactgegevens (gestapeld) -->
-                    <div class="space-y-6">
+                 
+
+                        <!-- Rechter kolom: Contributie kaart + Contactgegevens (gestapeld) -->
+                        <div class="space-y-6">
 
                         <!-- Donkere contributie kaart -->
                         <div class="bg-slate-900 text-white rounded-2xl p-6 shadow-lg relative overflow-hidden">
@@ -121,6 +158,7 @@
                                 U kunt een PDF of een foto (JPG, PNG, WEBP) van uw betaalbewijs uploaden, max. 5 MB.
                             </p>
                         </div>
+                        
 
                         <!-- Contactgegevens kaart -->
                         <div class="bg-white rounded-2xl border border-slate-200/60 shadow-sm p-6">
@@ -153,10 +191,14 @@
                                         </p>
                                     </div>
                                 </div>
+                                
                             </div>
+                            
                         </div>
+                        
 
                     </div>
+                    
                 </div>
 
                 <!-- Geschiedenis Betaling tabel (volle breedte onderaan) -->

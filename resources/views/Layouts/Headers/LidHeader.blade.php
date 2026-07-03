@@ -1,9 +1,7 @@
 <header class="main-header">
-    <div class="header-container">
+    <div class="flex justify-end items-center mr-6 ">
 
-        <div class="header-left">
-            <h1 class="font-semibold">Mijn Gegevens</h1> 
-        </div>
+       
 
         <div class="header-right flex items-center gap-4">
 

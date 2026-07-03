@@ -107,9 +107,16 @@
                         @endif
                     </td>
 
-                    <!-- Bedrag in SRD -->
+                    <!-- Bedrag in SRD (totaal van alle maanden uit dezelfde betaling) -->
                     <td class="px-4 py-3.5">
                         <span class="font-bold text-slate-800 text-[0.8125rem]">SRD {{ number_format($betaling->bedrag, 2) }}</span>
+                        @if(($betaling->aantal ?? 1) > 1)
+                            <span class="block text-[0.6875rem] text-slate-400 font-medium mt-0.5">
+                                {{ $betaling->aantal }} maanden
+                                ({{ \Carbon\Carbon::createFromDate($betaling->jaar, $betaling->eerste_maand, 1)->translatedFormat('F') }}
+                                t/m {{ \Carbon\Carbon::createFromDate($betaling->jaar, $betaling->laatste_maand, 1)->translatedFormat('F Y') }})
+                            </span>
+                        @endif
                     </td>
 
                     <!-- Datum van de betaling -->
@@ -119,16 +126,19 @@
 
                     <!-- Bonnummer als die er is, anders streepje -->
                     <td class="px-4 py-3.5">
-                        @if($betaling->bon?->bon_nummer)
+                        @if($betaling->bon_nummer)
                             <span class="font-mono text-[0.75rem] text-slate-500 bg-slate-50 border border-slate-200/60 px-2 py-0.5 rounded-md truncate">
-                                {{ $betaling->bon->bon_nummer }}
+                                {{ $betaling->bon_nummer }}
                             </span>
                         @else
                             <span class="text-slate-300 text-sm">—</span>
                         @endif
                     </td>
 
-                    <!-- Acties: Bewerken & Verwijderen, alleen zichtbaar bij hoveren -->
+                    <!-- Acties: Bewerken & Verwijderen, alleen zichtbaar bij hoveren.
+                         Bij een batch (meerdere maanden uit één bewijs) gelden de acties
+                         voor de hele betaling: bewerken past status/bedrag op alle maanden
+                         toe, verwijderen wist alle maanden van de batch. -->
                     @can('betalingen-beheren')
                     <td class="px-4 py-3.5 text-center">
                         <div class="flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-150">
@@ -144,10 +154,7 @@
                                 title="Bewerken">
                                 <i class="fa-solid fa-pen-to-square text-xs"></i>
                             </button>
-                            @endcan
 
-
-                            @can('betalingen-beheren')
                             <!-- Verwijderknop -->
                             <form action="{{ route('betalingen.destroy', $betaling->betaling_id) }}" method="POST" class="inline-block">
                                 @csrf
@@ -160,11 +167,9 @@
                                     <i class="fa-solid fa-trash text-xs"></i>
                                 </button>
                             </form>
-                        @endcan
-
-                        
                         </div>
                     </td>
+                    @endcan
                 </tr>
 
                 <!-- Lege staat als er geen betalingen zijn -->

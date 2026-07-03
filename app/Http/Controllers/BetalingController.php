@@ -77,12 +77,36 @@ class BetalingController extends Controller
             ];
         }
 
-        // Recente betaalde transacties met optionele zoekfilter
-        $recenteQuery = Betaling::select('betalingen.*', 'gebruikers.naam')
+        // Recente betaalde transacties met optionele zoekfilter.
+        // Net als op de Bewijs Ontvangen-pagina ($recentReviews) worden maanden uit
+        // één betaalbewijs (zelfde betaling_bewijs) samengevoegd tot één transactie
+        // met het totaalbedrag en de periode. Handmatige betalingen zonder bewijs
+        // blijven losse rijen dankzij COALESCE(betaling_bewijs, betaling_id).
+        $recenteQuery = Betaling::query()
+            ->select(
+                'gebruikers.naam',
+                'betalingen.lid_id',
+                'betalingen.jaar',
+                DB::raw('SUM(betalingen.bedrag) as bedrag'),
+                DB::raw('COUNT(*) as aantal'),
+                DB::raw('MIN(betalingen.maand) as eerste_maand'),
+                DB::raw('MAX(betalingen.maand) as laatste_maand'),
+                DB::raw('MAX(betalingen.methode) as methode'),
+                DB::raw('MAX(betalingen.status) as status'),
+                DB::raw('MAX(betalingen.ingediend_op) as ingediend_op'),
+                DB::raw('MAX(betalingen.betaling_id) as betaling_id'),
+                DB::raw('MAX(bonnen.bon_nummer) as bon_nummer')
+            )
             ->join('leden',      'leden.lid_id',           '=', 'betalingen.lid_id')
             ->join('gebruikers', 'gebruikers.gebruiker_id', '=', 'leden.gebruiker_id')
             ->leftJoin('bonnen', 'bonnen.betaling_id', '=', 'betalingen.betaling_id')
-            ->where('betalingen.status', 'betaald');
+            ->where('betalingen.status', 'betaald')
+            ->groupBy(
+                DB::raw('COALESCE(betalingen.betaling_bewijs, betalingen.betaling_id)'),
+                'betalingen.lid_id',
+                'gebruikers.naam',
+                'betalingen.jaar'
+            );
 
         if (!empty($search)) {
             // Bij zoekopdracht: zoek door alle betaalde transacties (geen 30 dagen limiet)
@@ -99,7 +123,7 @@ class BetalingController extends Controller
         }
 
         $recenteBetalingen = $recenteQuery
-            ->orderBy('betalingen.ingediend_op', 'desc')
+            ->orderByDesc('ingediend_op')
             ->take($limit)
             ->get();
 
@@ -139,19 +163,29 @@ class BetalingController extends Controller
 
         $startDatum = Carbon::createFromDate($jaar, $maand, 1)->startOfMonth();
         $eindDatum  = $startDatum->copy()->endOfMonth();
+        $aantalDagen = $eindDatum->day;
 
-        // Groep per dag
+        // Filter op de maand WAARVOOR betaald is (maand/jaar), net als de tabel en de
+        // "Inkomsten deze maand"-kaart. Niet op ingediend_op, want één betaling kan
+        // meerdere maanden dekken en op een latere datum zijn geregistreerd.
         $betalingen = Betaling::select(
             DB::raw('DAY(ingediend_op) as dag'),
             DB::raw('SUM(bedrag) as totaal_bedrag')
         )
-        ->where('status', 'betaald')
-        ->whereBetween('ingediend_op', [$startDatum->toDateString(), $eindDatum->toDateString()])
+        ->whereIn('status', ['betaald', 'goed_gekeurd'])
+        ->where('maand', $maand)
+        ->where('jaar', $jaar)
         ->groupBy('dag')
-        ->get()
-        ->keyBy('dag');
+        ->get();
 
-        $aantalDagen = $eindDatum->day;
+        // Verdeel het bedrag over de dagen. Valt de registratiedag buiten deze maand
+        // (bv. betaling op 30 juni voor februari), bundel hem dan op de laatste dag,
+        // zodat het totaal van het diagram altijd gelijk blijft aan de database.
+        $perDag = [];
+        foreach ($betalingen as $row) {
+            $dag = min((int) $row->dag, $aantalDagen);
+            $perDag[$dag] = ($perDag[$dag] ?? 0) + (float) $row->totaal_bedrag;
+        }
 
         $labels = [];
         $data   = [];
@@ -159,7 +193,7 @@ class BetalingController extends Controller
         // Vul alle dagen, ook lege
         for ($dag = 1; $dag <= $aantalDagen; $dag++) {
             $labels[] = (string) $dag;
-            $data[]   = (float) ($betalingen->get($dag)->totaal_bedrag ?? 0);
+            $data[]   = (float) ($perDag[$dag] ?? 0);
         }
 
         return response()->json([
@@ -290,7 +324,12 @@ class BetalingController extends Controller
             'betaling_bewijs' => 'nullable|file|max:5120',
         ]);
 
-        // Oud bewijs weggooien bij nieuwe upload
+        // Alle maanden die bij deze betaling horen (1 bewijs = meerdere maanden).
+        // Voor een losse betaling is dit gewoon de betaling zelf.
+        $batch  = $this->batchVanBetaling($betaling);
+        $aantal = $batch->count();
+
+        // Oud (gedeeld) bewijs weggooien bij nieuwe upload
         if ($request->hasFile('betaling_bewijs') && $betaling->betaling_bewijs) {
             Storage::disk('public')->delete($betaling->betaling_bewijs);
         }
@@ -303,28 +342,41 @@ class BetalingController extends Controller
 
         $datum = Carbon::parse($request->datum);
 
-        $betaling->update([
-            'bedrag'          => $request->bedrag,
-            'methode'         => $request->methode,
-            'status'          => $request->status,
-            'ingediend_op'    => $datum->format('Y-m-d'),
-            'maand'           => $datum->month,
-            'jaar'            => $datum->year,
-            'betaling_bewijs' => $bewijsPath,
-        ]);
+        // Het ingevoerde bedrag is het totaal van de hele betaling. Verdeel het
+        // gelijk over de maanden; een eventueel afrondingsverschil komt op de 1e maand.
+        $bedragPerMaand = round($request->bedrag / $aantal, 2);
+        $rest           = round($request->bedrag - ($bedragPerMaand * $aantal), 2);
 
-        // Deadline updaten
-        if (in_array($request->status, ['betaald', 'goed_gekeurd'])) {
-            $betaling->berekenVolgendeDeadline($datum->format('Y-m-d'));
-        } else {
-            // Status niet meer betaald = deadline weghalen
-            $betaling->update(['volgende_deadline' => null]);
+        foreach ($batch->values() as $i => $b) {
+            $b->bedrag          = $bedragPerMaand + ($i === 0 ? $rest : 0);
+            $b->methode         = $request->methode;
+            $b->status          = $request->status;
+            $b->ingediend_op    = $datum->format('Y-m-d');
+            $b->betaling_bewijs = $bewijsPath;
+
+            // Alleen bij een losse betaling de maand/jaar meeschuiven met de datum;
+            // bij een batch blijven de oorspronkelijke maanden behouden.
+            if ($aantal === 1) {
+                $b->maand = $datum->month;
+                $b->jaar  = $datum->year;
+            }
+
+            $b->save();
+
+            // Deadline updaten
+            if (in_array($request->status, ['betaald', 'goed_gekeurd'])) {
+                $b->berekenVolgendeDeadline($datum->format('Y-m-d'));
+            } else {
+                // Status niet meer betaald = deadline weghalen
+                $b->volgende_deadline = null;
+                $b->save();
+            }
         }
 
         if (auth()->check()) {
             Activiteit::log(auth()->id(), 'betaling_bijgewerkt', [
                 'betaling_id' => $betaling->betaling_id,
-                'details'     => 'Betaling #' . $betaling->betaling_id . ' bijgewerkt.',
+                'details'     => $aantal . ' betaling(en) bijgewerkt (#' . $betaling->betaling_id . ').',
             ]);
         }
 
@@ -342,16 +394,35 @@ class BetalingController extends Controller
             return response()->json(['success' => false, 'message' => 'Betaling niet gevonden']);
         }
 
-        $betaling->delete();
+        // Bij een batch (1 bewijs, meerdere maanden) alles in 1 keer verwijderen
+        $batch  = $this->batchVanBetaling($betaling);
+        $aantal = $batch->count();
+
+        foreach ($batch as $b) {
+            $b->delete();
+        }
 
         if (auth()->check()) {
             Activiteit::log(auth()->id(), 'betaling_verwijderd', [
                 'betaling_id' => $betaling->betaling_id,
-                'details'     => 'Betaling #'. $betaling->betaling_id . ' ('. $betaling->ingediend_op .') van lid: ' . $betaling->lid->gebruiker->naam . ' verwijderd door '. auth()->user()->naam,
+                'details'     => $aantal . ' betaling(en) (#'. $betaling->betaling_id . ', '. $betaling->ingediend_op .') van lid: ' . $betaling->lid->gebruiker->naam . ' verwijderd door '. auth()->user()->naam,
             ]);
         }
 
-        return redirect()->back()->with('success', 'Betaling verwijderd');
+        return redirect()->back()->with('success', $aantal . ' betaling(en) verwijderd');
+    }
+
+    // Alle maanden die hetzelfde bewijs-bestand delen (1 betaling/upload), ongeacht status.
+    // Voor een betaling zonder bewijs (handmatig) is dit gewoon de betaling zelf.
+    private function batchVanBetaling(Betaling $betaling)
+    {
+        if (!$betaling->betaling_bewijs) {
+            return collect([$betaling]);
+        }
+
+        return Betaling::where('lid_id', $betaling->lid_id)
+            ->where('betaling_bewijs', $betaling->betaling_bewijs)
+            ->get();
     }
 
     // Prullenbak pagina
@@ -405,9 +476,7 @@ class BetalingController extends Controller
             ->orderBy('ingediend_op', 'desc')
             ->paginate(5);
 
-        // Recent beoordeeld: per upload (lid + bewijs) samengevoegd, zodat meerdere
-        // maanden uit 1 betaalbewijs als 1 rij verschijnen. Eigen paginanaam zodat
-        // deze tabel los van de andere tabel pagineert.
+        // Per upload samengevoegd, zodat meerdere maanden uit 1 bewijs als 1 rij tonen
         $recentReviews = Betaling::select(
                 'gebruikers.naam',
                 'betalingen.lid_id',
@@ -430,12 +499,12 @@ class BetalingController extends Controller
 
         $pendingCount = Betaling::where('status', 'in_afwachting')->count();
 
-        // Beoordeeld vandaag = aantal goedkeur/afwijs-acties van vandaag (uit de activiteitenlog)
+        // Beoordeeld vandaag = acties van vandaag uit activiteitenlog
         $totalReviewedToday = Activiteit::whereIn('actie', ['betaling_goedgekeurd', 'betaling_afgewezen'])
             ->whereDate('aangemaakt_op', today())
             ->count();
 
-        //maanden uit 1 upload delen hetzelfde bewijs-bestand
+        // Maanden uit 1 upload delen hetzelfde bewijs-bestand
         $batchInfo = [];
         Betaling::where('status', 'in_afwachting')
             ->whereNotNull('betaling_bewijs')
@@ -449,7 +518,7 @@ class BetalingController extends Controller
                 }
             });
 
-        // Lege placeholders zodat de preview niet laadt bij opstarten
+        // Lege placeholders zodat preview niet laadt bij opstarten
         $betaling = null;
         $bewijsUrl = null;
         $isPdf = false;

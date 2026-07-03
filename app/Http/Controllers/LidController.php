@@ -186,7 +186,7 @@ class LidController extends Controller
             ->whereIn('status', ['niet_betaald', 'Openstaand', 'in_afwachting'])
             ->orderBy('jaar', 'asc')
             ->orderBy('maand', 'asc')
-            ->paginate(3);
+            ->paginate(4);
 
           
 

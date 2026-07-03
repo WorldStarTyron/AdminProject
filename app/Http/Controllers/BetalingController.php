@@ -474,7 +474,7 @@ class BetalingController extends Controller
         $pendingPayments = Betaling::where('status', 'in_afwachting')
             ->with(['lid.gebruiker'])
             ->orderBy('ingediend_op', 'desc')
-            ->paginate(5);
+            ->paginate(5); //
 
         // Per upload samengevoegd, zodat meerdere maanden uit 1 bewijs als 1 rij tonen
         $recentReviews = Betaling::select(

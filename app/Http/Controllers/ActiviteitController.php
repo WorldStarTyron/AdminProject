@@ -99,11 +99,12 @@ class ActiviteitController extends Controller
                                     ->count();
 
         if ($lastWeekCount > 0) {
-            $diff         = $thisWeekCount - $lastWeekCount;
-            $trendPercent = round(($diff / $lastWeekCount) * 100);
+            $verschil     = $thisWeekCount - $lastWeekCount;
+            $trendPercent = round(($verschil / $lastWeekCount) * 100);
             $weeklyTrend  = ($trendPercent >= 0 ? '+' : '') . $trendPercent . '% deze week';
         } else {
-            $weeklyTrend = '+12% deze week';
+            // Geen data van vorige week, dus geen trend te berekenen
+            $weeklyTrend = 'Geen data vorige week';
         }
 
         return view('ActiviteitLog', compact('activiteiten', 'search', 'tab', 'totalCount', 'weeklyTrend'));

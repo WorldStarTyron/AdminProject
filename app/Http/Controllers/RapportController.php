@@ -41,22 +41,19 @@ class RapportController extends Controller
         $endYear = (int) date('Y', strtotime($to));
         $endMonth = (int) date('m', strtotime($to));
 
-        // Card 2: openstaand bedrag
-        $openstaandBedrag = Betaling::whereIn('status', ['niet_betaald', 'Openstaand'])
+        // Card 2: openstaand bedrag (1 basisquery, hergebruikt met clone)
+        $openstaandQuery = Betaling::whereIn('status', ['niet_betaald', 'Openstaand'])
             ->whereRaw('(jaar * 12 + maand) >= ?', [$startYear * 12 + $startMonth])
-            ->whereRaw('(jaar * 12 + maand) <= ?', [$endYear * 12 + $endMonth])
-            ->sum('bedrag');
+            ->whereRaw('(jaar * 12 + maand) <= ?', [$endYear * 12 + $endMonth]);
+
+        $openstaandBedrag = (clone $openstaandQuery)->sum('bedrag');
 
         // Distinct lid_id voor unieke tellingen
-        $openstaandAantal = Betaling::whereIn('status', ['niet_betaald', 'Openstaand'])
-            ->whereRaw('(jaar * 12 + maand) >= ?', [$startYear * 12 + $startMonth])
-            ->whereRaw('(jaar * 12 + maand) <= ?', [$endYear * 12 + $endMonth])
-            ->distinct('lid_id')
-            ->count('lid_id');
+        $openstaandAantal = (clone $openstaandQuery)->distinct('lid_id')->count('lid_id');
 
-        // Schatting van 150 per lid als bedrag ontbreekt
+        // Schatting per openstaande maand (niet per lid) als bedrag ontbreekt
         if ($openstaandBedrag == 0 && $openstaandAantal > 0) {
-            $openstaandBedrag = $openstaandAantal * 150;
+            $openstaandBedrag = (clone $openstaandQuery)->count() * 150;
         }
 
         // Dekkingsgraad

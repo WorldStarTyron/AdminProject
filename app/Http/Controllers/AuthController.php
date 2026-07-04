@@ -33,6 +33,9 @@ class AuthController extends Controller
                     ->with('error', 'Je account is gedeactiveerd.');
             }
 
+            // Nieuwe sessie-id na inloggen (beveiliging tegen session fixation)
+            $request->session()->regenerate();
+
             // Loggen nadat login is gelukt
             Activiteit::log($user->gebruiker_id, 'ingelogd', [
                 'ip' => $request->ip(),
@@ -53,12 +56,20 @@ class AuthController extends Controller
         $user = Auth::user();
         $user->load('rollen');
 
+        // Medewerkers en beheerders eerst, anders komt iemand met 2 rollen op de ledenpagina
+        if ($user->hasAnyRole(['Administratie Medewerker', 'Voorzitter', 'Applicatie Beheerder'])) {
+            return redirect()->route('MainDashboardPagina');
+        }
+
         if ($user->rollen->contains('naam', 'Lid')) {
             return redirect()->route('GegevensPagina')
                 ->with('success', 'Welkom ' . $user->naam);
         }
 
-        return redirect()->route('MainDashboardPagina');
+        // Geen rol: uitloggen, anders komt de gebruiker op een 403 pagina terecht
+        Auth::logout();
+        return redirect()->route('login')
+            ->with('error', 'Je account heeft nog geen rol. Neem contact op met de beheerder.');
     }
 
     // Uitloggen

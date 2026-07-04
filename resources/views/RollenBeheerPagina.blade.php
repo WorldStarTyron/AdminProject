@@ -46,7 +46,7 @@
                 <!-- Snel Rol Toewijzen -->
                 <div class="bg-white border border-gray-200 rounded-xl p-5 mb-5">
                     <h2 class="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-bolt text-yellow-400"></i>
+
                         Snel Rol Toewijzen
                     </h2>
                     <form action="{{ route('rollen-beheer.assign') }}" method="POST" id="quickAssignForm">

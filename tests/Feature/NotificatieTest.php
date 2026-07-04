@@ -58,24 +58,24 @@ class NotificatieTest extends TestCase
 
     /**
      * TESTCASE 1: Notification Authorization.
-     * Verifies that members (Lid) cannot access notification endpoints,
-     * while admins (Administratie Medewerker, Applicatie Beheerder) can.
+     * Iedere ingelogde gebruiker ziet alleen zijn EIGEN notificaties
+     * (leden krijgen bv. bericht als hun betaling is goedgekeurd of afgekeurd).
      */
-    public function test_notification_endpoints_are_only_accessible_by_admins(): void
+    public function test_notification_endpoints_require_login(): void
     {
         // 1. Unauthenticated users cannot access notifications
         $response = $this->getJson(route('notificaties.index'));
         $response->assertStatus(401);
 
-        // 2. Members (Lid role) are forbidden (403) from accessing notification list or marking as read
+        // 2. Leden mogen hun eigen notificaties bekijken en op gelezen zetten
         $lid = $this->createLid();
         $this->actingAs($lid->gebruiker);
 
         $response = $this->getJson(route('notificaties.index'));
-        $response->assertStatus(403);
+        $response->assertStatus(200);
 
         $response = $this->postJson(route('notificaties.lezen'));
-        $response->assertStatus(403);
+        $response->assertStatus(200);
 
         // 3. Admin roles can successfully access the endpoints (200)
         $admin = $this->createUserWithRole('Administratie Medewerker');

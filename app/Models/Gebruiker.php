@@ -22,7 +22,6 @@ class Gebruiker extends Authenticatable
     const UPDATED_AT = 'bijgewerkt_op';
 
     protected $fillable = [
-        "gebruiker_id",
         "naam",
         "email",
         "wachtwoord_hash",

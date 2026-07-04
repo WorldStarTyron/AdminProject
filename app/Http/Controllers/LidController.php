@@ -7,7 +7,6 @@ use App\Models\Betaling;
 use App\Models\Gebruiker;
 use App\Models\Notificatie;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 
@@ -79,37 +78,14 @@ class LidController extends Controller
         return view('ledenpagina', compact('leden', 'totaalLeden', 'labels', 'values', 'woonplaatsen'));
     }
 
-    // Verwijder dubbele betalingen zonder methode
-    public function removeduplicateBetalingen()
-    {
-        $huidigeMaand = now()->month;
-        $huidigeJaar = now()->year;
-
-        // Alleen betalingen zonder methode (= nog niet verwerkt)
-        $betalingen = Betaling::whereNull('methode')
-            ->where('maand', $huidigeMaand)
-            ->where('jaar', $huidigeJaar)
-            ->get();
-
-        $verwijderd = 0;
-
-        foreach ($betalingen as $betaling) {
-            $betaling->delete();
-            $verwijderd++;
-        }
-
-        return redirect()->back()->with('success', $verwijderd . ' dubbele betaling(en) verwijderd');
-    }
-
- 
     public function show(Request $request, $id = null)
     {
         // $id wordt genegeerd, alleen eigen lid via Auth::id()
         $lid = \App\Models\Lid::where('gebruiker_id', Auth::id())->firstOrFail();
 
-        // Openstaande balans
+        // Openstaande balans (ook in_afwachting telt mee tot het bewijs is goedgekeurd)
         $openstaandeBalans = \App\Models\Betaling::where('lid_id', $lid->lid_id)
-            ->whereIn('status', ['niet_betaald', 'Openstaand'])
+            ->whereIn('status', Betaling::ONBETAALDE_STATUSSEN)
             ->sum('bedrag');
 
         // Laatste betaalde betaling
@@ -183,7 +159,7 @@ class LidController extends Controller
 
         // Alle openstaande maanden voor de selecteerbare tabel
         $openstaandeMaanden = \App\Models\Betaling::where('lid_id', $lid->lid_id)
-            ->whereIn('status', ['niet_betaald', 'Openstaand', 'in_afwachting'])
+            ->whereIn('status', Betaling::ONBETAALDE_STATUSSEN)
             ->orderBy('jaar', 'asc')
             ->orderBy('maand', 'asc')
             ->paginate(4);
@@ -228,6 +204,8 @@ class LidController extends Controller
     // Lid deactiveren
     public function deactiveer($lid_id)
     {
+        Gate::authorize('leden-Deactiveren');
+
         $lid = Lid::findOrFail($lid_id);
         $lid->gebruiker->status = 'Inactief';
         $lid->gebruiker->save();

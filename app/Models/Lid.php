@@ -35,7 +35,6 @@ class Lid extends Model
 
     // Naam en email staan in gebruikers, niet hier
     protected $fillable = [
-        "lid_id",
         "gebruiker_id",
         "telefoonnummer",
         "adres",

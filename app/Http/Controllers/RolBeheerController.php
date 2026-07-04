@@ -58,34 +58,29 @@ class RolBeheerController extends Controller
     public function assignRole(Request $request)
     {
         $validated = $request->validate([
-            'gebruiker_id'         => 'required|exists:gebruikers,gebruiker_id',
-            'rol_id'               => 'required|exists:rollen,rol_id',
-            'tijdelijk_wachtwoord' => 'nullable|string|min:6',
-            'verplicht_wijzigen'   => 'sometimes|boolean',
+            'gebruiker_id' => 'required|exists:gebruikers,gebruiker_id',
+            'rol_id'       => 'required|exists:rollen,rol_id',
         ]);
 
         $gebruiker = Gebruiker::findOrFail($validated['gebruiker_id']);
-        $rol = Rol::find($validated['rol_id']);
-        $rolNaam = $rol ? $rol->naam : 'Onbekend';
+        $rol = Rol::findOrFail($validated['rol_id']);
 
-        // Eerst checken om dubbele rollen te voorkomen
-        $alreadyHasRole = $gebruiker->rollen->contains('rol_id', $validated['rol_id']);
-        if (!$alreadyHasRole) {
-            $gebruiker->rollen()->attach($validated['rol_id']);
+        // De beheerder-rol mag niet via dit formulier worden toegewezen
+        if (strtolower($rol->naam) === 'applicatie beheerder') {
+            return redirect()->route('rollen-beheer')
+                             ->with('error', 'De rol Applicatie Beheerder kan hier niet worden toegewezen.');
         }
 
-        if (auth()->check()) {
-            if (!$alreadyHasRole) {
-                Activiteit::log(auth()->id(), 'lid_bijgewerkt', [
+        // Eerst checken om dubbele rollen te voorkomen
+        $alreadyHasRole = $gebruiker->rollen->contains('rol_id', $rol->rol_id);
+        if (!$alreadyHasRole) {
+            $gebruiker->rollen()->attach($rol->rol_id);
+
+            if (auth()->check()) {
+                Activiteit::log(auth()->id(), 'gebruiker_gewijzigd', [
                     'doel_gebruiker' => $gebruiker->naam,
-                    'rol_toegevoegd' => $rolNaam,
-                    'details'        => 'Rol ' . $rolNaam . ' toegewezen aan gebruiker ' . $gebruiker->naam . '.'
-                ]);
-            }
-            if ($pwChanged) {
-                Activiteit::log(auth()->id(), 'wachtwoord_gewijzigd', [
-                    'doel_gebruiker' => $gebruiker->naam,
-                    'details'        => 'Tijdelijk wachtwoord ingesteld voor gebruiker ' . $gebruiker->naam . ' door beheerder.'
+                    'rol_toegevoegd' => $rol->naam,
+                    'details'        => 'Rol ' . $rol->naam . ' toegewezen aan gebruiker ' . $gebruiker->naam . '.'
                 ]);
             }
         }
@@ -114,10 +109,24 @@ class RolBeheerController extends Controller
 
         $gebruiker = Gebruiker::findOrFail($userId);
         // ?? [] zorgt dat lege selectie alle rollen verwijdert
-        $gebruiker->rollen()->sync($validated['rollen'] ?? []);
+        $nieuweRollen = $validated['rollen'] ?? [];
+
+        // De beheerder-rol kan hier niet worden toegevoegd of afgenomen
+        // (voorkomt ook dat de enige beheerder zichzelf buitensluit)
+        $beheerderRol = Rol::whereRaw('LOWER(naam) = ?', ['applicatie beheerder'])->first();
+        if ($beheerderRol) {
+            $nieuweRollen = array_diff($nieuweRollen, [$beheerderRol->rol_id]);
+
+            $heeftBeheerderRol = $gebruiker->rollen->contains('rol_id', $beheerderRol->rol_id);
+            if ($heeftBeheerderRol) {
+                $nieuweRollen[] = $beheerderRol->rol_id;
+            }
+        }
+
+        $gebruiker->rollen()->sync($nieuweRollen);
 
         if (auth()->check()) {
-            Activiteit::log(auth()->id(), 'lid_bijgewerkt', [
+            Activiteit::log(auth()->id(), 'gebruiker_gewijzigd', [
                 'gebruiker_id'   => $userId,
                 'gebruiker_naam' => $gebruiker->naam,
                 'details'        => 'Rollen bijgewerkt voor gebruiker ' . $gebruiker->naam . ' door beheerder.'

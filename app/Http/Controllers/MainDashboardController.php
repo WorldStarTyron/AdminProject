@@ -63,8 +63,9 @@ class MainDashboardController extends Controller
         // Lege maand = alle 12 maanden
         $selectedMaand = $request->input('maand');
 
-        // Contributie per maand
+        // Contributie per maand (alleen betaalde bedragen, net als op de betalingenpagina)
         $contributie = Betaling::where('jaar', $jaar)
+            ->whereIn('status', ['betaald', 'goed_gekeurd'])
             ->selectRaw('maand, SUM(bedrag) as totaal')
             ->groupBy('maand')
             ->pluck('totaal', 'maand');

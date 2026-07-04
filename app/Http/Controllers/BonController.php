@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Bonnen;
 use App\Models\Betaling;
 
@@ -34,10 +33,4 @@ class BonController extends Controller
             'aangemaakt_op' => now(),
         ]);
     }
-
-    public function store(Request $request) {}
-    public function edit(Request $request) {}
-    public function update(Request $request) {}
-    public function destroy(Request $request) {}
-    public function download(Request $request) {}
 }

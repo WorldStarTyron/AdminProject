@@ -28,8 +28,10 @@ class BetalingController extends Controller
         $search = $request->input('search');
 
         // Query met optionele zoekfilter (op naam, email of telefoon)
+        // Alleen actieve leden, zodat er geen schuld ontstaat voor gedeactiveerde accounts
         $ledenQuery = Lid::with('gebruiker')
             ->join('gebruikers', 'leden.gebruiker_id', '=', 'gebruikers.gebruiker_id')
+            ->where('gebruikers.status', 'Actief')
             ->select('leden.*');
 
         if (!empty($search)) {
@@ -42,27 +44,34 @@ class BetalingController extends Controller
 
         $leden = $ledenQuery->get();
 
+        // Voor toekomstige maanden alleen kijken, niets aanmaken (voorkomt spookschuld via de URL)
+        $periodeIsToekomst = $jaar > now()->year || ($jaar == now()->year && $maand > now()->month);
+
         // Maak per lid een statusrij voor de tabel
         $ledenStatus = [];
         foreach ($leden as $lid) {
+            $zoekVelden = [
+                'lid_id' => $lid->lid_id,
+                'maand'  => $maand,
+                'jaar'   => $jaar,
+            ];
+            $standaardWaarden = [
+                'status'          => 'Openstaand',
+                'bedrag'          => $lid->MaandelijkseBijdrage(),
+                'methode'         => null,
+                'ingediend_op'    => Carbon::createFromDate($jaar, $maand, 1)->format('Y-m-d'),
+                'betaling_bewijs' => null,
+            ];
+
             // firstOrCreate: maakt automatisch een Openstaande betaling als er nog geen is
-            $betaling = Betaling::firstOrCreate(
-                [
-                    'lid_id' => $lid->lid_id,
-                    'maand'  => $maand,
-                    'jaar'   => $jaar,
-                ],
-                [
-                    'status'          => 'Openstaand',
-                    'bedrag'          => $lid->MaandelijkseBijdrage(),
-                    'methode'         => null,
-                    'ingediend_op'    => Carbon::createFromDate($jaar, $maand, 1)->format('Y-m-d'),
-                    'betaling_bewijs' => null,
-                ]
-            );
+            if ($periodeIsToekomst) {
+                $betaling = Betaling::firstOrNew($zoekVelden, $standaardWaarden);
+            } else {
+                $betaling = Betaling::firstOrCreate($zoekVelden, $standaardWaarden);
+            }
 
             // Bedrag aanvullen als het 0 was (oude records)
-            if ($betaling->bedrag == 0 && $lid->MaandelijkseBijdrage() > 0) {
+            if ($betaling->exists && $betaling->bedrag == 0 && $lid->MaandelijkseBijdrage() > 0) {
                 $betaling->bedrag = $lid->MaandelijkseBijdrage();
                 $betaling->save();
             }
@@ -127,13 +136,8 @@ class BetalingController extends Controller
             ->take($limit)
             ->get();
 
-        // Totalen voor de stats kaarten
+        // Totaal voor de stats kaart
         $maandTotaal = Betaling::whereIn('status', ['betaald', 'goed_gekeurd'])
-            ->where('maand', $maand)
-            ->where('jaar', $jaar)
-            ->sum('bedrag');
-
-        $onbetaaldTotaal = Betaling::where('status', 'niet_betaald')
             ->where('maand', $maand)
             ->where('jaar', $jaar)
             ->sum('bedrag');
@@ -142,7 +146,6 @@ class BetalingController extends Controller
             'ledenStatus',
             'recenteBetalingen',
             'maandTotaal',
-            'onbetaaldTotaal',
             'maand',
             'jaar',
             'search'
@@ -213,7 +216,7 @@ class BetalingController extends Controller
             'naam'            => 'required|string',
             'datum'           => 'required|date',
             'methode'         => 'required|in:fysiek,overmaking',
-            'status'          => 'required|in:Openstaand,in_afwachting,afgewezen,betaald,niet_betaald',
+            'status'          => 'required|in:Openstaand,in_afwachting,betaald,niet_betaald',
             // Minimaal 150 (vaste contributie)
             'bedrag'          => 'required|numeric|min:150',
             'betaling_bewijs' => 'nullable|file|max:5120',
@@ -266,9 +269,10 @@ class BetalingController extends Controller
             $betaling->berekenVolgendeDeadline($datum->format('Y-m-d'));
         }
 
-        // Bon aanmaken als er nog geen is
+        // Bon aanmaken als er nog geen is (genereer maakt alleen een bon bij status betaald)
+        $nieuweBon = null;
         if (!$betaling->bon) {
-            BonController::genereer(
+            $nieuweBon = BonController::genereer(
                 $betaling,
                 $gebruiker->naam,
                 $datum->translatedFormat('F Y')
@@ -301,11 +305,14 @@ class BetalingController extends Controller
                 'details'     => 'Betaling van SRD ' . $bedrag . ' geregistreerd voor lid ' . $gebruiker->naam . '.',
             ]);
 
-            Activiteit::log(auth()->id(), 'bon_aangemaakt', [
-                'betaling_id' => $betaling->betaling_id,
-                'lid_naam'    => $gebruiker->naam,
-                'details'     => 'Factuurbon automatisch aangemaakt voor betaling #' . $betaling->betaling_id . '.',
-            ]);
+            // Alleen loggen als er echt een bon is aangemaakt
+            if ($nieuweBon) {
+                Activiteit::log(auth()->id(), 'bon_aangemaakt', [
+                    'betaling_id' => $betaling->betaling_id,
+                    'lid_naam'    => $gebruiker->naam,
+                    'details'     => 'Factuurbon automatisch aangemaakt voor betaling #' . $betaling->betaling_id . '.',
+                ]);
+            }
         }
 
         return response()->json(['success' => true, 'message' => 'Betaling succesvol toegevoegd'], 201);
@@ -319,7 +326,7 @@ class BetalingController extends Controller
         $request->validate([
             'bedrag'          => 'required|numeric|min:150',
             'methode'         => 'required|in:fysiek,overmaking',
-            'status'          => 'required|in:Openstaand,in_wachting,afgewezen,betaald,niet_betaald',
+            'status'          => 'required|in:Openstaand,in_afwachting,betaald,niet_betaald',
             'datum'           => 'required|date',
             'betaling_bewijs' => 'nullable|file|max:5120',
         ]);
@@ -391,7 +398,7 @@ class BetalingController extends Controller
         $betaling = Betaling::find($betaling_id);
 
         if (!$betaling) {
-            return response()->json(['success' => false, 'message' => 'Betaling niet gevonden']);
+            return redirect()->back()->with('error', 'Betaling niet gevonden');
         }
 
         // Bij een batch (1 bewijs, meerdere maanden) alles in 1 keer verwijderen
@@ -451,6 +458,19 @@ class BetalingController extends Controller
 
         if (!$betaling) {
             return response()->json(['success' => false, 'message' => 'Betaling niet gevonden']);
+        }
+
+        // Voorkom dubbelen: er kan intussen een nieuwe betaling voor dezelfde maand zijn aangemaakt
+        $bestaatAl = Betaling::where('lid_id', $betaling->lid_id)
+            ->where('maand', $betaling->maand)
+            ->where('jaar', $betaling->jaar)
+            ->exists();
+
+        if ($bestaatAl) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Er bestaat al een betaling voor deze maand. Verwijder die eerst voordat je deze herstelt.',
+            ]);
         }
 
         $betaling->restore();
@@ -668,7 +688,7 @@ class BetalingController extends Controller
     public function removeduplicateBetalingen()
     {
         // Alleen openstaande zonder methode
-        $allebetalingen = Betaling::with('bonnen')
+        $allebetalingen = Betaling::with('bon')
             ->where('status', 'Openstaand')
             ->whereNull('methode')
             ->get();

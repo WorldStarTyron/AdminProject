@@ -79,7 +79,7 @@
                         </select>
                     </div>
 
-<!-- Status van de betaling -->
+                    <!-- Status van de betaling -->
                     <div class="flex flex-col">
                         <label for="betaling_status" class="text-[0.8125rem] font-semibold text-slate-700 mb-1.5">
                             Status <span class="text-red-500">*</span>
@@ -87,9 +87,7 @@
                         <select id="betaling_status" name="status" required
                             class="px-3 py-2.5 border-[1.5px] border-slate-200 rounded-[10px] text-[0.8125rem] text-slate-700 bg-slate-50 w-full box-border transition-all duration-200 font-[inherit] focus:outline-none focus:border-blue-600 focus:bg-white focus:shadow-[0_0_0_3px_rgba(37,99,235,0.08)]">
                             <option value="" disabled selected>Select</option>
-<option value="Openstaand">Openstaand</option>
-                            <option value="in_afwachting">In Afwachting</option>
-                            <option value="afgewezen">Afgewezen</option>
+                            <option value="Openstaand">Openstaand</option>
                             <option value="niet_betaald">Niet Betaald</option>
                             <option value="betaald">Betaald</option>
                         </select>
@@ -103,7 +101,7 @@
                         <div class="flex items-stretch border-[1.5px] border-slate-200 rounded-[10px] overflow-hidden bg-slate-50 transition-all duration-200 focus-within:border-blue-600 focus-within:bg-white focus-within:shadow-[0_0_0_3px_rgba(37,99,235,0.08)]">
                             <!-- Valuta label links -->
                             <span class="flex items-center px-3 bg-slate-100 text-slate-500 text-[0.8125rem] font-semibold border-r-[1.5px] border-slate-200 whitespace-nowrap select-none">SRD</span>
-                            <input type="number" id="betaling_bedrag" name="bedrag" placeholder="0.00" step="0.01" min="0" required
+                            <input type="number" id="betaling_bedrag" name="bedrag" placeholder="0.00" step="0.01" min="150" required
                                 class="border-none !rounded-none bg-transparent !shadow-none flex-1 min-w-0 px-3 py-2.5 text-[0.8125rem] text-slate-700 font-[inherit] focus:outline-none focus:shadow-none">
                         </div>
                     </div>

@@ -7,7 +7,6 @@ use App\Models\Gebruiker;
 use App\Models\Activiteit;
 use App\Http\Requests\StoreLidRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
@@ -15,27 +14,6 @@ use Illuminate\Support\Facades\Log;
 // Lid CRUD
 class PostController extends Controller
 {
-    public function index()
-    {
-        $leden = Lid::select(
-            'leden.lid_id',
-            'gebruikers.naam',
-            'leden.telefoonnummer',
-            'leden.adres',
-            'leden.woonplaats',
-            'gebruikers.email',
-            'leden.lid_sinds'
-        )->join('gebruikers', 'leden.gebruiker_id', '=', 'gebruikers.gebruiker_id')
-        ->get();
-
-        return view('ledenpagina', compact('leden'));
-    }
-
-    public function create()
-    {
-        return view('layouts.AddModals.add-lid-modal');
-    }
-
     // Nieuw lid toevoegen (met gebruiker, rol en eerste betaling)
     public function store(StoreLidRequest $request)
     {
@@ -237,7 +215,26 @@ class PostController extends Controller
         if ($lid) {
             // Naam onthouden voor de log voordat we deleten
             $naam = $lid->gebruiker ? $lid->gebruiker->naam : 'Onbekend';
-            $lid->delete();
+
+            // Alles in 1 transactie: eerst gekoppelde records weg,
+            // anders blokkeert de database het verwijderen (foreign keys)
+            DB::transaction(function () use ($lid) {
+                $betalingIds = \App\Models\Betaling::withTrashed()
+                    ->where('lid_id', $lid->lid_id)
+                    ->pluck('betaling_id');
+
+                \App\Models\Bonnen::whereIn('betaling_id', $betalingIds)->delete();
+                \App\Models\Betaling::withTrashed()->where('lid_id', $lid->lid_id)->forceDelete();
+                \App\Models\Notificatie::where('lid_id', $lid->lid_id)->delete();
+
+                $lid->delete();
+
+                // Gekoppeld account deactiveren zodat er niet meer ingelogd kan worden
+                if ($lid->gebruiker) {
+                    $lid->gebruiker->status = 'Inactief';
+                    $lid->gebruiker->save();
+                }
+            });
 
             if (auth()->check()) {
                 Activiteit::log(auth()->id(), 'lid_verwijderd', [

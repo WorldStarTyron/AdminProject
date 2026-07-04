@@ -31,7 +31,7 @@ class RolBeheerController extends Controller
         }
 
         $gebruikers = $query->orderBy('naam')->paginate(10);
-        $alleRollen = Rol::orderBy('naam')->get();
+        $alleRollen = Rol::where('naam', '!=', 'Applicatie Beheerder')->orderBy('naam')->get();
 
         return view('RollenBeheerPagina', compact('gebruikers', 'alleRollen'));
     }

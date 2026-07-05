@@ -23,7 +23,7 @@
                 <input type="text"
                        name="search"
                        value="{{ $search ?? '' }}"
-                       placeholder="Zoek lid..."
+                       placeholder="Zoek betalingen..."
                        class="px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-300">
 
                 <button type="submit"

@@ -46,8 +46,20 @@ class AuthController extends Controller
             return $this->redirectBasedOnRole();
         }
 
-        // Niet zeggen of email of wachtwoord fout was
-        return redirect()->route('login')->with('error', 'Ongeldige inloggegevens');
+        // Kijken of het email of wachtwoord fout was
+        $InlogBestaat = Gebruiker::where('email', $request->email)->exists();
+
+      if ($InlogBestaat) {
+    //  wachtwoord was fout
+    return redirect()->route('login')
+        ->withErrors(['password' => 'Het wachtwoord is onjuist.'])
+        ->withInput($request->only('email'));
+} else {
+    // Email bestaat niet
+    return redirect()->route('login')
+        ->withErrors(['email' => 'Geen account gevonden met dit email adress.'])
+        ->withInput($request->only('email'));
+}
     }
 
     // Naar de juiste pagina op basis van rol

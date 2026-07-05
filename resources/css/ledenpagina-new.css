@@ -42,6 +42,7 @@
 .lp-page-header-right {
     display: flex;
     align-items: center;
+    gap: 0.75rem;
 }
 
 .lp-filter-form {
@@ -53,29 +54,30 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 10px;
+    padding: 0.5rem 0.875rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
     background: #ffffff;
-    color: #475569;
+    color: #6b7280;
     cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 0.8125rem;
+    transition: all 0.15s ease;
+    font-size: 0.875rem;
     font-weight: 500;
 }
 
-.lp-btn-filters:hover {
-    border-color: #1e3a8a;
-    box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.06);
+.lp-btn-filters:hover,
+.lp-btn-filters:focus-within {
+    border-color: #2A374A;
+    box-shadow: 0 0 0 2px rgba(42, 55, 74, 0.1);
 }
 
 .lp-btn-filters select {
     border: none;
     outline: none;
     background: transparent;
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     font-family: 'Inter', sans-serif;
-    color: #475569;
+    color: #374151;
     cursor: pointer;
     appearance: auto;
     font-weight: 500;

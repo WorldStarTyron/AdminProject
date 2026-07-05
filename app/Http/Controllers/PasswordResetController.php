@@ -144,7 +144,7 @@ class PasswordResetController extends Controller
             $remainingAttempts = 5 - ($attempts + 1);
             $message = 'De code is onjuist of verlopen.';
             if ($remainingAttempts > 0) {
-                $message .= ' Je hebt nog ' . $remainingAttempts . ' poging(en) over.';
+                $message .= ' Je hebt nog ' . $remainingAttempts . ' om de code correct in te voeren.';
             }
 
             return redirect()->route('verify-code')

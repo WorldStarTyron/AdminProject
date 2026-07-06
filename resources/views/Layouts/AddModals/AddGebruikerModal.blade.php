@@ -52,20 +52,38 @@
                 <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Beveiliging</span>
             </div>
 
-            <div class="flex flex-col gap-1.5">
-                <label for="add_gebruiker_wachtwoord" class="text-[0.8125rem] font-semibold text-slate-700">
-                    Wachtwoord <span class="text-red-500">*</span>
-                </label>
-                <input type="password" id="add_gebruiker_wachtwoord" name="wachtwoord" required
-                       class="px-3 py-2.5 border-[1.5px] border-slate-200 rounded-[10px] text-[0.8125rem] text-slate-700 bg-slate-50 w-full box-border transition-all duration-200 focus:outline-none focus:border-blue-600 focus:bg-white focus:shadow-[0_0_0_3px_rgba(37,99,235,0.08)]">
-            </div>
+    <div class="flex flex-col gap-1.5">
+    <label for="add_gebruiker_wachtwoord" class="text-[0.8125rem] font-semibold text-slate-700">
+        Wachtwoord <span class="text-red-500">*</span>
+    </label>
+
+    <div class="relative">
+        <input type="password" id="add_gebruiker_wachtwoord" name="wachtwoord" required
+               class="px-3 py-2.5 pr-10 border-[1.5px] border-slate-200 rounded-[10px] text-[0.8125rem] text-slate-700 bg-slate-50 w-full box-border transition-all duration-200 focus:outline-none focus:border-blue-600 focus:bg-white focus:shadow-[0_0_0_3px_rgba(37,99,235,0.08)]">
+
+        <button type="button" id="togglePassword1" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none">
+            <i class="fa-solid fa-eye"></i>
+            <i class="fa-solid fa-eye-slash"></i>
+        </button>
+    </div>
+</div>
+
+          
 
             <div class="flex flex-col gap-1.5">
-                <label for="add_gebruiker_wachtwoord_bevestiging" class="text-[0.8125rem] font-semibold text-slate-700">
-                    Wachtwoord bevestiging <span class="text-red-500">*</span>
-                </label>
-                <input type="password" id="add_gebruiker_wachtwoord_bevestiging" name="wachtwoord_confirmation" required
-                       class="px-3 py-2.5 border-[1.5px] border-slate-200 rounded-[10px] text-[0.8125rem] text-slate-700 bg-slate-50 w-full box-border transition-all duration-200 focus:outline-none focus:border-blue-600 focus:bg-white focus:shadow-[0_0_0_3px_rgba(37,99,235,0.08)]">
+    <label for="add_gebruiker_wachtwoord_bevestiging" class="text-[0.8125rem] font-semibold text-slate-700">
+        Wachtwoord bevestiging <span class="text-red-500">*</span>
+    </label>
+
+    <div class="relative">
+        <input type="password" id="add_gebruiker_wachtwoord_bevestiging" name="wachtwoord_confirmation" required
+               class="px-3 py-2.5 pr-10 border-[1.5px] border-slate-200 rounded-[10px] text-[0.8125rem] text-slate-700 bg-slate-50 w-full box-border transition-all duration-200 focus:outline-none focus:border-blue-600 focus:bg-white focus:shadow-[0_0_0_3px_rgba(37,99,235,0.08)]">
+
+        <button type="button" id="togglePassword2" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none">
+            <i class="fa-solid fa-eye"></i>
+            <i class="fa-solid fa-eye-slash"></i>
+        </button>
+       </div>
             </div>
 
         </div>

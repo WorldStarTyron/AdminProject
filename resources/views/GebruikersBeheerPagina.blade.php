@@ -5,13 +5,12 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GebruikerBeheerPagina</title>
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <!-- Stylesheets & Scripts -->
-    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/js/UI/Sidebar.js', 'resources/js/AddModals/AddGebruikerModal.js'])
+    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/js/UI/Sidebar.js', 'resources/js/AddModals/AddGebruikerModal.js', 'resources/js/UI/ShowPassword.js'])
 </head>
 <body class="min-h-screen bg-white font-sans antialiased">
     <!-- Main page flex wrapper -->
@@ -421,13 +420,6 @@
 
                                 </tbody>
                             </table>
-
-                            {{--
-                                FIX: Paginering alleen tonen als er resultaten zijn.
-                                firstItem() en lastItem() geven NULL terug bij een lege collectie
-                                en veroorzaken een PHP Notice / crash.
-                                Door @if($gebruikers->isNotEmpty()) te checken is dit nu veilig.
-                            --}}
                             @if($gebruikers->isNotEmpty())
                                 <div class="flex items-center justify-between px-6 py-4 border-t border-gray-100">
                                     <span class="text-sm text-gray-500">

@@ -70,7 +70,7 @@
 
           
 
-            <div class="flex flex-col gap-1.5">
+         <div class="flex flex-col gap-1.5">
     <label for="add_gebruiker_wachtwoord_bevestiging" class="text-[0.8125rem] font-semibold text-slate-700">
         Wachtwoord bevestiging <span class="text-red-500">*</span>
     </label>

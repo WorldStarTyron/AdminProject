@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 // Betalingen beheer
 class BetalingController extends Controller
@@ -242,10 +243,18 @@ class BetalingController extends Controller
 
         $bedrag = $request->bedrag;
 
-        // Bewijs opslaan als geupload
+        // Bewijs opslaan als geupload, met leesbare bestandsnaam (naam-lidid-datum)
         $bewijsPath = null;
         if ($request->hasFile('betaling_bewijs')) {
-            $bewijsPath = $request->file('betaling_bewijs')->store('bewijzen', 'public');
+            $file = $request->file('betaling_bewijs');
+
+            $bestandsnaam = Str::slug($gebruiker->naam)     //zet naam om naar kleine letters en koppel aan elkaar
+            . '-lid-' . $lid->lid_id                        //zet lid-id aan elkaar
+            . '-' . now()->format('Ymd-His')                //"-20260707-1530-45"
+            . '-betalingsbewijs'                            //zet betalingsbewijs aan elkaar
+            . '.' . $file->getClientOriginalExtension();     //pdf
+
+            $bewijsPath = $file->storeAs('bewijzen', $bestandsnaam, config('filesystems.bewijs_disk'));
         }
 
         // updateOrCreate voorkomt dubbele betalingen
@@ -338,13 +347,21 @@ class BetalingController extends Controller
 
         // Oud (gedeeld) bewijs weggooien bij nieuwe upload
         if ($request->hasFile('betaling_bewijs') && $betaling->betaling_bewijs) {
-            Storage::disk('public')->delete($betaling->betaling_bewijs);
+            Storage::disk(config('filesystems.bewijs_disk'))->delete($betaling->betaling_bewijs);
         }
 
         // Bestaand pad behouden als er geen nieuwe upload is
         $bewijsPath = $betaling->betaling_bewijs;
         if ($request->hasFile('betaling_bewijs')) {
-            $bewijsPath = $request->file('betaling_bewijs')->store('bewijzen', 'public');
+            $file = $request->file('betaling_bewijs');
+
+            $bestandsnaam = Str::slug($betaling->lid->gebruiker->naam) //zet naam om naar kleine letters en koppel aan elkaar
+            . '-lid-' . $betaling->lid_id                   //zet lid-id aan elkaar
+            . '-' . now()->format('Ymd-His')                //"-20260707-1530-45"
+            . '-betalingsbewijs'                            //zet betalingsbewijs aan elkaar
+            . '.' . $file->getClientOriginalExtension();     //pdf
+
+            $bewijsPath = $file->storeAs('bewijzen', $bestandsnaam, config('filesystems.bewijs_disk'));
         }
 
         $datum = Carbon::parse($request->datum);
@@ -559,7 +576,7 @@ class BetalingController extends Controller
         }
 
         // Check 2: bestaat het bestand nog op disk?
-        if (!\Storage::disk('public')->exists($betaling->betaling_bewijs)) {
+        if (!Storage::disk(config('filesystems.bewijs_disk'))->exists($betaling->betaling_bewijs)) {
             return redirect()->back()->with('error', 'Bestand niet gevonden op de server.');
         }
 
@@ -584,12 +601,14 @@ class BetalingController extends Controller
 
         $betaling = Betaling::findOrFail($betaling_id);
 
-        if (!$betaling->betaling_bewijs || !\Storage::disk('public')->exists($betaling->betaling_bewijs)) {
+        if (!$betaling->betaling_bewijs || !Storage::disk(config('filesystems.bewijs_disk'))->exists($betaling->betaling_bewijs)) {
             abort(404, 'Bestand niet gevonden op de server.');
         }
 
-        // Inline tonen (niet downloaden) zodat de iframe/img het kan weergeven
-        return response()->file(\Storage::disk('public')->path($betaling->betaling_bewijs));
+        // Inline tonen (niet downloaden) zodat de iframe/img het kan weergeven.
+        // Streamt vanaf de geconfigureerde disk; werkt ook voor cloud-opslag
+        // (Supabase/S3) waar geen lokaal bestandspad bestaat.
+        return Storage::disk(config('filesystems.bewijs_disk'))->response($betaling->betaling_bewijs);
     }
 
     // Bewijs goedkeuren (alle maanden uit dezelfde upload in 1 keer)

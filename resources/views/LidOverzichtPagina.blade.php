@@ -241,6 +241,7 @@
                                         <th class="text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider pb-3 pr-4">Contributiebedrag</th>
                                         <th class="text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider pb-3 pr-4">Betaling</th>
                                         <th class="text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider pb-3 pr-4">Status</th>
+                                        <th class="text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider pb-3 pr-4">Month/Jaar</th>
                                         <th class="text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider pb-3">Bonnummer</th>
                                     </tr>
                                 </thead>
@@ -278,6 +279,15 @@
                                                     {{ $statusLabel }}
                                                 </span>
                                             </td>
+
+                                            <td class="py-3 text-slate-500 text-xs font-mono">
+                                                @if($betaling->maand && $betaling->jaar)
+                                                    {{ \Carbon\Carbon::createFromDate( $betaling->jaar, $betaling->maand,1)->translatedFormat('F Y') }}
+                                                @else
+                                                    —
+                                                @endif
+                                            </td>
+
                                             <td class="py-3 text-slate-500 text-xs font-mono">
                                                 @if($betaling->bon)
                                                     {{ $betaling->bon->bon_nummer }}

@@ -9,6 +9,7 @@ use App\Models\Notificatie;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 
 // Ledenoverzicht, lid profiel en upload functie
 class LidController extends Controller
@@ -232,7 +233,17 @@ class LidController extends Controller
         ]);
 
         $lid = Lid::where('gebruiker_id', Auth::id())->firstOrFail();
-        $pad = $request->file('betaling_bewijs')->store('bewijzen', 'public');
+        
+        $file = $request->file('betaling_bewijs');
+ 
+        // Betalingsbewijs opslaan
+        $bestandsnaam = Str::slug($lid->gebruiker->naam)  //zet naam om naar kleine letters en koppel aan elkaar
+        . '-lid-' . $lid->lid_id                        //zet lid-id aan elkaar
+        . '-' . now()->format('Ymd-His')                //"20260707-1530-45"
+        . '-betalingsbewijs'                            //zet betalingsbewijs aan elkaar
+        . '.' . $file->getClientOriginalExtension();     //pdf
+
+        $pad = $file->storeAs('bewijzen', $bestandsnaam, config('filesystems.bewijs_disk'));
 
         // Pak de gekozen maanden; zonder selectie de oudste openstaande maand
         $query = Betaling::where('lid_id', $lid->lid_id)

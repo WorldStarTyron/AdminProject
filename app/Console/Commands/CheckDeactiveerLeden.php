@@ -15,54 +15,47 @@ class CheckDeactiveerLeden extends Command
     protected $description = 'Deactiveer leden die 3 Maanden achter elkaar niet hebben betaald';
 
     public function handle()
-    {
-        $gebruikers = Gebruiker::where('status', 'Actief')
-            ->whereHas('lid')
-            ->get();
+{
+    $gebruikers = Gebruiker::where('status', 'Actief')
+        ->whereNull('suspension_at')
+        ->whereHas('lid')
+        ->get();
 
-        foreach ($gebruikers as $gebruiker) {
-            $lid = $gebruiker->lid;
+    foreach ($gebruikers as $gebruiker) {
+        $lid = $gebruiker->lid;
 
-            // Skip 1: nieuwe leden die nog geen 3 maanden lid zijn
-            if ($lid->lid_sinds && Carbon::parse($lid->lid_sinds)->diffInMonths(now()) < 3) {
-                continue;
-            }
+        // Nieuwe leden overslaan (nog geen 3 volle maanden lid)
+        if ($lid->lid_sinds && $lid->lid_sinds->diffInMonths(now()) < 3) {
+            continue;
+        }
 
-            // Skip 2: heeft deze maand al betaald → niet deactiveren
-            $betaaldDezeMaand = Betaling::where('lid_id', $lid->lid_id)
-                ->where('maand', now()->month)
-                ->where('jaar', now()->year)
-                ->whereIn('status', ['betaald', 'goed_gekeurd'])
-                ->exists();
+        // Huidige maand betaald? → uitzondering, blijft actief
+        if ($this->heeftBetaald($lid, now())) {
+            continue;
+        }
 
-            if ($betaaldDezeMaand) {
-                continue;
-            }
-
-            // Tel hoeveel van de vorige 3 maanden niet betaald zijn
-            $nietBetaaldAantal = 0;
-
-            for ($i = 1; $i <= 3; $i++) {
-                $heeftBetaald = Betaling::where('lid_id', $lid->lid_id)
-                    ->where('maand', now()->subMonths($i)->month)
-                    ->where('jaar', now()->subMonths($i)->year)
-                    ->whereIn('status', ['betaald', 'goed_gekeurd'])
-                    ->exists();
-
-                if (!$heeftBetaald) {
-                    $nietBetaaldAantal++;
-                }
-            }
-
-            // 3 maanden niet betaald = account deactiveren
-            if ($nietBetaaldAantal === 3) {
-                $gebruiker->status = 'Inactief';
-                $gebruiker->save();
-
-                $this->info("Gedeactiveerd: {$gebruiker->naam}");
+        // Laatste 3 opeenvolgende maanden allemaal onbetaald?
+        $alleDrieOnbetaald = true;
+        for ($i = 1; $i <= 3; $i++) {
+            if ($this->heeftBetaald($lid, now()->subMonthsNoOverflow($i))) {
+                $alleDrieOnbetaald = false;
+                break;
             }
         }
 
-        $this->info('Klaar met controleren');
+        if ($alleDrieOnbetaald) {
+            $gebruiker->Suspend();
+            $this->info("Suspend: {$gebruiker->naam}");
+        }
     }
+}
+
+private function heeftBetaald($lid, $moment): bool
+{
+    return Betaling::where('lid_id', $lid->lid_id)
+        ->where('maand', $moment->month)
+        ->where('jaar', $moment->year)
+        ->whereIn('status', ['betaald', 'goed_gekeurd'])
+        ->exists();
+}
 }

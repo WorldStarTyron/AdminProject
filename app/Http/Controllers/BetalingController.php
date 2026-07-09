@@ -218,9 +218,8 @@ class BetalingController extends Controller
             'datum'           => 'required|date',
             'methode'         => 'required|in:fysiek,overmaking',
             'status'          => 'required|in:Openstaand,in_afwachting,betaald,niet_betaald',
-            // Minimaal 150 (vaste contributie)
-            'bedrag'          => 'required|numeric|min:150',
-            'betaling_bewijs' => 'nullable|file|max:5120',
+            'bedrag'          => 'required|numeric|min:150',// Minimaal 150 (vaste contributie)
+            'betaling_bewijs' => 'nullable|pdf|max:5120',
         ], [
             'bedrag.min' => 'Het bedrag moet minimaal SRD150 zijn',
         ]);
@@ -276,6 +275,11 @@ class BetalingController extends Controller
         // Volgende deadline berekenen als status betaald is
         if (in_array($request->status, ['betaald', 'goed_gekeurd'])) {
             $betaling->berekenVolgendeDeadline($datum->format('Y-m-d'));
+
+            // Geschorst lid weer activeren zodra er betaald is
+            if ($gebruiker->isSuspended()) {
+                $gebruiker->UnSuspend();
+            }
         }
 
         // Bon aanmaken als er nog geen is (genereer maakt alleen een bon bij status betaald)
@@ -337,7 +341,7 @@ class BetalingController extends Controller
             'methode'         => 'required|in:fysiek,overmaking',
             'status'          => 'required|in:Openstaand,in_afwachting,betaald,niet_betaald',
             'datum'           => 'required|date',
-            'betaling_bewijs' => 'nullable|file|max:5120',
+            'betaling_bewijs' => 'nullable|pdf|max:5120',
         ]);
 
         // Alle maanden die bij deze betaling horen (1 bewijs = meerdere maanden).
@@ -394,6 +398,14 @@ class BetalingController extends Controller
                 // Status niet meer betaald = deadline weghalen
                 $b->volgende_deadline = null;
                 $b->save();
+            }
+        }
+
+        // Geschorst lid weer activeren zodra er betaald is
+        if (in_array($request->status, ['betaald', 'goed_gekeurd'])) {
+            $lidGebruiker = $betaling->lid ? $betaling->lid->gebruiker : null;
+            if ($lidGebruiker && $lidGebruiker->isSuspended()) {
+                $lidGebruiker->UnSuspend();
             }
         }
 
@@ -628,6 +640,12 @@ class BetalingController extends Controller
                 $periode = \Carbon\Carbon::createFromDate($b->jaar, $b->maand, 1)->translatedFormat('F Y');
                 BonController::genereer($b, $b->lid->gebruiker->naam, $periode);
             }
+        }
+
+        // Geschorst lid weer activeren nu het bewijs is goedgekeurd
+        $lidGebruiker = $betaling->lid ? $betaling->lid->gebruiker : null;
+        if ($lidGebruiker && $lidGebruiker->isSuspended()) {
+            $lidGebruiker->UnSuspend();
         }
 
         $aantal = $batch->count();

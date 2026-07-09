@@ -21,6 +21,7 @@ return new class extends Migration
     $table->enum('status', ['Actief', 'Inactief'])->default('Actief');
     $table->timestamp('aangemaakt_op')->useCurrent();
     $table->timestamp('bijgewerkt_op')->useCurrent();
+    $table->timestamp('suspension_at')->nullable();
 });
 
         Schema::enableForeignKeyConstraints();

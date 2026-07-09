@@ -28,6 +28,7 @@ class Gebruiker extends Authenticatable
         "status",
         "aangemaakt_op",
         "bijgewerkt_op",
+        "suspension_at",
     ];
 
     // Wachtwoord niet meesturen in json
@@ -38,6 +39,7 @@ class Gebruiker extends Authenticatable
     protected $casts = [
         'aangemaakt_op' => 'datetime',
         'bijgewerkt_op' => 'datetime',
+        'suspension_at' => 'datetime',
     ];
 
     public function lid()
@@ -115,4 +117,27 @@ class Gebruiker extends Authenticatable
     {
         return $this->wachtwoord_hash;
     }
+
+    // check als de suspension_at is nog actief
+    public function isSuspended(): bool
+    {
+       return !is_null($this->suspension_at);
+    }
+
+    public function Suspend(): void
+    {
+        $this->update([
+            'status'  => 'Inactief',
+            'suspension_at' => now(),
+        ]);
+    }
+
+    public function UnSuspend(): void
+    {
+        $this->update([
+            'status' => 'Actief',
+            'suspension_at' => null,
+        ]);
+    }
+
 }

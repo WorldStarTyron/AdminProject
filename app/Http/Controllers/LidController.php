@@ -225,11 +225,11 @@ class LidController extends Controller
     public function UploadBewijs(Request $request)
     {
         $request->validate([
-            'betaling_bewijs' => 'required|file|mimes:pdf,jpg,jpeg,png,webp|max:5120',
+            'betaling_bewijs' => 'required|file|mimes:pdf|max:5120',
             'betaling_ids'    => 'nullable|array',
             'betaling_ids.*'  => 'integer',
         ], [
-            'betaling_bewijs.mimes' => 'Het betalingsbewijs moet een PDF of afbeelding (JPG, PNG, WEBP) zijn.',
+            'betaling_bewijs.mimes' => 'Het betalingsbewijs moet een PDF zijn.',
         ]);
 
         $lid = Lid::where('gebruiker_id', Auth::id())->firstOrFail();

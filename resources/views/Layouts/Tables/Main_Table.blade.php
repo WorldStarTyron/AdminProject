@@ -116,15 +116,15 @@
                     <tr class="hover:bg-gray-50/50 transition-colors">
 
                         <!-- Lid-ID met opvulling zodat het er zo uitziet: 001, 002, etc. -->
-                        <td class="py-4 px-6">
-                            <span class="inline-flex px-2 py-0.5 text-[11px] font-extrabold tracking-wide text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-md font-mono">
+                        <td class="py-4 px-6 w-30">
+                            <span class="item-center justify-center px-1 py-0.5 text-[11px]  font-extrabold tracking-wide text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-md font-mono">
                                 <i class="fa-solid fa-id-badge mr-1 text-indigo-400"></i>
                                 {{ str_pad($lid->lid_id, 3, '0', STR_PAD_LEFT) }}
                             </span>
                         </td>
 
                         <!-- Naam met avatar (rondje met initialen) -->
-                        <td class="py-4 px-6">
+                        <td class="py-4 px-6 w-60">
                             <div class="flex items-center gap-3">
                                 <!-- Gekleurde cirkel met initialen van het lid -->
                                 <div class="w-8 h-8 rounded-full bg-gradient-to-tr {{ $gradient }} flex items-center justify-center text-[11px] font-extrabold text-white shadow-sm">
@@ -135,19 +135,19 @@
                         </td>
 
                         <!-- E-mailadres van het lid -->
-                        <td class="py-4 px-6 text-gray-500 font-medium">
+                        <td class="py-4 px-6 w-30 text-gray-500 font-medium">
                             <i class="fa-regular fa-envelope mr-1 text-gray-400"></i>
                             {{ $lid->gebruiker->email ?? '—' }}
                         </td>
 
                         <!-- Telefoonnummer van het lid -->
-                        <td class="py-4 px-6 text-gray-500 font-medium">
+                        <td class="py-4 px-6 w-50 text-gray-500 font-medium">
                             <i class="fa-solid fa-phone mr-1 text-gray-400"></i>
                             {{ $lid->telefoonnummer ?? '—' }}
                         </td>
 
                         <!-- Betaalstatus badge: kleur hangt af van de status -->
-                        <td class="py-4 px-6 text-center">
+                        <td class="py-4 px-6 w-40 text-center">
 
                             @if($isPaid)
                                 <!-- Lid heeft betaald deze maand: groene badge -->

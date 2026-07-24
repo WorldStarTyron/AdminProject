@@ -119,6 +119,7 @@ class PostController extends Controller
 
         return redirect()->route('ledenpagina')->with('success', 'Lid toegevoegd');
     }
+  
 
     // Lid detailpagina
     public function show(string $id)
@@ -164,21 +165,30 @@ class PostController extends Controller
     {
         Gate::authorize('leden-beheren');
 
-        $validated = $request->validate([
-            'naam'           => 'required|string|max:255',
-            'email'          => 'required|email|max:255',
-            'telefoonnummer' => 'required|string|max:255',
-            'adres'          => 'required|string|max:255',
-            'woonplaats'     => 'required|string|max:255',
-            'geboortedatum'  => 'required|date',
-            'lid_sinds'      => 'required|date',
-            'lid_type'       => 'required|string|max:255',
-        ]);
-
         $lid = Lid::where('lid_id', $id)
             ->join('gebruikers', 'leden.gebruiker_id', '=', 'gebruikers.gebruiker_id')
             ->select('leden.*', 'gebruikers.naam', 'gebruikers.email')
             ->firstOrFail();
+
+        $validated = $request->validate([
+            'naam'           => 'required|string|max:255',
+            // Email moet uniek blijven, behalve het eigen account
+            'email'          => 'required|email|max:255|unique:gebruikers,email,' . $lid->gebruiker_id . ',gebruiker_id',
+            // Telefoonnummer moet uniek blijven, behalve het eigen lid
+            'telefoonnummer' => 'required|string|max:255|unique:leden,telefoonnummer,' . $lid->lid_id . ',lid_id',
+            'adres'          => 'required|string|max:255',
+            'woonplaats'     => 'required|string|max:255',
+            // Realistische geboortedatum: niet in de toekomst en niet voor 1920
+            'geboortedatum'  => 'required|date|before:today|after:1920-01-01',
+            'lid_sinds'      => 'required|date|before_or_equal:today',
+            'lid_type'       => 'required|string|max:255',
+        ], [
+            'email.unique'              => 'Dit e-mailadres is al in gebruik door een ander account.',
+            'telefoonnummer.unique'     => 'Dit telefoonnummer is al in gebruik door een ander lid.',
+            'geboortedatum.before'      => 'Geboortedatum moet in het verleden liggen.',
+            'geboortedatum.after'       => 'Voer een realistische geboortedatum in.',
+            'lid_sinds.before_or_equal' => 'Lid sinds mag niet in de toekomst liggen.',
+        ]);
 
         // Naam en email zitten op gebruikers tabel
         Gebruiker::where('gebruiker_id', $lid->gebruiker_id)->update([

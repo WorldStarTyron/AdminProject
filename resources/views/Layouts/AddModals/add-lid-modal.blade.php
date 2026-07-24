@@ -27,7 +27,7 @@
 
                     <div class="form-group">
                         <label for="woonplaats">Woonplaats <span class="required">*</span></label>
-                        <select id="woonplaats" name="woonplaats" required>
+                        <select id="woonplaats" name="woonplaats" required> 
                             <option value="" disabled selected>Selecteer woonplaats</option>
                             <option value="Latour">Latour</option>
                             <option value="Paramaribo">Paramaribo</option>

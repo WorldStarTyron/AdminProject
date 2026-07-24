@@ -36,6 +36,11 @@ class LidController extends Controller
             $query->where('leden.woonplaats', $request->woonplaats);
         }
 
+        // Filter op lid type
+        if ($request->filled('lid_type')) {
+            $query->where('leden.lid_type', $request->lid_type);
+        }
+
         // Zoeken op 5 velden tegelijk
         if ($request->filled('search')) {
             $search = $request->input('search');
@@ -309,13 +314,21 @@ class LidController extends Controller
         Gate::authorize('leden-beheren');
 
         $request->validate([
-            'telefoonnummer' => 'required|string',
+            'telefoonnummer' => 'required|string|unique:leden,telefoonnummer',
             'adres'          => 'required|string',
             'woonplaats'     => 'required|string',
-            'geboortedatum'  => 'required|date',
+            // Realistische geboortedatum: niet in de toekomst en niet voor 1920
+            'geboortedatum'  => 'required|date|before:today|after:1920-01-01',
             'lid_type'       => 'required|in:Actief,Passief,Bijzonder',
-            'lid_sinds'      => 'required|date',
-            'gebruiker_id'   => 'required|exists:gebruikers,gebruiker_id',
+            'lid_sinds'      => 'required|date|before_or_equal:today',
+            // Eén persoon = één lidmaatschap: deze gebruiker mag nog geen lid zijn
+            'gebruiker_id'   => 'required|exists:gebruikers,gebruiker_id|unique:leden,gebruiker_id',
+        ], [
+            'telefoonnummer.unique'     => 'Dit telefoonnummer is al in gebruik door een ander lid.',
+            'geboortedatum.before'      => 'Geboortedatum moet in het verleden liggen.',
+            'geboortedatum.after'       => 'Voer een realistische geboortedatum in.',
+            'lid_sinds.before_or_equal' => 'Lid sinds mag niet in de toekomst liggen.',
+            'gebruiker_id.unique'       => 'Deze gebruiker is al gekoppeld als lid.',
         ]);
 
         $lid = Lid::create([

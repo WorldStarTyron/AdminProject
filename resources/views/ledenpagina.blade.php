@@ -28,9 +28,12 @@
                     </div>
 
                          <!--Searchbar-->
-                    <div class="lp-page-header-right">
+                    <div class="flex gap-3 item-center">
                           <div class="w-full max-w-md">
                              <form action="{{ route('ledenpagina')}}" method="GET" class="relative flex items-center">
+                                <!-- Actieve filters behouden bij het zoeken -->
+                                <input type="hidden" name="woonplaats" value="{{ request('woonplaats') }}">
+                                <input type="hidden" name="lid_type" value="{{ request('lid_type') }}">
                                 <i class="fa-solid fa-magnifying-glass absolute left-3 text-gray-400 text-sm pointer-events-none"></i>
                                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Zoeken..." class="w-full py-2 pl-9 pr-24 rounded-lg border border-gray-300 bg-white text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#2A374A] focus:ring-2 focus:ring-[#2A374A]/10 transition" />
                                 <button type="submit" class="absolute right-1.5 top-1/2 -translate-y-1/2 bg-[#2A374A] hover:bg-[#3a4a63] text-white text-sm font-medium rounded-md px-3.5 py-1 transition">Zoeken</button>
@@ -40,6 +43,8 @@
 
                                  <!-- FIlter-->
                         <form method="GET" action="{{ route('ledenpagina') }}" class="lp-filter-form">
+                            <!-- Zoekterm behouden als er gefilterd wordt -->
+                            <input type="hidden" name="search" value="{{ request('search') }}">
                             <div class="lp-btn-filters" id="filterBtn">
                                 <i class="fa-solid fa-sliders"></i>
                                 <select name="woonplaats" id="filter" onchange="this.form.submit()">
@@ -52,6 +57,18 @@
                                     @endforeach
                                 </select>
                             </div>
+
+                            <!--Filter lid type-->
+                            <div class="lp-btn-filters">
+                                <i class="fa-solid fa-user-tag"></i>
+                                <select name="lid_type" id="filterType" onchange="this.form.submit()">
+                                    <option value="">Lid type</option>
+                                    <option value="Actief"    {{ request('lid_type') == 'Actief'    ? 'selected' : '' }}>Actief</option>
+                                    <option value="Passief"   {{ request('lid_type') == 'Passief'   ? 'selected' : '' }}>Passief</option>
+                                    <option value="Bijzonder" {{ request('lid_type') == 'Bijzonder' ? 'selected' : '' }}>Bijzonder</option>
+                                </select>
+                            </div>
+
                         </form>
 
 
@@ -85,7 +102,8 @@
                             </thead>
                             <tbody>
                                 @forelse($leden as $lid)
-                                    <tr class="lp-table-row">
+                                    <tr class="lp-table-row" style="cursor: pointer;"
+                                        onclick="if(!event.target.closest('a, button, .dropdown-container')) window.location='{{ route('ledenpagina.show', $lid->lid_id) }}'">
                                         <td>
                                             <span class="lp-id-badge">{{ $lid->lid_id }}</span>
                                         </td>

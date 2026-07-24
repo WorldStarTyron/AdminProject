@@ -66,7 +66,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 
                 <!-- Card 1: Totale Inkomsten -->
-                <div class="bg-white rounded-2xl border border-slate-100 shadow-[0_2px_12px_-3px_rgba(0,0,0,0.04)] p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-6px_rgba(0,0,0,0.08)] flex items-start justify-between">
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-[0_2px_12px_-3px_rgba(0,0,0,0.04)] p-6 flex items-start justify-between">
                     <div class="space-y-3">
                         <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Totale Inkomsten</span>
                         <div class="space-y-1">
@@ -83,7 +83,7 @@
                 </div>
 
                 <!-- Card 2: Openstaand Bedrag -->
-                <div class="bg-white rounded-2xl border border-slate-100 shadow-[0_2px_12px_-3px_rgba(0,0,0,0.04)] p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-6px_rgba(0,0,0,0.08)] flex items-start justify-between">
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-[0_2px_12px_-3px_rgba(0,0,0,0.04)] p-6 flex items-start justify-between">
                     <div class="space-y-3">
                         <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Openstaand Bedrag</span>
                         <div class="space-y-1">
@@ -100,7 +100,7 @@
                 </div>
 
                 <!-- Card 3: Totaal Aantal Leden -->
-                <div class="bg-white rounded-2xl border border-slate-100 shadow-[0_2px_12px_-3px_rgba(0,0,0,0.04)] p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-6px_rgba(0,0,0,0.08)] flex items-start justify-between">
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-[0_2px_12px_-3px_rgba(0,0,0,0.04)] p-6 flex items-start justify-between">
                     <div class="space-y-3">
                         <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Totaal Leden</span>
                         <div class="space-y-1">

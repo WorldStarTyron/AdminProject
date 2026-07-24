@@ -40,7 +40,7 @@
                     <div class="flex-1">
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
 
-                            {{-- Header --}}
+                          <!-- Header -->
                             <div class="flex items-center justify-between px-8 py-5 border-b border-gray-100">
                                 <div>
                                     <h1 class="text-base font-semibold text-gray-800">
@@ -57,17 +57,12 @@
                                     </a>
                                     <button type="submit" form="edit-form"
                                             class="px-4 py-2 text-sm font-medium text-white bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors flex items-center gap-2">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                            <polyline points="17 21 17 13 7 13 7 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                            <polyline points="7 3 7 8 15 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                        </svg>
+                                        <i class="fa-solid fa-floppy-disk"></i>
                                         Opslaan
                                     </button>
                                 </div>
                             </div>
 
-                            {{-- Form: PUT als lid bestaat, POST als nieuw --}}
                             @if($lid)
                                 <form id="edit-form" action="{{ route('ledenpagina.update', $lid->lid_id) }}" method="POST">
                                     @csrf
@@ -93,10 +88,7 @@
                                     <div>
                                         <div class="flex items-center gap-2 mb-4">
                                             <div class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                    <circle cx="12" cy="7" r="4" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
+                                                <i class="fa-solid fa-user"></i>
                                             </div>
                                             <h2 class="text-sm font-semibold text-gray-700">Persoonlijke Informatie</h2>
                                         </div>
@@ -169,6 +161,7 @@
                                                 <label for="geboortedatum" class="block text-xs font-medium text-gray-500 mb-1.5">Geboortedatum</label>
                                                 <input type="date" name="geboortedatum" id="geboortedatum"
                                                        value="{{ old('geboortedatum', $lid->geboortedatum ?? '') }}"
+                                                       min="1920-01-01" max="{{ date('Y-m-d') }}"
                                                        required
                                                        class="w-full px-3 py-2.5 text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 transition-all">
                                             </div>
@@ -185,7 +178,7 @@
                                             </div>
                                             <div>
                                                 <label for="lid_sinds" class="block text-xs font-medium text-gray-500 mb-1.5">Lid Sinds</label>
-                                                <input type="date" name="lid_sinds" id="lid_since" value="{{ old('lid_sinds', $lid->lid_sinds ?? '') }}" required class="w-full px-3 py-2.5 text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 transition-all">
+                                                <input type="date" name="lid_sinds" id="lid_sinds" value="{{ old('lid_sinds', $lid->lid_sinds ? \Carbon\Carbon::parse($lid->lid_sinds)->format('Y-m-d') : '') }}" max="{{ date('Y-m-d') }}" required class="w-full px-3 py-2.5 text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 transition-all">
                                             </div>
                                         </div>
                                     </div>
